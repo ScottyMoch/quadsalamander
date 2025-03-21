@@ -12,10 +12,9 @@ There are several smaller changes complementing the 4 panels such as:
 - added music, pictures, videos, downloads, and desktop user folders to the drive bar
 
 The only projects that were modified were:
-- salamand
-- lang
-  
-Both projects are part of the solution salamander_lite.sln.
+-salamand
+-lang (English)
+Both of which are part of the solution salamander_lite.sln.
 Projects require VisualStudio 2019 with Windows10 SDK. However this can be easily changed (OpenSalamander uses VS2022).
 
 
