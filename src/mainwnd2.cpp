@@ -4223,6 +4223,7 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                 BottomLeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
             }
             UpdateWindow(BottomLeftPanel->HWindow); // zajisti vykresleni dir/info line hned po vykresleni obsahu panelu
+
             tryNet = TRUE;
             if (!bottomRightPanelPathSet)
             {

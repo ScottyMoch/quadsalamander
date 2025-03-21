@@ -3598,12 +3598,12 @@ BOOL CFileHistory::HasItem()
 //
 
 #define DIRECTORY_COMMAND_BROWSE 1              // browse directory
-#define DIRECTORY_COMMAND_LEFT 3      // cesta z leveho panelu
-#define DIRECTORY_COMMAND_RIGHT 4     // cesta z praveho panelu
+#define DIRECTORY_COMMAND_LEFT 3              // cesta z leveho panelu
+#define DIRECTORY_COMMAND_RIGHT 4             // cesta z praveho panelu
 #define DIRECTORY_COMMAND_BOTTOM_LEFT 13      // cesta z leveho panelu
 #define DIRECTORY_COMMAND_BOTTOM_RIGHT 14     // cesta z praveho panelu
-#define DIRECTORY_COMMAND_HOTPATHF 5  // prvni hot path
-#define DIRECTORY_COMMAND_HOTPATHL 35 // posledni hot path
+#define DIRECTORY_COMMAND_HOTPATHF 5        // prvni hot path
+#define DIRECTORY_COMMAND_HOTPATHL 35       // posledni hot path
 
 BOOL SetEditOrComboText(HWND hWnd, const char* text)
 {
@@ -3679,6 +3679,7 @@ MENU_TEMPLATE_ITEM CopyMoveBrowseMenu[] =
     mii.ID = DIRECTORY_COMMAND_RIGHT;
     mii.String = LoadStr(IDS_PATHMENU_RIGHT);
     popup.InsertItem(0xFFFFFFFF, TRUE, &mii);
+
 
     mii.ID = DIRECTORY_COMMAND_BOTTOM_LEFT;
     mii.String = LoadStr(IDS_PATHMENU_BOTTOM_LEFT);

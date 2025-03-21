@@ -868,6 +868,8 @@ public:
 
 
 
+
+
     // toggles Smart Column mode for the given panel
     void ToggleSmartColumnMode(CFilesWindow* panel);
     // returns Smart Column mode (TRUE/FALSE) for the given panel

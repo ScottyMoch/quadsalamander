@@ -599,6 +599,20 @@ void CMainWindow::FillViewModeMenu(CMenuPopup* popup, int firstIndex, int type)
         break;
     }
 
+    case 3:
+    {
+        fistCMID = CM_BOTTOMLEFTMODE_1;
+        panel = BottomLeftPanel;
+        break;
+    }
+
+    case 4:
+    {
+        fistCMID = CM_BOTTOMRIGHTMODE_1;
+        panel = BottomRightPanel;
+        break;
+    }
+
     default:
     {
         TRACE_E("Uknown type=" << type);
@@ -887,7 +901,7 @@ void CMainWindow::ToggleSmartColumnMode(CFilesWindow* panel)
                 cmdLineParams->BottomLeftPath[0] == 0 && cmdLineParams->BottomRightPath[0] == 0 &&
                 cmdLineParams->ActivePath[0] != 0)
             {
-            GetActivePanel()->ChangeDir(cmdLineParams->ActivePath); // makes no sense to combine with setting the left/right panel
+            GetActivePanel()->ChangeDir(cmdLineParams->ActivePath); // nema smysl kombinovat s nastavenim leveho/praveho panelu
             }
             else
             {
@@ -1516,7 +1530,7 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
         // see doc\interesting.zip\Shell Notifications.mht (http://www.geocities.com/SiliconValley/4942/notify.html)
 
             LPITEMIDLIST* ppidl;
-        hLock = SHChangeNotification_Lock((HANDLE)wParam, (DWORD)lParam, &ppidl, &wEventId); // FIXME_X64 - verify casting to (DWORD)
+        hLock = SHChangeNotification_Lock((HANDLE)wParam, (DWORD)lParam, &ppidl, &wEventId); // FIXME_X64 - overit pretypovani na (DWORD)
             if (hLock == NULL)
             {
                 TRACE_E("SHChangeNotification_Lock failed");
@@ -3554,6 +3568,8 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
                 return 0;
             }
 
+
+
             // zmena prohlizeneho disku v pravem panelu
             case CM_BRCHANGEDRIVE:
             {
@@ -3663,21 +3679,21 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
                 return 0;
             }
 
-            // enabling/diabling the left panel status line
+            // zapinani/vypinani status liny leveho panelu
             case CM_LEFTSTATUS:
             {
                 LeftPanel->ToggleStatusLine();
-            IdleRefreshStates = TRUE; // on the next Idle, force a check of status variables
+            IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
                 return 0;
             }
-            // enabling/disabling the right panel status line
+            // zapinani/vypinani status liny praveho panelu
             case CM_RIGHTSTATUS:
             {
                 RightPanel->ToggleStatusLine();
-            IdleRefreshStates = TRUE; // on the next Idle, force a check of status variables
+            IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
                 return 0;
             }
-            // zapinani/vypinani status liny leveho panelu
+            // zapinani/vypinani directory liny leveho panelu
             case CM_BOTTOMLEFTSTATUS:
             {
                 BottomLeftPanel->ToggleStatusLine();
@@ -3696,10 +3712,10 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
             case CM_LEFTDIRLINE:
             {
                 LeftPanel->ToggleDirectoryLine();
-            IdleRefreshStates = TRUE; // on the next Idle, force a check of status variables
+            IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
                 return 0;
             }
-            // enabling/disabling the right panel directory line
+            // zapinani/vypinani directory liny praveho panelu
             case CM_RIGHTDIRLINE:
             {
                 RightPanel->ToggleDirectoryLine();
@@ -3717,7 +3733,7 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
             case CM_BOTTOMRIGHTDIRLINE:
             {
                 BottomRightPanel->ToggleDirectoryLine();
-            IdleRefreshStates = TRUE; // on the next Idle, force a check of status variables
+            IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
                 return 0;
             }
 
@@ -3749,7 +3765,7 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
                 return 0;
             }
 
-        case CM_LEFTREFRESH: // refresh the left panel
+        case CM_LEFTREFRESH: // refresh leveho panelu
             {
                 LeftPanel->NextFocusName[0] = 0;
                 while (SnooperSuspended)
@@ -3762,7 +3778,7 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
                 int t1 = MyTimeCounter++;
                 HANDLES(LeaveCriticalSection(&TimeCounterSection));
                 SendMessage(LeftPanel->HWindow, WM_USER_REFRESH_DIR, 0, t1);
-            RebuildDriveBarsIfNeeded(FALSE, 0, FALSE, 0); // maybe the user refreshed to update the drives list?
+            RebuildDriveBarsIfNeeded(FALSE, 0, FALSE, 0); // mozna uzivatel vyvolal refresh, aby obnovil listu s disky?
                 return 0;
             }
 
@@ -3944,7 +3960,7 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
                 char temporarySelected[MAX_PATH];
                 activePanel->SelectFocusedItemAndGetName(temporarySelected, MAX_PATH);
 
-            if (activePanel->Is(ptDisk)) // source is disk - all operations go here
+            if (activePanel->Is(ptDisk)) // zdroj je disk - jdou sem vsechny operace
                 {
                     CActionType type;
                     switch (LOWORD(wParam))
@@ -4741,7 +4757,7 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
             case CM_TOGGLEBOTTOMTOOLBAR:
             {
                 ToggleBottomToolBar();
-            IdleRefreshStates = TRUE; // on the next Idle, force a check of status variables
+            IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
                 LayoutWindows();
                 break;
             }

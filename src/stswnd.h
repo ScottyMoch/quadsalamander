@@ -181,6 +181,8 @@ public:
 
     BOOL IsTop() { return Top; }
 
+    BOOL IsTop() { return Top; }
+
     BOOL SetDriveIcon(HICON hIcon);     // The icon is copied into the image list - the caller is responsible for destruction
     void SetDrivePressed(BOOL pressed); // Presses the drive icon
 

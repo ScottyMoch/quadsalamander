@@ -17,6 +17,10 @@ extern "C"
 #include <KnownFolders.h>
 #include <shlobj.h>
 
+#include <windows.h>
+#include <KnownFolders.h>
+#include <shlobj.h>
+
 // original location in fileswnd.h (kept here only because of MakeCopyOfName in CImpDropTarget::ProcessClipboardData)
 extern BOOL OurClipDataObject; // TRUE when "paste" is done with our IDataObject
                                // (detecting our custom copy/move routine with foreign data)
@@ -2762,6 +2766,88 @@ BOOL GetMyDocumentsOrDesktopPath(char* path, int pathLen)
     }
 
     return ret;
+}
+
+//*****************************************************************************
+// GetSpecialFolderPath
+//
+
+BOOL GetSpecialFolderPath(char* path, int pathLen, int id)
+{
+    char buff[2 * MAX_PATH];
+
+    BOOL ret = FALSE;
+    ITEMIDLIST* pidl = NULL;
+    if (SHGetSpecialFolderLocation(NULL, id, &pidl) == NOERROR)
+    {
+        if (SHGetPathFromIDList(pidl, buff))
+            ret = TRUE;
+        IMalloc* alloc;
+        if (SUCCEEDED(CoGetMalloc(1, &alloc)))
+        {
+            alloc->Free(pidl);
+            alloc->Release();
+        }
+    }
+
+    if (ret)
+    {
+        if ((int)strlen(buff) >= pathLen)
+            TRACE_E("GetSpecialFolderPath() Buffer too small!");
+
+        lstrcpyn(path, buff, pathLen);
+    }
+    
+    return ret;
+}
+
+BOOL GetKnownFolderPath(char* path, int pathLen, const KNOWNFOLDERID &id)
+{
+    BOOL ret = FALSE;
+    
+    if (WindowsVistaAndLater)   // knownfolder api is for vista and later...
+    {
+        PWSTR widePath;
+        if (SHGetKnownFolderPath(id, 0, NULL, &widePath) == S_OK && widePath !=NULL)
+        {
+            int wideLen = lstrlenW(widePath);
+            if (ConvertU2A(widePath, wideLen, path, pathLen) != 0)
+                ret = TRUE;
+
+            CoTaskMemFree(widePath);
+        }
+        else
+        {
+            TRACE_E("GetKnownFolderPath() couldnt find path");
+        }
+    }
+    return ret;
+}
+
+
+BOOL GetMyPicturesPath(char* path, int pathLen)
+{
+    return GetSpecialFolderPath(path, pathLen, CSIDL_MYPICTURES);
+}
+
+BOOL GetMyVideosPath(char* path, int pathLen)
+{
+    return GetSpecialFolderPath(path, pathLen, CSIDL_MYVIDEO);
+}
+
+BOOL GetMyMusicPath(char* path, int pathLen)
+{
+    return GetSpecialFolderPath(path, pathLen, CSIDL_MYMUSIC);
+}
+
+BOOL GetDesktopPath(char* path, int pathLen)
+{
+    return GetSpecialFolderPath(path, pathLen, CSIDL_DESKTOP);
+}
+
+BOOL GetDownloadsPath(char* path, int pathLen)
+{
+    return GetKnownFolderPath(path, pathLen, FOLDERID_Downloads);
 }
 
 //*****************************************************************************
