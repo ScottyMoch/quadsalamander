@@ -479,7 +479,7 @@ void CFilesWindow::FilesAction(CActionType type, CFilesWindow* target, int count
                     (path[0] != 0 && path[1] == ':' ||                                             // paths like X:...
                      (path[0] == '/' || path[0] == '\\') && (path[1] == '/' || path[1] == '\\') || // UNC paths
                      Is(ptDisk) || Is(ptZIPArchive)))                                              // disk/archive relative paths
-                {                                                                                  // it's a disk path (absolute or relative) - convert all '/' to '\' and remove duplicate '\'
+                   // it's a disk path (absolute or relative) - convert all '/' to '\' and remove duplicate '\'
                     SlashesToBackslashesAndRemoveDups(path);
                 }
 
@@ -604,7 +604,7 @@ void CFilesWindow::FilesAction(CActionType type, CFilesWindow* target, int count
                                 if (nullFile)
                                 {
                                     nullFileAttrs = SalGetFileAttributes(path);
-                                    ClearReadOnlyAttr(path, nullFileAttrs); // so it's possible to delete even read-only files
+                                    ClearReadOnlyAttr(path, nullFileAttrs); // so it’s possible to delete even read-only files
                                     DeleteFile(path);
                                 }
                                 //---  custom packing
