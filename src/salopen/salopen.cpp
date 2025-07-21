@@ -4,6 +4,19 @@
 #include <windows.h>
 #include <shlobj.h>
 
+
+// make this a build /D define, #define COMPILING_SALOPEN
+
+#if defined( COMPILING_SALOPEN )
+
+#pragma message("******** COMPILING_SALOPEN has been defined in project configuration")
+
+#else
+
+#pragma message("******** COMPILING_SALOPEN is NOT DEFINED in project configuration")
+
+#endif
+
 #include "lstrfix.h"
 
 #pragma warning(3 : 4706) // warning C4706: assignment within conditional expression
@@ -201,6 +214,7 @@ BOOL GetShellFolder(const char* dir, IShellFolder*& shellFolderObj, LPITEMIDLIST
                 {
                     lstrcpy(root, dir);
                     char* name = root + lstrlen(root);
+
                     if (*--name == '\\')
                         *name = 0;
                     else
