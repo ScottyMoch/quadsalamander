@@ -1,5 +1,6 @@
 ﻿// SPDX-FileCopyrightText: 2023 Open Salamander Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
+// CommentsTranslationProject: TRANSLATED
 
 #include "precomp.h"
 
@@ -1514,26 +1515,22 @@ BOOL AddFoundItem(const char* path, const char* name, DWORD sizeLow, DWORD sizeH
 
 /*
 dirStack' is used to store the directory for later grep. Otherwise, a recursive search in subdirectories would occur while searching the current directory. This approach will first find all files and directories that match the criteria, and then this function will be called for all found directories.
-'dirStack' is only inflated. If items are deleted from it,
+// 'dirStack' stores directories for late grepping. Otherwise, 
 they are only destroyed, but not removed from the array. Therefore, the 'dirStackCount' variable is passed, which contains the actual number of items in the array (always less than or equal to dirStack->Count).
-If there is insufficient memory or subdirectories are not searched,
+// during searching in the current directory, recursive searching in subdirectories would occur. With this
 'dirStack' is equal to NULL.
 If 'duplicateCandidates' != NULL, found items will be added to this array instead of data->FoundFilesListView
 */
 
-// 'dirStack' slouzi k ukladani adresaru pro pozdni grepnuti. Jinak
-// by behem hledani v aktualnim adresari doslo k rekurzivnimu hledani
-// v podadresarich. Touto obezlickou budou napred nalezeny vsechny
-// soubory a adresare, ktere vyhovuji kriteriim a pak bude tato funkce
-// zavolana pro vsechny nalezene adresare.
-// 'dirStack' je pouze nafukovan. Pokud jsou z nej polozky odstranovany,
-// pouze jsou destruovany, ale z pole se neodebereou. Proto je predavana
-// promenna 'dirStackCount', ktra obsahuje skutecny pocet polozek
-// v poli (vzdy je mensi nebo rovna dirStack->Count).
-// Pokud je nedostatek pameti nebo se nehleda v podadresarich,
-// je 'dirStack' roven NULL.
-// Pokud je 'duplicateCandidates' != NULL, budou se nalezene polozky
-// pridavat do tohoto pole misto do data->FoundFilesListView
+// trick all files and directories matching the criteria are found first and
+// then this function is called for all discovered directories.
+// 'dirStack' only grows. When items are removed from it, they are just destroyed but
+// not removed from the array, therefore the variable 'dirStackCount' holds the
+// actual number of items in the array (always less than or equal to dirStack->Count).
+// If memory is low or subdirectories are not searched,
+// 'dirStack' is NULL.
+// If 'duplicateCandidates' != NULL, found items will be added to this array
+// instead of data->FoundFilesListView
 void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
                      CMaskGroup* masksGroup, BOOL includeSubDirs, CGrepData* data,
                      TDirectArray<char*>* dirStack, int dirStackCount,
@@ -1573,13 +1570,13 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
             *(end - 1) = 0;
         else
             *end = 0;
-        data->SearchingText->Set(path); // nastavime aktualni cestu
+        data->SearchingText->Set(path); // set the current path
         if (end - path > 3)
             *(end - 1) = '\\';
         else
             *end = 0;
 
-        int dirStackEnterCount = 0; // pocet polozek pred zacatkem hledani v teto urovni
+        int dirStackEnterCount = 0; // number of items before starting the search at this level
         if (dirStack != NULL)
             dirStackEnterCount = dirStackCount;
         BOOL testFindNextErr = TRUE;
@@ -1590,8 +1587,8 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
             BOOL ignoreDir = isDir && (lstrcmp(file.cFileName, ".") == 0 || lstrcmp(file.cFileName, "..") == 0);
             if (ignoreDir || (end - path) + lstrlen(file.cFileName) < _countof(path))
             {
-                // po nalezeni polozky bez zobrazeni a po uplynuti 0.5 vteriny od posledniho
-                // prekresleni pozadame listview o prekresleni
+                // after finding an item without displaying it and once 0.5 s have passed since the last redraw,
+                // we request the listview to redraw
                 if (data->NeedRefresh && GetTickCount() - data->FoundVisibleTick >= 500)
                 {
                     SendMessage(data->HWindow, WM_USER_ADDFILE, 0, 0);
@@ -1600,27 +1597,27 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
 
                 if (file.cFileName[0] != 0 && !ignoreDir)
                 {
-                    // pridavat budeme vsechny soubory a adresare mimo "." a ".."
+                    // add all files and directories except "." and ".."
 
-                    // otestujeme kriteria attributes, size, date, time
+                    // test the criteria attributes, size, date and time
                     CQuadWord size(file.nFileSizeLow, file.nFileSizeHigh);
                     if (data->Criteria.Test(file.dwFileAttributes, &size, &file.ftLastWriteTime))
                     {
                         // file name
-                        // priponu nechame dohledat ext==NULL
-                        if (masksGroup->AgreeMasks(file.cFileName, NULL)) // maska o.k.
+                        // let the extension be resolved if ext==NULL
+                        if (masksGroup->AgreeMasks(file.cFileName, NULL)) // mask is OK
                         {
                             BOOL ok;
                             if (data->Grep)
                             {
                                 // content
                                 if (isDir)
-                                    ok = FALSE; // adresar nelze grepovat
+                                    ok = FALSE; // a directory cannot be grepped
                                 else
                                 {
                                     strcpy_s(end, _countof(path) - (end - path), file.cFileName);
-                                    // linky: file.nFileSizeLow == 0 && file.nFileSizeHigh == 0, velikost souboru
-                                    // se musi ziskat pres SalGetFileSize() dodatecne
+                                    // links: file.nFileSizeLow == 0 && file.nFileSizeHigh == 0, the file size
+                                    // must be additionally obtained via SalGetFileSize()
                                     BOOL isLink = (file.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
                                     ok = TestFileContent(file.nFileSizeLow, file.nFileSizeHigh, path, data, isLink);
                                 }
@@ -1628,8 +1625,8 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
                             else
                                 ok = TRUE;
 
-                            // pokud polozka vyhovuje vsem kriteriim,
-                            // pridam ji do seznamu nalezenych polozek
+                            // if the item matches all criteria,
+                            // add it to the list of found items
                             if (ok)
                             {
                                 if (end - path > 3)
@@ -1649,7 +1646,7 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
                         }
                     }
                 }
-                if (isDir && includeSubDirs && !ignoreDir) // directory + neni to "." a ".."
+                if (isDir && includeSubDirs && !ignoreDir) // directory + not "." or ".."
                 {
                     int l = (int)strlen(file.cFileName);
 
@@ -1659,21 +1656,21 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
 
                         if (dirStack != NULL)
                         {
-                            // pouze ulozim pro pozdejsi prohledani
+                            // just store for later search
                             char* newFileName = new char[l + 1];
                             if (newFileName != NULL)
                             {
                                 memmove(newFileName, file.cFileName, l + 1);
                                 if (dirStackCount < dirStack->Count)
                                 {
-                                    // nemusime priradi polozku - mame misto
+                                    // no need to assign an item - we have space
                                     dirStack->At(dirStackCount) = newFileName;
                                     dirStackCount++;
                                     searchNow = FALSE;
                                 }
                                 else
                                 {
-                                    // musime alokovat novou polozku v poli
+                                    // we must allocate a new item in the array
                                     dirStack->Add(newFileName);
                                     if (dirStack->IsGood())
                                     {
@@ -1691,7 +1688,7 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
 
                         if (searchNow)
                         {
-                            // neni pamet - nebudeme pouzivat dirStack
+                            // out of memory - we will not use dirStack
                             strcpy_s(end, _countof(path) - (end - path), file.cFileName);
                             strcat_s(end, _countof(path) - (end - path), "\\");
                             l++;
@@ -1750,14 +1747,14 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
                 *end = 0;
         }
 
-        // doprohledam adresare
+        // search through directories
         if (dirStack != NULL)
         {
             int i;
             for (i = dirStackEnterCount; i < dirStackCount; i++)
             {
                 char* newFileName = (char*)dirStack->At(i);
-                if (!data->StopSearch) // muze byt nastavena behem SearchDirectory
+                if (!data->StopSearch) // may be set during SearchDirectory
                 {
                     strcpy_s(end, _countof(path) - (end - path), newFileName);
                     strcat_s(end, _countof(path) - (end - path), "\\");
@@ -1765,7 +1762,7 @@ void SearchDirectory(char (&path)[MAX_PATH], char* end, int startPathLen,
                                     dirStack, dirStackCount, duplicateCandidates, ignoreList, message);
                 }
             }
-            // a uvolnim data z teto urovne
+            // and release data from this level
             for (i = dirStackEnterCount; i < dirStackCount; i++)
                 delete[] dirStack->At(i);
         }
@@ -1807,27 +1804,27 @@ void RefineData(CMaskGroup* masksGroup, CGrepData* data)
     {
         if (!data->Grep)
         {
-            // pokud se negrepuje, budeme zobrazovat procenta
+            // if grepping is disabled, show progress in percent
             int progress = (int)((double)i / (double)refineCount * 100.0);
             if (progress != oldProgress)
             {
                 char buf[20];
                 sprintf(buf, "%d%%", progress);
-                data->SearchingText->Set(buf); // nastavime aktualni cestu
+                data->SearchingText->Set(buf); // set the current path
                 oldProgress = progress;
             }
         }
 
         CFoundFilesData* refineData = data->FoundFilesListView->GetDataForRefine(i);
 
-        // otestujeme kriteria
+        // test the criteria
         BOOL ok = TRUE;
 
         // attributes, size, date, time
         if (ok && !data->Criteria.Test(refineData->Attr, &refineData->Size, &refineData->LastWrite))
             ok = FALSE;
 
-        // file name (priponu nechame dohledat ext==NULL)
+        // file name (let the extension be resolved if ext==NULL)
         if (ok && !masksGroup->AgreeMasks(refineData->Name, NULL))
             ok = FALSE;
 
@@ -1835,7 +1832,7 @@ void RefineData(CMaskGroup* masksGroup, CGrepData* data)
         if (ok && data->Grep)
         {
             if (refineData->IsDir)
-                ok = FALSE; // adresar nelze grepovat
+                ok = FALSE; // a directory cannot be grepped
             else
             {
                 char fullPath[MAX_PATH];
@@ -1843,15 +1840,15 @@ void RefineData(CMaskGroup* masksGroup, CGrepData* data)
                 if (fullPath[strlen(fullPath) - 1] != '\\')
                     strcat(fullPath, "\\");
                 strcat(fullPath, refineData->Name);
-                // linky: refineData->Size == 0, velikost souboru se musi ziskat pres SalGetFileSize() dodatecne
-                BOOL isLink = (refineData->Attr & FILE_ATTRIBUTE_REPARSE_POINT) != 0; // velikost == 0, velikost souboru se musi ziskat pres SalGetFileSize()
+                // links: refineData->Size == 0, the file size must be additionally obtained via SalGetFileSize()
+                BOOL isLink = (refineData->Attr & FILE_ATTRIBUTE_REPARSE_POINT) != 0; // size == 0, the file size must be obtained via SalGetFileSize()
                 ok = TestFileContent(refineData->Size.LoDWord, refineData->Size.HiDWord,
                                      fullPath, data, isLink);
             }
         }
 
-        // pokud je refine==1 (intersect) a polozka vyhovuje, pridame ji
-        // pokud je refine==2 (subtract) a polozka nevyhovuje, pridame ji
+        // if refine==1 (intersect) and the item matches, add it
+        // if refine==2 (subtract) and the item does not match, add it
         if (data->Refine == 1 && ok ||
             data->Refine == 2 && !ok)
         {
@@ -1869,7 +1866,7 @@ unsigned GrepThreadFBody(void* ptr)
 
     SetThreadNameInVCAndTrace("Grep");
     TRACE_I("Begin");
-    //  Sleep(200);  // trochu casu pro prekresleni dialogu...
+    //  Sleep(200);  // give the dialog a moment to redraw...
     CGrepData* data = (CGrepData*)ptr;
     data->NeedRefresh = FALSE;
     data->Criteria.PrepareForTest();
@@ -1902,17 +1899,17 @@ unsigned GrepThreadFBody(void* ptr)
     }
     else
     {
-        // pokud hledame duplikaty, data se primarne umistuji do tohoto pole
-        // po prohledani vsech adresaru se pole seradi (podle jmena nebo podle velikosti)
-        // pokud se kontroluje obsah, napocitaji se pro sporne pripady MD5
-        // potom se data predaji do FoundFilesListView
+        // if we search for duplicates, data are primarily placed into this array
+        // after scanning all directories, the array is sorted (by name or by size)
+        // if content is checked, MD5 is calculated for ambiguous cases
+        // afterwards the data are passed to FoundFilesListView
         CDuplicateCandidates* duplicateCandidates = NULL;
         if (data->FindDuplicates)
         {
             duplicateCandidates = new CDuplicateCandidates;
             if (duplicateCandidates == NULL)
             {
-                TRACE_E(LOW_MEMORY); // algoritmus pobezi i bez stacku
+                TRACE_E(LOW_MEMORY); // the algorithm will run even without the stack
                 data->StopSearch = TRUE;
             }
         }
@@ -1940,19 +1937,19 @@ unsigned GrepThreadFBody(void* ptr)
                 }
 
                 BOOL includeSubDirs = data->Data->At(i)->IncludeSubDirs;
-                TDirectArray<char*>* dirStack = NULL; // popis u funkce SearchDirectory
+                TDirectArray<char*>* dirStack = NULL; // see description at SearchDirectory
                 if (includeSubDirs)
                 {
                     dirStack = new TDirectArray<char*>(1000, 1000);
                     if (dirStack == NULL)
-                        TRACE_E(LOW_MEMORY); // algoritmus pobezi i bez stacku
+                    TRACE_E(LOW_MEMORY); // the algorithm will run even without the stack
                 }
 
-                // udelame si lokalni kopii ignore listu, stejne je treba ho predkousat
-                // a jako bonus muzeme uzivatele ignore list nechat editovat v prubehu hledani
+                // create a local copy of the ignore list since it has to be processed anyway
+                // and as a bonus the user can edit the ignore list while searching
                 CFindIgnore* ignoreList = new CFindIgnore;
                 if (ignoreList == NULL)
-                    TRACE_E(LOW_MEMORY); // algoritmus pobezi i bez ignore listu
+                    TRACE_E(LOW_MEMORY); // the algorithm will run even without the ignore list
                 else
                 {
                     if (!ignoreList->Prepare(&FindIgnore))
@@ -1986,7 +1983,7 @@ unsigned GrepThreadFBody(void* ptr)
     }
 
     data->SearchStopped = data->StopSearch;
-    SendMessage(data->HWindow, WM_USER_ADDFILE, 0, 0); // aktualizace listview
+    SendMessage(data->HWindow, WM_USER_ADDFILE, 0, 0); // update the listview
     PostMessage(data->HWindow, WM_COMMAND, IDC_FIND_STOP, 0);
     TRACE_I("End");
     return 0;
@@ -2005,7 +2002,7 @@ unsigned GrepThreadFEH(void* param)
     {
         TRACE_I("Thread Grep: calling ExitProcess(1).");
         //    ExitProcess(1);
-        TerminateProcess(GetCurrentProcess(), 1); // tvrdsi exit (tenhle jeste neco vola)
+        TerminateProcess(GetCurrentProcess(), 1); // harder exit (this call still performs some operations)
         return 1;
     }
 #endif // CALLSTK_DISABLE
@@ -2092,14 +2089,14 @@ unsigned ThreadFindDialogMessageLoopBody(void* parameter)
     CALL_STACK_MESSAGE1("ThreadFindDialogMessageLoopBody()");
     BOOL ok;
 
-    { // tento blok je zde kvuli korektnimu zavolani destruktoru pred volanim _end_thread() (viz nize)
+    { // this block ensures destructors are called properly before calling _end_thread() (see below)
         SetThreadNameInVCAndTrace("FindDialog");
         TRACE_I("Begin");
         CTFDData* data = (CTFDData*)parameter;
         CFindDialog* findDialog = data->FindDialog;
-        findDialog->SetZeroOnDestroy(&findDialog); // pri WM_DESTROY bude ukazatel vynulovan
-                                                   // obrana pred pristupem na neplatny ukazatel
-                                                   // z message loopy po destrukci okna
+        findDialog->SetZeroOnDestroy(&findDialog); // on WM_DESTROY the pointer is zeroed
+                                                   // protection against accessing an invalid pointer
+                                                   // from the message loop after the window is destroyed
 
         data->Success = TRUE;
 
@@ -2114,23 +2111,23 @@ unsigned ThreadFindDialogMessageLoopBody(void* parameter)
             data->Success = FALSE;
 
         ok = data->Success;
-        data = NULL;                  // dale jiz neni platne
-        SetEvent(FindDialogContinue); // pustime dal hlavni thread
+        data = NULL;                  // no longer valid afterwards
+        SetEvent(FindDialogContinue); // let the main thread continue
 
-        if (ok) // pokud se okno vytvorilo, spustime aplikacni smycku
+        if (ok) // if the window was created, run the message loop
         {
             CALL_STACK_MESSAGE1("ThreadFindDialogMessageLoopBody::message_loop");
 
             MSG msg;
-            HWND findDialogHWindow = findDialog->HWindow; // kvuli wm_quit pri ktere uz okno nebude alokovane
-            BOOL haveMSG = FALSE;                         // FALSE pokud se ma volat GetMessage() v podmince cyklu
+            HWND findDialogHWindow = findDialog->HWindow; // because of WM_QUIT, when the window will no longer be allocated
+            BOOL haveMSG = FALSE;                         // FALSE means GetMessage() should be called in the loop condition
             while (haveMSG || GetMessage(&msg, NULL, 0, 0))
             {
                 haveMSG = FALSE;
                 if ((msg.message == WM_SYSKEYDOWN || msg.message == WM_KEYDOWN) &&
                     msg.wParam != VK_MENU && msg.wParam != VK_CONTROL && msg.wParam != VK_SHIFT)
-                    SetCurrentToolTip(NULL, 0); // zhasneme tooltip
-                // zajistime zaslani zprav do naseho menu (obchazime tim potrebu hooku pro klavesnici)
+                    SetCurrentToolTip(NULL, 0); // turn off the tooltip
+                // ensure messages reach our menu (avoids the need for a keyboard hook)
                 if (findDialog == NULL || !findDialog->IsMenuBarMessage(&msg))
                 {
                     if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE && findDialog != NULL)
@@ -2140,7 +2137,7 @@ unsigned ThreadFindDialogMessageLoopBody(void* parameter)
                             (!findDialog->ManageHiddenShortcuts(&msg)) &&
                             (!IsDialogMessage(findDialogHWindow, &msg)))
                     {
-                        TranslateMessage(&msg); // aby se nenageneroval WM_CHAR -> zpusobilo pipnuti pri Cancel
+                        TranslateMessage(&msg); // prevent generating WM_CHAR -> would cause a beep on Cancel
                         DispatchMessage(&msg);
                     }
                     if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE && findDialog != NULL)
@@ -2150,10 +2147,10 @@ unsigned ThreadFindDialogMessageLoopBody(void* parameter)
                 if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
                 {
                     if (msg.message == WM_QUIT)
-                        break;      // ekvivalent situace, kdy GetMessage() vraci FALSE
-                    haveMSG = TRUE; // mame zpravu, jdeme ji zpracovat (bez volani GetMessage())
+                        break;      // equivalent to the situation when GetMessage() is returning FALSE
+                    haveMSG = TRUE; // a message is pending; process it without calling GetMessage()
                 }
-                else // pokud ve fronte neni zadna message, provedeme Idle processing
+                else // if there is no message in the queue, perform Idle processing
                 {
                     if (findDialog != NULL)
                         findDialog->OnEnterIdle();
@@ -2165,10 +2162,10 @@ unsigned ThreadFindDialogMessageLoopBody(void* parameter)
     }
 
 #ifndef CALLSTK_DISABLE
-    CCallStack::ReleaseBeforeExitThread(); // pred exitem treadu musime uvolnit call-stack data (ale nadale jsme v chranene sekci - generovani naseho bug reportu)
+    CCallStack::ReleaseBeforeExitThread(); // before exiting the thread, we must release call-stack data (still in protected section - generating our bug report)
 #endif                                     // CALLSTK_DISABLE
     _endthreadex(ok ? 0 : 1);
-    return ok ? 0 : 1; // dead code (pro spokojenost prekladace)
+    return ok ? 0 : 1; // dead code to keep the compiler happy
 }
 
 unsigned ThreadFindDialogMessageLoopEH(void* param)
@@ -2184,7 +2181,7 @@ unsigned ThreadFindDialogMessageLoopEH(void* param)
     {
         TRACE_I("Thread FindDialogMessageLoop: calling ExitProcess(1).");
         //    ExitProcess(1);
-        TerminateProcess(GetCurrentProcess(), 1); // tvrdsi exit (tenhle jeste neco vola)
+        TerminateProcess(GetCurrentProcess(), 1); // harder exit (this call still performs some operations)
         return 1;
     }
 #endif // CALLSTK_DISABLE
@@ -2216,13 +2213,13 @@ BOOL OpenFindDialog(HWND hCenterAgainst, const char* initPath)
             goto ERROR_TFD_CREATE;
         }
 
-        WaitForSingleObject(FindDialogContinue, INFINITE); // pockame az se thread nahodi
+        WaitForSingleObject(FindDialogContinue, INFINITE); // wait until the thread starts
         if (!data.Success)
         {
             HANDLES(CloseHandle(loop));
             goto ERROR_TFD_CREATE;
         }
-        AddAuxThread(loop); // pridame thread mezi existujici viewry (kill pri exitu)
+        AddAuxThread(loop); // add the thread among existing viewers (killed on exit)
         SetCursor(hOldCur);
         return TRUE;
     }
