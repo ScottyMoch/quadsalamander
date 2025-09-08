@@ -1,1 +1,1 @@
-set OPENSAL_BUILD_DIR=D:\Build\QuadSal\ 
+set OPENSAL_BUILD_DIR=V:\Build\QuadSal\ 

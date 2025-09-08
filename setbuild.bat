@@ -1,1 +1,4 @@
-subst d: c:\Users\vincere\vcbuilds
+subst v: c:\vcbuilds
+subst q: C:\source\repos\quadsalamander
+subst b: C:\source\repos\quadsalamander\BuildSetup
+
