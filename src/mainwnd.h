@@ -1,5 +1,6 @@
 ﻿// SPDX-FileCopyrightText: 2023 Open Salamander Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
+// CommentsTranslationProject: TRANSLATED
 
 #pragma once
 
@@ -12,13 +13,13 @@ extern const int MIN_WIN_WIDTH;
 
 struct CCommandLineParams;
 
-// pokud uzivatel nechce vic instanci, pouze aktivujeme predchozi
+// if the user disallows multiple instances, just activate the previous one
 BOOL CheckOnlyOneInstance(const CCommandLineParams* cmdLineParams);
 
-// otevrenym oknum interniho vieweru a findu rozesle zpravu WM_USER_CFGCHANGED
+// sends the WM_USER_CFGCHANGED message to open internal viewer and find windows
 void BroadcastConfigChanged();
 
-// univerzalni callback pro message boxy
+// universal callback for message boxes
 void CALLBACK MessageBoxHelpCallback(LPHELPINFO helpInfo);
 
 //
@@ -516,10 +517,10 @@ protected:
            
     CToolTipWindow ToolTipWindow;
 
-    BOOL FirstActivateApp; // WM_ACTIVATEAPP vyuziva tuto promennou pri spusteni
+    BOOL FirstActivateApp; // WM_ACTIVATEAPP uses this variable during startup
 
-    BOOL IdleStatesChanged;    // je nastavovani metodou CheckAndSet()
-    BOOL PluginsStatesChanged; // je treba rebuildnout plugin bar
+    BOOL IdleStatesChanged;    // set by the CheckAndSet() method
+    BOOL PluginsStatesChanged; // the plugin bar needs to be rebuilt
 
 public:
     CMainWindow();
@@ -527,7 +528,7 @@ public:
 
     void EnterViewerMasksCS() { HANDLES(EnterCriticalSection(&ViewerMasksCS)); }
     void LeaveViewerMasksCS() { HANDLES(LeaveCriticalSection(&ViewerMasksCS)); }
-    BOOL GetViewersAssoc(int wantedViewerType, CDynString* strViewerMasks); // pomocna metoda: posbira vsechny masky asociovane pro viewer-type 'wantedViewerType'; vraci TRUE pri uspechu (pri dostatku pameti pro string)
+    BOOL GetViewersAssoc(int wantedViewerType, CDynString* strViewerMasks); // helper: collects all masks associated with the given viewer type "wantedViewerType"; returns TRUE on success (when enough memory for the string)
 
     void ClearHistory(); // promaze vsechny historie
 
@@ -544,38 +545,38 @@ public:
 
     BOOL IsGood();
 
-    // rozesle informaci o zmene na ceste 'path' (je-li 'includingSubdirs' TRUE, jsou zmeny
-    // mozne i v podadresarich); informace se rozdistribuuje do panelu a do vsech otevrenych FS
-    // z plug-inu (panely i FS muzou reagovat refreshnutim obsahu);
-    // mozne volat z lib. threadu
+    // sends information about a change on the path 'path' (if 'includingSubdirs' is TRUE,
+    // changes may occur in subdirectories as well); the information is distributed to panels
+    // and to all opened FS from plugins (both panels and FS can respond by refreshing their content);
+    // can be called from any thread
     void PostChangeOnPathNotification(const char* path, BOOL includingSubdirs);
 
-    // tyto funkce nedopadnou, pokud neni splnena podminka CFilesWindow::CanBeFocused
+    // these functions have no effect if CFilesWindow::CanBeFocused is not satisfied
     void ChangePanel(CFilesWindow* newActivePanel, BOOL force = FALSE);     // cti EditMode; aktivuje neaktivni panel; (pokud je force==TRUE, ignoruje ZOOM)
     void FocusPanel(CFilesWindow* focus, BOOL testIfMainWndActive = FALSE); // sejme EditMode, protoze do panelu umisti focus
     void FocusLeftPanel();                                                  // vola FocusPanel pro levy panel
 
-    // porovna adresare v levem a pravem panelu
-    void CompareDirectories(DWORD flags); // flags je kombinaci COMPARE_DIRECTORIES_xxx
+    // compares directories in the left and right panels
+    void CompareDirectories(DWORD flags); // flags are a combination of COMPARE_DIRECTORIES_xxx
 
-    // zajisti volani DirHistory->AddPathUnique a zaroven spravne nastaveni SetHistory panelu
+    // ensures DirHistory->AddPathUnique is called and correctly updates the panel's SetHistory
     void DirHistoryAddPathUnique(int type, const char* pathOrArchiveOrFSName,
                                  const char* archivePathOrFSUserPart, HICON hIcon,
                                  CPluginFSInterfaceAbstract* pluginFS,
                                  CPluginFSInterfaceEncapsulation* curPluginFS);
 
-    // zajisti volani DirHistory->RemoveActualPath a zaroven spravne nastaveni SetHistory panelu
+    // ensures DirHistory->RemoveActualPath is called and correctly updates the panel's SetHistory
     void DirHistoryRemoveActualPath(CFilesWindow* panel);
 
-    // vraci TRUE pokud se podarilo uzavrit odpojene FS (vola TryCloseOrDetach, ReleaseObject a pak CloseFS),
-    // pokud plug-in nechce FS zavrit, pta se usera jestli zavrit nasilne (ala canForce==TRUE)
+    // returns TRUE if the detached FS was successfully closed (calls TryCloseOrDetach, ReleaseObject, then CloseFS)
+    // if the plugin does not want to close the FS, asks the user whether to close forcibly (as if canForce==TRUE)
     BOOL CloseDetachedFS(HWND parent, CPluginFSInterfaceEncapsulation* detachedFS);
 
-    // vraci TRUE, pokud jiz plug-in neni Salamanderem pouzivan -> muze se unloadnout
+    // returns TRUE if the plugin is no longer used by Salamander -> it can be unloaded
     BOOL CanUnloadPlugin(HWND parent, CPluginInterfaceAbstract* plugin);
 
-    // vola se pri zavirani FS - v dir-historii jsou ulozene FS ifacy, ktere je po zavreni potreba
-    // NULLovat (aby nahodou nedoslo ke shode jen diky alokaci FS ifacu na stejnou adresu)
+    // called when closing a file system; the directory history stores FS
+    // interfaces that must be set to NULL after closing (to prevent accidental match just because FS interfaces were allocated at the same address)
     void ClearPluginFSFromHistory(CPluginFSInterfaceAbstract* fs);
 
     void SaveConfig(HWND parent = NULL); // parent: NULL = MainWindow->HWindow
@@ -588,15 +589,15 @@ public:
     void UserMenu(HWND parent, int itemIndex, UM_GetNextFileName getNextFile, void* data,
                   CUserMenuAdvancedData* userMenuAdvancedData);
 
-    // nastavi hot path 'path' s indexem 'index'; vstupuje validni cesta, bez zdvojenych '$' nebo bez promennych
+    // sets the hot path 'path' with index 'index'; receives a valid path without doubled '$' or variables
     void SetUnescapedHotPath(int index, const char* path);
 
-    // do 'buffer' o velikosti 'bufferSize' expanduje hot path s indexem 'index'
-    // 'hParent' -- k tomuto oknu se budou zobrazovat chyby behem expanze cesty; pokud je NULL, chyby se nezobrazuji
-    // vraci TRUE, pokud se cestu podarilo ziskat, jinak FALSE
+    // expands the hot path with index 'index' into 'buffer' of size 'bufferSize'
+    // 'hParent' -- errors during path expansion will be shown for this window; if NULL, errors are suppressed
+    // returns TRUE if the path was successfully obtained, otherwise FALSE
     BOOL GetExpandedHotPath(HWND hParent, int index, char* buffer, int bufferSize);
 
-    // vrati index neprirazene hot path nebo -1 pokud jsou vsechny prirazene
+    // returns the index of an unassigned hot path or -1 if all are assigned
     int GetUnassignedHotPathIndex();
 
     void SetFont();
@@ -605,9 +606,9 @@ public:
     void RefreshDiskFreeSpace();
     void RefreshDirs();
 
-    // obnovi DefaultDir podle cest v panelech, je-li 'activePrefered' bude mit prednost
-    // cesta v aktivnim panelu (zapise se pozdeji do DefaultDir), jinak ma prednost cesta
-    // v neaktivnim panelu
+    // restores DefaultDir based on the panel paths; if 'activePrefered' is TRUE the
+    // active panel path is preferred (and later written to DefaultDir), otherwise
+    // the non-active panel path has priority
     void UpdateDefaultDir(BOOL activePrefered);
     void SetDefaultDirectories(const char* curPath = NULL);
 
@@ -708,11 +709,11 @@ public:
     }
 
     BOOL EditWindowKnowHWND(HWND hwnd);
-    void EditWindowSetDirectory(); // nastavi text pred command-line a zaroven ji enabluje/disabluje
+    void EditWindowSetDirectory(); // sets the text before the command line and enables/disables it at the same time
     HWND GetEditLineHWND(BOOL disableSkip = FALSE);
 
-    // vraci TRUE, pokud byla klavesa zpracovana
-    BOOL HandleCtrlLetter(char c); // Ctrl+pismenko hotkeys
+    // returns TRUE if the key was handled
+    BOOL HandleCtrlLetter(char c); // Ctrl+letter hotkeys
 
     void LayoutWindows();
     BOOL ToggleTopToolBar(BOOL storePos = TRUE);
@@ -721,8 +722,7 @@ public:
     BOOL ToggleBottomToolBar();
     BOOL ToggleUserMenuToolBar(BOOL storePos = TRUE);
     BOOL ToggleHotPathsBar(BOOL storePos = TRUE);
-    // pokud je 'twoDriveBars' rovno TRUE, uzivatel chce zapnout/vypnout dve listy
-    // jinak pouze jednu listu
+    // If 'twoDriveBars' is TRUE, the user wants two drive lists; otherwise only one
     BOOL ToggleDriveBar(BOOL twoDriveBars, BOOL storePos = TRUE);
 
     void ToggleToolBarGrips();
@@ -747,27 +747,27 @@ public:
     void RemoveTrayIcon();
     void SetTrayIconText(const char* text);
 
-    // naleje menu polozkama UserMenuItems
-    // customize urcuje, jestli se ma pripojit nabidka pro konfiguraci
+    // fills the menu with UserMenuItems items
+    // customize specifies whether the configuration option should be added
     void FillUserMenu(CMenuPopup* menu, BOOL customize = TRUE);
-    // interni rekurzivni funkce pro plneni
+    // internal recursive function used for filling
     void FillUserMenu2(CMenuPopup* menu, int* iterator, int max);
 
-    // naplni menu View modama
-    // 'popup' popup, ktery budeme plnit
-    // 'firstIndex' index do 'popup', od ktere je treba polozky vkladat
+    // fills the View menu with modes
+    // 'popup' is the popup we are going to be filling
+    // 'firstIndex' index in 'popup' from which the items should be inserted
     // 'type' 0=TopToolbar||MiddleToolBar, 1=LeftMenu/LeftToolbar, 2=RightMenu/RightToolbar
     void FillViewModeMenu(CMenuPopup* popup, int firstIndex, int type);
 
     void MakeFileList();
 
-    // pomocna metoda pro SetTitle; 'text' musi mit delku minimalne 2 * MAX_PATH
+    // helper method for SetTitle; 'text' must be at least 2 * MAX_PATH characters long
     void GetFormatedPathForTitle(char* text);
 
-    // pokud je 'text' == NULL, bude nastaven standardni obsah
+    // if 'text' == NULL the default content will be set
     void SetWindowTitle(const char* text = NULL);
 
-    // nastavi ikonku hlavniho okna podle MainWindowIconIndex
+    // sets the main window icon according to MainWindowIconIndex
     void SetWindowIcon();
 
     void ShowCommandLine();
@@ -804,15 +804,16 @@ public:
         }
     }
 
-    // doslo ke zmene barev nebo barevne hloubky obrazovky; uz jsou vytvorene nove imagelisty
-    // pro tooblary a je treba je priradit controlum, ktere je pouzivaji
-    // reloadUMIcons urcuje, zda se znovu nactou ikony pro UserMenu, POZOR muze byt drasticky pomale,
-    // pokud polozky UM lezi na sitovem disku (napriklad 1500ms na ikonu)
+    // The color palette or color depth changed; new image lists for toolbars
+    // have already been created and must be assigned to the controls that use them.
+    // reloadUMIcons determines whether the UserMenu icons are reloaded. WARNING:
+    // if the items are on a network drive, this can be extremely slow
+    // (for example about 1500 ms per icon).
     void OnColorsChanged(BOOL reloadUMIcons);
 
-    // informuje hlavni okno, ze doslo ke zmene pluginu (load pluginu, pridani/odstraneni
-    // pluginu, ... akce vedouci ke zmene Plugin Bar)
-    // metoda pouze uspini promennou, k vlastnimu rebuildu toolbary dojde az v IDLE
+    // Notifies the main window that plugins have changed (loading, adding or
+    // removing plugins, or any action that modifies the Plugin Bar). The method
+    // only marks the variable; the toolbar is rebuilt later in the idle handler.
     void OnPluginsStateChanged()
     {
         PluginsStatesChanged = TRUE;
@@ -822,36 +823,36 @@ public:
     BOOL CanEnterHelpMode();
     void OnContextHelp();
     HWND SetHelpCapture(POINT point, BOOL* pbDescendant);
-    BOOL ProcessHelpMsg(MSG& msg, DWORD* pContext, HWND* hDirtyWindow); // hDirtyWindow: vraci okno, kteremu jsme zaslali WM_USER_HELP_MOUSEMOVE a je mu potreba zaslat WM_USER_HELP_MOUSELEAVE
+    BOOL ProcessHelpMsg(MSG& msg, DWORD* pContext, HWND* hDirtyWindow); // hDirtyWindow: returns the window to which we sent WM_USER_HELP_MOUSEMOVE and that needs to receive WM_USER_HELP_MOUSELEAVE
     void ExitHelpMode();
     DWORD MapClientArea(POINT point);
     DWORD MapNonClientArea(int iHit);
 
     CMainWindowsHitTestEnum HitTest(int xPos, int yPos); // scree souradnice
 
-    // podle cest v panelech zamackne tlacitka v drive bars
+    // Presses drive bar buttons according to the panel paths
     void UpdateDriveBars();
 
-    // pokud drive bar ma jinou bitovou masku disku nez 'drivesMask' nebo je-li 'checkCloudStorages' TRUE
-    // a drive bar ma jinou bitovou masku cloudu nez 'cloudStoragesMask', bude pregenerovana
+    // if the drive bar has a different disk bitmask than 'drivesMask' or if 'checkCloudStorages' is TRUE
+    // and the drive bar has a different cloud bitmask than 'cloudStoragesMask', it will be regenerated
     void RebuildDriveBarsIfNeeded(BOOL useDrivesMask, DWORD drivesMask, BOOL checkCloudStorages,
                                   DWORD cloudStoragesMask);
 
-    // nastavuje DoNotLoadAnyPlugins + pri FALSE rozesila refreshe panelum loadicim thumbnaily
+    // it sets DoNotLoadAnyPlugins and when it is FALSE, it sends refreshes to panels loading thumbnails
     void SetDoNotLoadAnyPlugins(BOOL doNotLoad);
 
-    // na zaklade 'show' zobrazi nebo zhasne dve drive bary
+    // based on 'show', shows or hides two drive bars
     void ShowHideTwoDriveBarsInternal(BOOL show);
 
-    // vrati sirku split bary v bodech (pokud je zobrazena Middle Bar, bude o ni rozsirena)
+    // returns the width of the split bar in pixels (expanded if the Middle Bar is visible)
     int GetSplitBarWidth();
     int GetHorizSplitBarHeight();
 
     void StartAnimate();
     void StopAnimate();
 
-    void CancelPanelsUI();          // ukonci pripadny QuickSearch a QuickRename
-    BOOL QuickRenameWindowActive(); // vraci TRUE, pokud je v nekterem z panelu aktivni QuickRenameWindow
+    void CancelPanelsUI();          // cancels any QuickSearch or QuickRename
+    BOOL QuickRenameWindowActive(); // returns TRUE if QuickRenameWindow is active in any panel
 
     // prejmenovat podle QuickRenameWindow; vraci TRUE v pripade uspech nebo pokud zadne prejmenovani neprobiha
     // pokud vrati FALSE, je treba okenko nezavirat (nevolat CancelPanelsUI) a nemenit focus (je v editline)
@@ -866,12 +867,12 @@ public:
 
 
 
-    // prepne Smart Column mode pro dany panel
+    // toggles Smart Column mode for the given panel
     void ToggleSmartColumnMode(CFilesWindow* panel);
-    // vrati Smart Column mode (TRUE/FALSE) pro dany panel
+    // returns Smart Column mode (TRUE/FALSE) for the given panel
     BOOL GetSmartColumnMode(CFilesWindow* panel);
 
-    // pripojeni a odpojeni hlavniho okna k odberu notifikaci o zmenach v shellu (pridani/odebrani disku)
+    // attach or detach the main window from shell change notifications (adding/removing drives)
     BOOL SHChangeNotifyInitialize();
     BOOL SHChangeNotifyRelease();
     BOOL OnAssociationsChangedNotification(BOOL showWaitWnd);
@@ -894,11 +895,11 @@ public:
 // ****************************************************************************
 // C__MainWindowCS
 //
-// zajisteni pristupu k promenne MainWindow mimo hlavni thread, pouziti:
+// ensures access to the MainWindow variable outside the main thread, usage:
 // if (MainWindowCS.LockIfNotClosed())
 // {
 //
-//   tady muzeme makat s MainWindow (zadny blokujici veci, pokud mozno jen vytahnout data a zmizet)...
+//   we can work with MainWindow here (no blocking actions-preferably just grab the data and leave)...
 //
 //   MainWindowCS.Unlock();
 // }
