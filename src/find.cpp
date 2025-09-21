@@ -35,8 +35,8 @@ const char* FINDOPTIONSITEM_GREP_REG = "Grep";
 const char* FINDIGNOREITEM_PATH_REG = "Path";
 const char* FINDIGNOREITEM_ENABLED_REG = "Enabled";
 
-// nasledujici promennou jsme pouzivali do Altap Salamander 2.5,
-// kde jsme presli na CFilterCriteria a jeho Save/Load
+// following variable was used up to Altap Salamander 2.5,
+// where we switched to CFilterCriteria with its Save/Load
 const char* OLD_FINDOPTIONSITEM_EXCLUDEMASK_REG = "ExcludeMask";
 
 //*********************************************************************************
@@ -100,7 +100,7 @@ void ClearFindHistory(BOOL dataOnly)
         }
     }
 
-    // mame promazat i combboxy otevrenych oken
+    // we should also clear the comboboxes of open windows
     if (!dataOnly)
     {
         FindDialogQueue.BroadcastMessage(WM_USER_CLEARHISTORY, 0, 0);
@@ -109,7 +109,7 @@ void ClearFindHistory(BOOL dataOnly)
 
 void ReleaseFind()
 {
-    ClearFindHistory(TRUE); // pouze uvolnime data
+    ClearFindHistory(TRUE); // we only release data
     if (FindDialogContinue != NULL)
         HANDLES(CloseHandle(FindDialogContinue));
 }
@@ -170,8 +170,8 @@ void CFindOptionsItem::BuildItemName()
 
 BOOL CFindOptionsItem::Save(HKEY hKey)
 {
-    // optimalizace na velikost v Registry: ukladame pouze "non-default hodnoty";
-    // pred ukladanim je proto treba promazat klic, do ktereho se budeme ukladat
+    // optimize registry size by storing only non-default values;
+    // before saving, we need to clear the key we’re going to save into
     CFindOptionsItem def;
 
     if (strcmp(ItemName, def.ItemName) != 0)
@@ -215,7 +215,7 @@ BOOL CFindOptionsItem::Load(HKEY hKey, DWORD cfgVersion)
 
     if (cfgVersion <= 13)
     {
-        // konverze starych hodnot
+        // conversion of old values
 
         // exclude mask
         BOOL excludeMask = FALSE;
@@ -381,7 +381,7 @@ BOOL CFindIgnore::Save(HKEY hKey)
         if (CreateKey(hKey, buf, subKey))
         {
             SetValue(subKey, FINDIGNOREITEM_PATH_REG, REG_SZ, Items[i]->Path, -1);
-            if (!Items[i]->Enabled) // ukladame pouze je-li FALSE
+            if (!Items[i]->Enabled) // save only if it is FALSE
                 SetValue(subKey, FINDIGNOREITEM_ENABLED_REG, REG_DWORD, &Items[i]->Enabled, sizeof(DWORD));
             CloseKey(subKey);
         }
@@ -411,12 +411,12 @@ BOOL CFindIgnore::Load(HKEY hKey, DWORD cfgVersion)
             path[0] = 0;
         item->Path = DupStr(path);
         if (!GetValue(subKey, FINDIGNOREITEM_ENABLED_REG, REG_DWORD, &item->Enabled, sizeof(DWORD)))
-            item->Enabled = TRUE; // ulozeno pouze je-li FALSE
+            item->Enabled = TRUE; // saved only if it is FALSE
         if (Configuration.ConfigVersion < 32)
         {
-            // uzivatele byli zmateni, ze jim neprohledavame tento adresar
-            // takze ho sice nechame v seznamu, ale vypneme checkbox
-            // kdo chce, muze si ho zapnout
+            // users were confused that this folder was not searched
+            // so we keep it listed but uncheck the checkbox
+            // anyone interested can manually enable it
             if (strcmp(item->Path, "Local Settings\\Temporary Internet Files") == 0)
                 item->Enabled = FALSE;
         }
@@ -454,7 +454,7 @@ BOOL CFindIgnore::Prepare(CFindIgnore* source)
     for (i = 0; i < source->Items.Count; i++)
     {
         CFindIgnoreItem* item = source->At(i);
-        if (item->Enabled) // zajimaji nas pouze enabled polozky
+        if (item->Enabled) // we are only interested in enabled items
         {
             const char* path = item->Path;
             while (*path == ' ')
@@ -519,12 +519,12 @@ const char* SkipRoot(const char* path)
 
 BOOL CFindIgnore::Contains(const char* path, int startPathLen)
 {
-    // plna cesta
+    // full path
     int i;
     for (i = 0; i < Items.Count; i++)
     {
-        // startPathLen - delka cesty zadane ve Find okne (root hledani), ignoruji se jen jeho
-        //                podcesty, viz https://forum.altap.cz/viewtopic.php?f=7&t=7434
+        // startPathLen is the path length entered in the Find dialog (search root);
+        // only its subpaths are ignored, see https://forum.altap.cz/viewtopic.php?f=7&t=7434
         CFindIgnoreItem* item = Items[i];
         switch (item->Type)
         {
@@ -549,11 +549,11 @@ BOOL CFindIgnore::Contains(const char* path, int startPathLen)
             while (m != NULL)
             {
                 m = StrIStr(m, item->Path);
-                if (m != NULL) // nalezeno
+                if (m != NULL) // found
                 {
-                    if ((m - path) + item->Len > startPathLen) // je to podcesta = ignorovat
+                    if ((m - path) + item->Len > startPathLen) // is it a subpath? then ignore it
                         return TRUE;
-                    m++; // jdeme hledat dalsi vyskyt, treba uz bude v podceste
+                    m++; // look for another occurrence, maybe it will be in a subpath
                 }
             }
             break;
@@ -613,7 +613,7 @@ BOOL CFindIgnore::AddUnique(BOOL enabled, const char* path)
     int len = (int)strlen(path);
     if (len < 1)
         return FALSE;
-    if (path[len - 1] == '\\') // budeme porovnavat bez koncovych lomitek
+    if (path[len - 1] == '\\') // compare without trailing backslashes
         len--;
     int i;
     for (i = 0; i < Items.Count; i++)
@@ -622,17 +622,17 @@ BOOL CFindIgnore::AddUnique(BOOL enabled, const char* path)
         int itemLen = (int)strlen(item->Path);
         if (itemLen < 1)
             continue;
-        if (item->Path[itemLen - 1] == '\\') // budeme porovnavat bez koncovych lomitek
+        if (item->Path[itemLen - 1] == '\\') // compare without a trailing backslash
             itemLen--;
         if (len != itemLen)
             continue;
         if (StrNICmp(path, item->Path, len) == 0)
         {
-            item->Enabled = TRUE; // v kazdem pripade polozku povolime
+            item->Enabled = TRUE; // always enable this item
             return TRUE;
         }
     }
-    // nenasli jsme -- pridame
+    // not found -- add it
     return Add(enabled, path);
 }
 
@@ -661,16 +661,14 @@ BOOL CFindIgnore::Set(int index, BOOL enabled, const char* path)
 //
 // CDuplicateCandidates
 //
-// Drzak CFoundFilesData pri hledani duplicitnich souboru.
-// 1) V prvni fazi se do objektu CDuplicateCandidates pridaji metodou Add
-//    vsechny soubory odpovidajici kriteriim Findu.
-// 2) Zavola se metoda Examine(), ktera pole seradi podle kriterii
-//    data->FindDupFlags. Pokud se porovnava take obsah souboru, napocitaji
-//    se MD5 digesty pro potencialne shodne soubory.
-//    Pole se pak znovu seradi a odstrani se single soubory.
-//    V poli zustanou pouze soubory vyskytujici se minimalne dvakrat.
-//    Tem je prirazena promenna Group, aby bylo mozne skupiny od sebe
-//    ve vysledkovem okne odlisit.
+// Container for CFoundFilesData when searching for duplicate files.
+// 1) In the first phase, all files matching the Find criteria are added
+//    to the CDuplicateCandidates object using the Add method.
+// 2) Then the Examine() method is called which sorts the array using data->FindDupFlags criteria. If file contents
+//    are compared, MD5 digests are calculated for potentially identical files.
+//    Then, the array is sorted again and single files are removed so
+//    Only files that appear at least twice remain in the array.
+//    These get a Group variable so that sets can be distinguished in the result window.
 //
 
 class CDuplicateCandidates : public TIndirectArray<CFoundFilesData>
@@ -678,41 +676,44 @@ class CDuplicateCandidates : public TIndirectArray<CFoundFilesData>
 public:
     CDuplicateCandidates() : TIndirectArray<CFoundFilesData>(2000, 4000) {}
 
-    // - [nacteni/vypocet MD5 digestu]
-    // - vyrazeni single souboru
-    // - nastaveni promenne Group
-    // - nastaveni promenne Different
+    // - loading/calculating MD5 digests
+    // - removing single files
+    // - setting the Group variable
+    // - setting the Different flag
     void Examine(CGrepData* data);
 
 protected:
-    // porovna dva zaznamy podle kriterii byName, bySize a byMD5
-    // byPath je kriterium s nejnnizsi prioritou, slouzi pouze pro prehledny vystup
+    // compares two records using criteria byName, bySize and byMD5
+    // byPath is a criterium with the lowest priority and is used only for clearer output
     int CompareFunc(CFoundFilesData* f1, CFoundFilesData* f2, BOOL byName, BOOL bySize, BOOL byMD5, BOOL byPath);
 
-    // seradi drzene soubory podle kriterii byName, bySize a byMD5
+    // sort stored files by byName, bySize and byMD5 criteria
     void QuickSort(int left, int right, BOOL byName, BOOL bySize, BOOL byMD5);
 
-    // projde vsechny drzene polozky a na zaklade volani metody CompareFunc urci
-    // ty, ktere se vyskytuji pouze jednou; ty pak z pole odstrani
-    // pred volanim teto metody musi byt pole serazeno metodou QuickSort
+    // goes through all stored items and uses CompareFunc to identify those that
+    // appear only once; those are then removed from the array
+    // before calling this method, the array must be sorted with QuickSort
     void RemoveSingleFiles(BOOL byName, BOOL bySize, BOOL byMD5);
 
-    // projde vsechny drzene polozky a na zaklade volani metody CompareFunc urci
-    // prislusnot do skupin; skupinam priradi na stridacku bit Different (0, 1, 0, 1, 0, 1, ...)
-    // pred volanim teto metody musi byt pole serazeno metodou QuickSort
+    // goes through all stored items and uses CompareFunc assign them
+    // to groups; Alternates the Different bit for the groups  (0, 1, 0, 1, 0, 1, ...)
+    // before calling this method, the array must be sorted with QuickSort
     void SetDifferentFlag(BOOL byName, BOOL bySize, BOOL byMD5);
 
-    // projde vsechny drzene polozky a na zaklade promenne Different priradi
-    // hodnotu Group; skupinam priradi na vzestupna cisla (0, 1, 2, 3, 4, 5, ...)
+    // goes through all stored items and uses the Different flag to assign
+    // Group values; groups are numbered increasingly (0, 1, 2, 3, 4, 5, ...)
     void SetGroupByDifferentFlag();
 
-    // napocita MD5 ze souboru 'file'
-    // 'progress' je ciselna hodnota zobrazena v status bar (optimalizace, abychom nenastavovali progress, ktery uz tam je)
-    // 'readSize' je pocet doposud nactenych bajtu ve vsech souborech
-    // 'totalSize' je celkovy pocet bajtu vsech souboru, pro ktere se bude urcovat MD5 digest
-    // metoda vraci TRUE, pokud se podarilo nacist MD5; na ukazatel (BYTE*)data->Group se zapise MD5 digest
-    // metoda vraci FALSE pri chybe cteni nebo pri preruseni operace uzivatelem (pak je nastavena
-    // promenna data->StopSearch na TRUE
+    // compute MD5 from the file 'file'
+    // 'progress' is the numeric value shown in the status bar (optimized so we do not
+    // update the same porgress repeatedly)
+    // 'readSize' holds the number of bytes read so far across all files
+    // 'totalSize' is the total number of bytes of all files for which the MD5 digest
+    // will be determined
+    // the method returns TRUE, if the MD5 value was successfully read; the digest is stored at
+    // (BYTE*)data->Group
+    // the method returns FALSE on read errors or when the user aborts the operation
+    // (then, the variable data->StopSearch is set to TRUE)
     BOOL GetMD5Digest(CGrepData* data, CFoundFilesData* file,
                       int* progress, CQuadWord* readSize, const CQuadWord* totalSize);
 };
@@ -780,7 +781,7 @@ LABEL_QuickSort:
         }
     } while (i <= j);
 
-    // nasledujici "hezky" kod jsme nahradili kodem podstatne setricim stack (max. log(N) zanoreni rekurze)
+    // the following "nice" code was replaced by a version that saves stack space (max. log(N) recursion depth)
     //  if (left < j) QuickSort(left, j, byName, bySize, byMD5);
     //  if (i < right) QuickSort(i, right, byName, bySize, byMD5);
 
@@ -788,7 +789,7 @@ LABEL_QuickSort:
     {
         if (i < right)
         {
-            if (j - left < right - i) // je potreba seradit obe "poloviny", tedy do rekurze posleme tu mensi, tu druhou zpracujeme pres "goto"
+            if (j - left < right - i) // both halves must be sorted: send the smaller half to recursion and handle the other via "goto"
             {
                 QuickSort(left, j, byName, bySize, byMD5);
                 left = i;
@@ -817,32 +818,32 @@ LABEL_QuickSort:
     }
 }
 
-#define DUPLICATES_BUFFER_SIZE 16384 // velikost bufferu pro vypocet MD5
+#define DUPLICATES_BUFFER_SIZE 16384 // buffer size for MD5 calculation
 
 BOOL CDuplicateCandidates::GetMD5Digest(CGrepData* data, CFoundFilesData* file,
                                         int* progress, CQuadWord* readSize, const CQuadWord* totalSize)
 {
-    // sestavime plnou cestu k souboru
+    // build full path to the file
     char fullPath[MAX_PATH];
     lstrcpyn(fullPath, file->Path, MAX_PATH);
     SalPathAppend(fullPath, file->Name, MAX_PATH);
 
-    data->SearchingText->Set(fullPath); // nastavime aktualni soubor
+    data->SearchingText->Set(fullPath); // set the current file
 
-    // otevreme soubor pro cteni a sekvencni pristup
+    // open the file for reading with sequential access
     HANDLE hFile = HANDLES_Q(CreateFile(fullPath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
                                         NULL, OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL));
     if (hFile != INVALID_HANDLE_VALUE)
     {
         BYTE buffer[DUPLICATES_BUFFER_SIZE];
         MD5 context;
-        DWORD read; // pocet skutecne nactenych bajtu
+        DWORD read; // number of bytes that were actually read
         while (TRUE)
         {
-            // nacteme do 'buffer' segment ze souboru 'file'
+            // read a segment from a file 'file' into 'buffer'
             if (!ReadFile(hFile, buffer, DUPLICATES_BUFFER_SIZE, &read, NULL))
             {
-                // chyba pri cteni souboru
+                // error reading the file
                 DWORD err = GetLastError();
                 HANDLES(CloseHandle(hFile));
 
@@ -857,32 +858,32 @@ BOOL CDuplicateCandidates::GetMD5Digest(CGrepData* data, CFoundFilesData* file,
                 return FALSE;
             }
 
-            // nechce user zastavit operaci?
+            // does the user want to stop the operation?
             if (data->StopSearch)
             {
                 HANDLES(CloseHandle(hFile));
                 return FALSE;
             }
 
-            // pokud jsme neco nacetli, provedeme update MD5
+            // if anything was read, update the MD5
             if (read > 0)
             {
                 context.update(buffer, read);
 
-                // napocitame a zobrazime progress (pokud se zmenila hodnota 'progress')
+                // compute and display progress (if the 'progress' value changed)
                 *readSize += CQuadWord(read, 0);
                 char buff[100];
                 int newProgress = *readSize >= *totalSize ? (totalSize->Value == 0 ? 0 : 100) : (int)((*readSize * CQuadWord(100, 0)) / *totalSize).Value;
                 if (newProgress != *progress)
                 {
                     *progress = newProgress;
-                    buff[0] = (BYTE)newProgress; // misto retezce predame primo hodnotu
+                    buff[0] = (BYTE)newProgress; // pass the numeric value directly instead of a string
                     buff[1] = 0;
-                    data->SearchingText2->Set(buff); // nastavime total
+                    data->SearchingText2->Set(buff); // update the total progress
                 }
             }
 
-            // pokud jsme nacetli mene nez buffer, mame hotovo
+            // if fewer bytes were read than the buffer size, we are done
             if (read != DUPLICATES_BUFFER_SIZE)
                 break;
         }
@@ -895,7 +896,7 @@ BOOL CDuplicateCandidates::GetMD5Digest(CGrepData* data, CFoundFilesData* file,
     }
     else
     {
-        // chyba pri otevirani souboru
+        // error occured while opening the file
         DWORD err = GetLastError();
 
         char buf[MAX_PATH + 100];
@@ -929,7 +930,7 @@ void CDuplicateCandidates::RemoveSingleFiles(BOOL byName, BOOL bySize, BOOL byMD
         {
             if (lastIsSingle)
             {
-                // lastData ukazuje na polozku, ktera se vyskytuje pouze jednou; vyradime ji
+                // lastData points to an item that occurs only once; remove it
                 Delete(lastDataIndex);
             }
             lastDataIndex = i;
@@ -939,7 +940,7 @@ void CDuplicateCandidates::RemoveSingleFiles(BOOL byName, BOOL bySize, BOOL byMD
     }
     if (lastIsSingle)
     {
-        // lastData ukazuje na polozku, ktera se vyskytuje pouze jednou; vyradime ji
+        // lastData points to an item that occurs only once; remove it
         Delete(lastDataIndex);
     }
 }
@@ -1011,27 +1012,27 @@ void CDuplicateCandidates::Examine(CGrepData* data)
 
     // dostali jsme seznam nalezenych souboru, odpovidajicich kriteriim
 
-    // vytahneme kriteria pro hledani duplicit
+    // extract criteria for duplicate search
     BOOL byName = (data->FindDupFlags & FIND_DUPLICATES_NAME) != 0;
     BOOL bySize = (data->FindDupFlags & FIND_DUPLICATES_SIZE) != 0;
     BOOL byContent = bySize && (data->FindDupFlags & FIND_DUPLICATES_CONTENT) != 0;
 
-    // dohledali jsme, pripravujeme vysledky (muze jeste prijit hledani MD5)
+    // search completed, preparing results (MD5 computation may still follow)
     data->SearchingText->Set(LoadStr(IDS_FIND_DUPS_RESULTS));
 
-    // seradime je podle zvolenych kriterii
+    // sort them according to selected criteria
     QuickSort(0, Count - 1, byName, bySize, FALSE);
 
-    // vyradime polozky, ktere se vyskytuji pouze jednou
+    // remove items that occur only once
     RemoveSingleFiles(byName, bySize, FALSE);
 
     CMD5Digest* digest = NULL;
     if (byContent)
     {
-        // pro soubory s velikosti nad 0 bajtu budeme pocitat MD5
-        // prostor pro MD5 digesty alokujeme najednou
+        // for files larger than 0 bytes we'll compute MD5
+        // allocate memory for MD5 digests at once
 
-        // urcime pocet souboru s velikosti vetsi nez 0 bajtu
+        // determine the number of files with size greater than 0 bytes
         DWORD count = 0;
         int i;
         for (i = 0; i < Count; i++)
@@ -1043,7 +1044,7 @@ void CDuplicateCandidates::Examine(CGrepData* data)
 
         if (count > 0)
         {
-            // alokujeme prostor pro MD5 digesty v jednom poli
+            // allocate memory for MD5 digests in one array
             digest = (CMD5Digest*)malloc(count * sizeof(CMD5Digest));
             if (digest == NULL)
             {
@@ -1051,7 +1052,7 @@ void CDuplicateCandidates::Examine(CGrepData* data)
                 return;
             }
 
-            // nasmerujeme ukazatele
+            // set up the pointers
             CMD5Digest* iterator = digest;
             for (i = 0; i < Count; i++)
             {
@@ -1065,12 +1066,12 @@ void CDuplicateCandidates::Examine(CGrepData* data)
                     file->Group = 0;
             }
 
-            // urcime celkovou velikost souboru pro progress
+            // determine total file size for progress
             CQuadWord totalSize(0, 0);
             for (i = 0; i < Count; i++)
                 totalSize += At(i)->Size;
 
-            // ziskame MD5 digest souboru
+            // retrieve the MD5 digest of files
             CQuadWord readSize(0, 0);
             int progress = -1;
             for (i = Count - 1; i >= 0; i--)
@@ -1082,43 +1083,43 @@ void CDuplicateCandidates::Examine(CGrepData* data)
                     {
                         if (data->StopSearch)
                         {
-                            // uzivatel chce zastavit hledani
-                            // podrizneme neprozkoumane polozky
+                            // the user wants to stop searching
+                            // trim the unprocessed items
                             int j;
                             for (j = 0; j <= i; j++)
                                 Delete(0);
-                            break; // ukazeme alespon nalezene duplicity
+                            break; // show at least the duplicates that have been already found
                         }
-                        // doslo k chybe pri cteni souboru, ale uzivatel chce hledat dal
-                        // vyradime soubor z kandidatu
+                        // an error occurred during reading the file but the user wants to continue
+                        // exclude the file from candidates
                         Delete(i);
                     }
                 }
             }
 
-            // dohledali jsme, pripravujeme vysledky
+            // search finished, preparing results
             data->SearchingText->Set(LoadStr(IDS_FIND_DUPS_RESULTS));
 
-            // znovu seradime soubory
+            // sort the files again
             if (Count > 0)
                 QuickSort(0, Count - 1, byName, bySize, TRUE);
 
-            // vyradime polozky, ktere se vyskytuji pouze jednou
+            // remove items that occur only once
             RemoveSingleFiles(byName, bySize, TRUE);
         }
     }
 
-    // nastavime bit Different
+    // set the Different bit
     SetDifferentFlag(byName, bySize, byContent);
 
     if (digest != NULL)
         free(digest);
 
-    // do promenne Group priradime cisla zacinajici 0
-    // soubory se stejnym bitem Different budou mit stejnou hodnotu
+    // assign numbers starting from 0 to the Group variable
+    // files with the same Different bit will share the same value
     SetGroupByDifferentFlag();
 
-    // pridame je do listview
+    // add them to the listview
     int i;
     for (i = 0; i < Count; i++)
     {
@@ -1127,11 +1128,11 @@ void CDuplicateCandidates::Examine(CGrepData* data)
         {
             TRACE_E(LOW_MEMORY);
             data->FoundFilesListView->ResetState();
-            // podrizneme nepridane polozky
+            // cut off items that were not added
             int j;
             for (j = Count - 1; j >= i; j--)
                 Delete(j);
-            // odpojime uz pridane
+            // detach the already added ones
             DetachMembers();
             return;
         }
@@ -1157,7 +1158,7 @@ void CSearchForData::Set(const char* dir, const char* masksGroup, BOOL includeSu
 // Search engine
 //
 
-#define SEARCH_SIZE 10000 // musi byt > nez max. delka retezce
+#define SEARCH_SIZE 10000 // must be greater than the maximum string length
 
 int SearchForward(CGrepData* data, char* txt, int size, int off)
 {
@@ -1223,9 +1224,9 @@ BOOL TestFileContentAux(BOOL& ok, CQuadWord& fileOffset, const CQuadWord& totalS
                             else
                             {
                                 if (EOL_CR &&
-                                    (end + 1 < totalEnd ||                              // slo otestovat, ze tam LF neni
-                                     !EOL_CRLF ||                                       // LF se nema uvazovat jako EOL
-                                     fileOffset + CQuadWord(viewSize, 0) >= totalSize)) // jde o konec souboru
+                                    (end + 1 < totalEnd ||                              // it was able to test that there is no LF there
+                                     !EOL_CRLF ||                                       // LF should not be considered an EOL
+                                     fileOffset + CQuadWord(viewSize, 0) >= totalSize)) // it is the end of the file
                                 {
                                     nextBeg = end + 1;
                                     break;
@@ -1246,14 +1247,14 @@ BOOL TestFileContentAux(BOOL& ok, CQuadWord& fileOffset, const CQuadWord& totalS
                 if (nextBeg == NULL)
                     nextBeg = end;
 
-                if (end == endLimit &&                               // pokud nebyl nalezen znak konce radky
-                    fileOffset + CQuadWord(viewSize, 0) < totalSize) // konec souboru neni ve view souboru
-                {                                                    // radka muze pokracovat pres okraj aktualniho view souboru
+                if (end == endLimit &&                               // if no line ending character was found
+                    fileOffset + CQuadWord(viewSize, 0) < totalSize) // the end of the file is not in the file view
+                {                                                    // the line can continue beyond the boundary of the current view of the file
                     fileOffset += CQuadWord(DWORD(beg - txt), 0);
-                    return TRUE; // pokracujeme s dalsim view souboru
+                    return TRUE; // continue with the next view segment
                 }
 
-                // radka beg->end
+                // line beg->end
                 if (data->RegExp.SetLine(beg, end))
                 {
                     int foundLen, start = 0;
@@ -1290,14 +1291,14 @@ BOOL TestFileContentAux(BOOL& ok, CQuadWord& fileOffset, const CQuadWord& totalS
                     log.Text = data->RegExp.GetLastErrorText();
                     log.Path = NULL;
                     SendMessage(data->HWindow, WM_USER_ADDLOG, (WPARAM)&log, 0);
-                    return FALSE; // dal soubor neprohledavej
+                    return FALSE; // do not search this file further
                 }
 
                 beg = nextBeg;
             }
-            // radka konci presne na konci view souboru (muze jit i o konec souboru)
+            // line ends exactly at the end of the view segment (may also be the end of the file)
             if (beg >= totalEnd)
-                fileOffset += CQuadWord(viewSize, 0); // posuneme offset, aby jsme hledali dale
+                fileOffset += CQuadWord(viewSize, 0); // advance the offset to continue searching
         }
         else
         {
@@ -1309,12 +1310,12 @@ BOOL TestFileContentAux(BOOL& ok, CQuadWord& fileOffset, const CQuadWord& totalS
                 {
                     if (data->WholeWords)
                     {
-                        if ((fileOffset + CQuadWord(off, 0) == CQuadWord(0, 0) ||                                        // zacatek souboru
-                             off > 0 && txt[off - 1] != '_' && IsNotAlphaNorNum[txt[off - 1]]) &&                        // neni na zac. bufferu + pred vzorkem ani znak ani cislo
-                            (fileOffset + CQuadWord(off, 0) + CQuadWord(data->SearchData.GetLength(), 0) >= totalSize || // konec souboru
-                             (DWORD)(off + data->SearchData.GetLength()) < viewSize &&                                   // neni na konci bufferu
+                        if ((fileOffset + CQuadWord(off, 0) == CQuadWord(0, 0) ||                                        // beginning of the file
+                             off > 0 && txt[off - 1] != '_' && IsNotAlphaNorNum[txt[off - 1]]) &&                        // not at the start of the buffer and no letter or digit before the pattern
+                            (fileOffset + CQuadWord(off, 0) + CQuadWord(data->SearchData.GetLength(), 0) >= totalSize || // end of the file
+                             (DWORD)(off + data->SearchData.GetLength()) < viewSize &&                                   // not at the end of the buffer
                                  txt[off + data->SearchData.GetLength()] != '_' &&
-                                 IsNotAlphaNorNum[txt[off + data->SearchData.GetLength()]])) // za vzorkem ani znak ani cislo
+                                 IsNotAlphaNorNum[txt[off + data->SearchData.GetLength()]])) // no letter or digit after the pattern
                         {
                             ok = TRUE; // found
                             break;
@@ -1330,7 +1331,7 @@ BOOL TestFileContentAux(BOOL& ok, CQuadWord& fileOffset, const CQuadWord& totalS
                 else
                     break; // not found or terminated
             }
-            if (!ok && !data->StopSearch) // nenalezeno ani nepreruseno
+            if (!ok && !data->StopSearch) // not found and not interrupted
             {
                 if (fileOffset + CQuadWord(viewSize, 0) < totalSize &&
                     CQuadWord(data->SearchData.GetLength() + 1, 0) < CQuadWord(viewSize, 0))
@@ -1338,21 +1339,21 @@ BOOL TestFileContentAux(BOOL& ok, CQuadWord& fileOffset, const CQuadWord& totalS
                     fileOffset = fileOffset + CQuadWord(viewSize, 0) - CQuadWord(data->SearchData.GetLength() + 1, 0);
                 }
                 else
-                    fileOffset = totalSize; // vzorek jiz v souboru byt nemuze
+                    fileOffset = totalSize; // the pattern cannot be in the file anymore
             }
         }
-        return TRUE; // pokracuj v hledani (pokud uz nejsme na konci souboru)
+        return TRUE; // continue searching (unless we are at the end of the file)
     }
     __except (HandleFileException(GetExceptionInformation(), txt, viewSize))
     {
-        // chyba v souboru
+        // file error
         FIND_LOG_ITEM log;
         log.Flags = FLI_ERROR;
         log.Text = LoadStr(IDS_FILEREADERROR2);
         log.Path = path;
         SendMessage(data->HWindow, WM_USER_ADDLOG, (WPARAM)&log, 0);
-        ok = FALSE;   // nenasel
-        return FALSE; // nepokracovat v hledani
+        ok = FALSE;   // not found
+        return FALSE; // do not continue searching
     }
 }
 
@@ -1366,7 +1367,7 @@ BOOL TestFileContent(DWORD sizeLow, DWORD sizeHigh, const char* path, CGrepData*
     if (totalSize > CQuadWord(0, 0) || isLink)
     {
         DWORD err = ERROR_SUCCESS;
-        data->SearchingText->Set(path); // nastavime aktualni soubor
+        data->SearchingText->Set(path); // set the current file
         HANDLE hFile = HANDLES_Q(CreateFile(path, GENERIC_READ,
                                             FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
                                             OPEN_EXISTING,
@@ -1375,7 +1376,7 @@ BOOL TestFileContent(DWORD sizeLow, DWORD sizeHigh, const char* path, CGrepData*
         BOOL getLinkFileSizeErr = FALSE;
         if (hFile != INVALID_HANDLE_VALUE)
         {
-            // linky maji nulovou velikost souboru, velikost ciloveho souboru se musi ziskat dodatecne
+            // links have zero file size; size of the target file must be obtained separately
             if (!isLink || SalGetFileSize(hFile, totalSize, err))
             {
                 HANDLE mFile = HANDLES(CreateFileMapping(hFile, NULL, PAGE_READONLY,
@@ -1385,23 +1386,23 @@ BOOL TestFileContent(DWORD sizeLow, DWORD sizeHigh, const char* path, CGrepData*
                     CQuadWord allocGran(AllocationGranularity, 0);
                     while (!data->StopSearch && fileOffset < totalSize)
                     {
-                        // zajistime, aby offset odpovidal granularite
+                        // ensure the offset matches the granularity
                         CQuadWord mapFileOffset(fileOffset);
                         mapFileOffset = (mapFileOffset / allocGran) * allocGran;
 
-                        // napocitame velikost view souboru
+                        // calculate the size of the view segment
                         if (CQuadWord(VOF_VIEW_SIZE, 0) <= totalSize - mapFileOffset)
                             viewSize = VOF_VIEW_SIZE;
                         else
                             viewSize = (DWORD)(totalSize - mapFileOffset).Value;
 
-                        // namapujeme view souboru
+                        // map the file view
                         char* txt = (char*)HANDLES(MapViewOfFile(mFile, FILE_MAP_READ,
                                                                  mapFileOffset.HiDWord, mapFileOffset.LoDWord,
                                                                  viewSize));
                         if (txt != NULL)
                         {
-                            // nechame prohlidnout view souboru
+                            // let the file view be examined
                             DWORD diff = (DWORD)(fileOffset - mapFileOffset).Value;
                             BOOL err2 = !TestFileContentAux(ok, fileOffset, totalSize, viewSize - diff,
                                                             path, txt + diff, data);
@@ -1445,7 +1446,7 @@ BOOL AddFoundItem(const char* path, const char* name, DWORD sizeLow, DWORD sizeH
                   DWORD attr, const FILETIME* lastWrite, BOOL isDir, CGrepData* data,
                   CDuplicateCandidates* duplicateCandidates)
 {
-    if (duplicateCandidates != NULL && isDir) // adresare nas pri hledani duplicit nezajimaji
+    if (duplicateCandidates != NULL && isDir) // directories are irrelevant to us when searching for duplicates
         return TRUE;
 
     CFoundFilesData* foundData = new CFoundFilesData;
@@ -1458,7 +1459,7 @@ BOOL AddFoundItem(const char* path, const char* name, DWORD sizeLow, DWORD sizeH
         {
             if (duplicateCandidates == NULL)
             {
-                // duplicateCandidates == NULL, pridavame polozku do data->FoundFilesListView
+                // duplicateCandidates == NULL, adding the item to data->FoundFilesListView
                 data->FoundFilesListView->Add(foundData);
                 if (!data->FoundFilesListView->IsGood())
                 {
@@ -1468,22 +1469,22 @@ BOOL AddFoundItem(const char* path, const char* name, DWORD sizeLow, DWORD sizeH
                 }
                 else
                 {
-                    // po kazdych 100 pridanych polozkach pozadam listview o prekresleni
-                    // take po uplynuti 0.5 vteriny o posledniho prekresleni
-                    // zaroven volame update v pripade grepovani pro kazdou polozku
+                    // request a listview redraw after every 100 added items
+                    // also after 0.5 seconds has passed since the last redraw
+                    // we also call update for each item when grepping
                     if (data->FoundFilesListView->GetCount() >= data->FoundVisibleCount + 100 ||
                         GetTickCount() - data->FoundVisibleTick >= 500
-                        /* || data->Grep*/) // po pul vterine update staci bohate i pro grepovani
+                        /* || data->Grep*/) // a half-second update interval is enough even for grepping
                     {
                         SendMessage(data->HWindow, WM_USER_ADDFILE, 0, 0);
                     }
                     else
-                        data->NeedRefresh = TRUE; // nejpozdeji za 0.5 vteriny prekreslime
+                        data->NeedRefresh = TRUE; // we will redraw at latest after 0.5 second
                 }
             }
             else
             {
-                // duplicateCandidates != NULL, pridavame polozku do duplicateCandidates
+                // duplicateCandidates != NULL, adding the item to duplicateCandidates
                 duplicateCandidates->Add(foundData);
                 if (!duplicateCandidates->IsGood())
                 {
@@ -1942,7 +1943,7 @@ unsigned GrepThreadFBody(void* ptr)
                 {
                     dirStack = new TDirectArray<char*>(1000, 1000);
                     if (dirStack == NULL)
-                    TRACE_E(LOW_MEMORY); // the algorithm will run even without the stack
+                        TRACE_E(LOW_MEMORY); // the algorithm will run even without the stack
                 }
 
                 // create a local copy of the ignore list since it has to be processed anyway
@@ -1961,9 +1962,7 @@ unsigned GrepThreadFBody(void* ptr)
 
                 char message[2 * MAX_PATH];
                 SearchDirectory(path, end, (int)(end - path), mg, includeSubDirs, data, dirStack, 0,
-                                    duplicateCandidates, ignoreList, message);
-
-                
+                                duplicateCandidates, ignoreList, message);
 
                 if (ignoreList != NULL)
                     delete ignoreList;
