@@ -1945,7 +1945,7 @@ unsigned GrepThreadFBody(void* ptr)
                 {
                     dirStack = new TDirectArray<char*>(1000, 1000);
                     if (dirStack == NULL)
-                    TRACE_E(LOW_MEMORY); // the algorithm will run even without the stack
+                        TRACE_E(LOW_MEMORY); // the algorithm will run even without the stack
                 }
 
                 // create a local copy of the ignore list since it has to be processed anyway
@@ -1964,9 +1964,7 @@ unsigned GrepThreadFBody(void* ptr)
 
                 char message[2 * MAX_PATH];
                 SearchDirectory(path, end, (int)(end - path), mg, includeSubDirs, data, dirStack, 0,
-                                    duplicateCandidates, ignoreList, message);
-
-                
+                                duplicateCandidates, ignoreList, message);
 
                 if (ignoreList != NULL)
                     delete ignoreList;
