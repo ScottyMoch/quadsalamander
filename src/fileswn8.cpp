@@ -395,7 +395,7 @@ void CFilesWindow::FilesAction(CActionType type, CFilesWindow* target, int count
                     lstrcpy(expanded, LoadStr(isDir ? IDS_QUESTION_DIRECTORY : IDS_QUESTION_FILE));
             }
             else
-                expanded[0] = 0; // nepouziva se
+                expanded[0] = 0; // not used
         }
         else // count-files in directories and individualfiles
         {
