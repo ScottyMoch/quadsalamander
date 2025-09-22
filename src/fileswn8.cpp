@@ -476,9 +476,9 @@ void CFilesWindow::FilesAction(CActionType type, CFilesWindow* target, int count
                 UpdateWindow(MainWindow->HWindow);
 
                 if (!IsPluginFSPath(path) &&
-                    (path[0] != 0 && path[1] == ':' ||                                             // paths like X:...
-                     (path[0] == '/' || path[0] == '\\') && (path[1] == '/' || path[1] == '\\') || // UNC paths
-                     Is(ptDisk) || Is(ptZIPArchive)))                                              // disk/archive relative paths
+                    (path[0] != 0 && path[1] == ':' ||                                             // cesty typu X:...
+                     (path[0] == '/' || path[0] == '\\') && (path[1] == '/' || path[1] == '\\') || // UNC cesty
+                     Is(ptDisk) || Is(ptZIPArchive)))                                              // disk+archiv relativni cesty
                    // it's a disk path (absolute or relative) - convert all '/' to '\' and remove duplicate '\'
                     SlashesToBackslashesAndRemoveDups(path);
                 }
@@ -604,7 +604,7 @@ void CFilesWindow::FilesAction(CActionType type, CFilesWindow* target, int count
                                 if (nullFile)
                                 {
                                     nullFileAttrs = SalGetFileAttributes(path);
-                                    ClearReadOnlyAttr(path, nullFileAttrs); // so it’s possible to delete even read-only files
+                                    ClearReadOnlyAttr(path, nullFileAttrs); // so it's possible to delete even read-only files
                                     DeleteFile(path);
                                 }
                                 //---  custom packing
@@ -644,7 +644,7 @@ void CFilesWindow::FilesAction(CActionType type, CFilesWindow* target, int count
                                         {
                                             if (nullFileAttrs != INVALID_FILE_ATTRIBUTES)
                                             {
-                                                // restore the "compressed" flag; on FAT and FAT32 it simply doesn't work
+                                                // restorneme "compressed" flag, na FAT a FAT32 se to proste nepovede
                                                 USHORT state = (nullFileAttrs & FILE_ATTRIBUTE_COMPRESSED) ? COMPRESSION_FORMAT_DEFAULT : COMPRESSION_FORMAT_NONE;
                                                 ULONG length;
                                                 DeviceIoControl(hFile2, FSCTL_SET_COMPRESSION, &state,
