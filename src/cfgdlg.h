@@ -392,11 +392,11 @@ struct CConfiguration
 
     // Change drive
     int ChangeDriveShowMyDoc;    // display Documents items
-    int ChangeDriveShowDownloads; // zobrazovat polozky Documents
-    int ChangeDriveShowDesktop;    // zobrazovat polozky Documents
-    int ChangeDriveShowMyVideos; // zobrazovat polozky Documents
-    int ChangeDriveShowMyPictures; // zobrazovat polozky Documents
-    int ChangeDriveShowMyMusic;    // zobrazovat polozky Documents
+    int ChangeDriveShowDownloads; // display Documents items
+    int ChangeDriveShowDesktop;    // display Documents items
+    int ChangeDriveShowMyVideos; // display Documents items
+    int ChangeDriveShowMyPictures; // display Documents items
+    int ChangeDriveShowMyMusic;    // display Documents items
     int ChangeDriveShowAnother;  // display the Another panel path item
     int ChangeDriveShowNet;      // display the Network item
     int ChangeDriveCloudStorage; // display items for cloud storage (Google Drive, etc.)
