@@ -11,3 +11,9 @@ Thumbs.db
 /src/plugins/automation/generated/salamander_h.h
 /src/plugins/automation/generated/salamander_i.c
 /src/plugins/automation/generated/salamander_p.c
+/setupstuff40
+/setupstuffQuad40
+/sfxstuff
+*.log
+*.err
+*.wrn

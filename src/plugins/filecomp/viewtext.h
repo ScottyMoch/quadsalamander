@@ -11,7 +11,10 @@
 template <class CChar>
 class TTextFileViewWindow : public CTextFileViewWindowBase
 {
-    SUPER(CTextFileViewWindowBase);
+    // SUPER(CTextFileViewWindowBase);
+private:
+    typedef CTextFileViewWindowBase super;
+
 
 protected:
     typedef typename TCharSpecific<CChar>::POLYTEXT POLYTEXT;
@@ -53,3 +56,6 @@ public:
                              typename std::vector<POLYTEXT>::iterator end);
     virtual void Paint();
 };
+
+//template class TTextFileViewWindow<char>;
+//template class TTextFileViewWindow<wchar_t>;
