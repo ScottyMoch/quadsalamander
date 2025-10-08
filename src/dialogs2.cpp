@@ -629,9 +629,9 @@ void CImportConfigDialog::Transfer(CTransferInfo& ti)
             if (ConfigurationExist[i])
             {
                 // detect whether this is "Open Salamander", "Altap Salamander", or the old "Servant Salamander"
-                BOOL openSalamander = StrIStr(SalamanderConfigurationRoots[i], "Open Salamander") != NULL;
+                BOOL openSalamander = StrIStr(SalamanderConfigurationRoots[i], "Quad Salamander") != NULL;
                 BOOL altapSalamander = StrIStr(SalamanderConfigurationRoots[i], "Altap Salamander") != NULL;
-                const char* name = openSalamander    ? "Open Salamander %s"
+                const char* name = openSalamander    ? "Quad Salamander %s"
                                    : altapSalamander ? "Altap Salamander %s"
                                                      : "Servant Salamander %s";
                 sprintf(buff, name, SalamanderConfigurationVersions[i]);
@@ -661,9 +661,9 @@ void CImportConfigDialog::Transfer(CTransferInfo& ti)
                 lvi.state = 0;
 
                 // detect whether this is "Open Salamander", "Altap Salamander", or the old "Servant Salamander"
-                BOOL openSalamander = StrIStr(SalamanderConfigurationRoots[i], "Open Salamander") != NULL;
+                BOOL openSalamander = StrIStr(SalamanderConfigurationRoots[i], "Quad Salamander") != NULL;
                 BOOL altapSalamander = StrIStr(SalamanderConfigurationRoots[i], "Altap Salamander") != NULL;
-                const char* name = openSalamander    ? "Open Salamander %s"
+                const char* name = openSalamander    ? "Quad Salamander %s"
                                    : altapSalamander ? "Altap Salamander %s"
                                                      : "Servant Salamander %s";
                 sprintf(buff, name, SalamanderConfigurationVersions[i]);

@@ -158,6 +158,8 @@ extern const char* DefTopToolBar; // default values
 extern const char* DefMiddleToolBar;
 extern const char* DefLeftToolBar;
 extern const char* DefRightToolBar;
+extern const char* DefBottomLeftToolBar;
+extern const char* DefBottomRightToolBar;
 
 #define TITLE_BAR_MODE_DIRECTORY 0 // must correspond to the array {IDS_TITLEBAR_DIRECTORY, IDS_TITLEBAR_COMPOSITE, IDS_TITLEBAR_FULLPATH}
 #define TITLE_BAR_MODE_COMPOSITE 1
@@ -315,6 +317,8 @@ struct CConfiguration
     char MiddleToolBar[400];
     char LeftToolBar[200];
     char RightToolBar[200];
+    char BottomLeftToolBar[200];
+    char BottomRightToolBar[200];
 
     int UseRecycleBin;       // 0 - do not use, 1 - for all, 2 - for RecycleMasks
     CMaskGroup RecycleMasks; // mask array determining what is sent to the Recycle Bin
@@ -388,6 +392,11 @@ struct CConfiguration
 
     // Change drive
     int ChangeDriveShowMyDoc;    // display Documents items
+    int ChangeDriveShowDownloads; // zobrazovat polozky Documents
+    int ChangeDriveShowDesktop;    // zobrazovat polozky Documents
+    int ChangeDriveShowMyVideos; // zobrazovat polozky Documents
+    int ChangeDriveShowMyPictures; // zobrazovat polozky Documents
+    int ChangeDriveShowMyMusic;    // zobrazovat polozky Documents
     int ChangeDriveShowAnother;  // display the Another panel path item
     int ChangeDriveShowNet;      // display the Network item
     int ChangeDriveCloudStorage; // display items for cloud storage (Google Drive, etc.)

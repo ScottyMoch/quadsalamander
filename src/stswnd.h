@@ -92,6 +92,7 @@ protected:
     int Allocated;
     int* AlpDX; // Array of lengths (from the first up to the X-th character in the string)
     BOOL Left;
+    BOOL Top;
 
     int ToolBarWidth; // Current toolbar width
 
@@ -173,10 +174,12 @@ public:
 
     BOOL FindHotTrackItem(int xPos, int& index);
 
-    void SetLeftPanel(BOOL left);
+    void SetTopLeftPanel(BOOL top, BOOL left);
     BOOL ToggleToolBar();
 
     BOOL IsLeft() { return Left; }
+
+    BOOL IsTop() { return Top; }
 
     BOOL SetDriveIcon(HICON hIcon);     // The icon is copied into the image list - the caller is responsible for destruction
     void SetDrivePressed(BOOL pressed); // Presses the drive icon

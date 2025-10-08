@@ -96,6 +96,8 @@ struct CUserMenuValidationData // additional data used to validate User Menu: ar
     BOOL UsesListOfSelFullNames; // TRUE = this parameter is used; (check that it is not too long)
     BOOL UsesFullPathLeft;       // TRUE = this parameter is used; (verify if it is defined)
     BOOL UsesFullPathRight;      // TRUE = this parameter is used; (verify if it is defined)
+    BOOL UsesFullPathBottomLeft; // TRUE = tento parametr se pouziva (musime overit jestli je definovan)
+    BOOL UsesFullPathBottomRight; // TRUE = tento parametr se pouziva (musime overit jestli je definovan)
     BOOL UsesFullPathInactive;   // TRUE = this parameter is used; (verify if it is defined)
 
     BOOL MustHandleItemsAsGroup;     // TRUE = items must be processed as a group: ListOfSelectedNames, ListOfSelectedFullNames, FileToCompareXXX, DirToCompareXXX
@@ -114,6 +116,8 @@ struct CUserMenuAdvancedData // additional data used only for the User Menu: arr
     BOOL ListOfSelFullNamesIsEmpty;             // TRUE = ListOfSelFullNames is empty
     char FullPathLeft[MAX_PATH];                // empty string = not defined (we are in Find or the panel shows archive/FS)
     char FullPathRight[MAX_PATH];               // empty string = not defined (we are in Find or the panel shows archive/FS)
+    char FullPathBottomLeft[MAX_PATH];                // prazdny string = neni definovana (jsme ve Findu nebo je v panelu archiv/FS)
+    char FullPathBottomRight[MAX_PATH];               // prazdny string = neni definovana (jsme ve Findu nebo je v panelu archiv/FS)
     const char* FullPathInactive;               // points to FullPathLeft or FullPathRight: empty string = not defined (we are in Find or the panel shows archive/FS)
     char CompareName1[MAX_PATH];                // first full name for compare (file or directory)
     char CompareName2[MAX_PATH];                // second full name for compare (file or directory)

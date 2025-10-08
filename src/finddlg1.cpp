@@ -3306,6 +3306,8 @@ CFindDialog::DialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case CM_FIND_NOW:
         case CM_FIND_DUPLICATES:
         {
+
+
             if (!SearchInProgress)
             {
                 if (ValidateData() && TransferData(ttDataFromWindow))

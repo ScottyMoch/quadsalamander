@@ -101,11 +101,21 @@
     <ClCompile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
+    <PreBuildEvent>
+      <Command>taskkill /f /fi "imagename eq $(ProjectName).exe"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <PreprocessorDefinitions>TRACE_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <PreBuildEvent>
+      <Command>taskkill /f /fi "imagename eq $(ProjectName).exe"</Command>
+    </PreBuildEvent>
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -257,6 +267,7 @@
     </ClCompile>
     <ClCompile Include="..\common\multimon.cpp">
     </ClCompile>
+    <ClCompile Include="..\common\numutils.cpp" />
     <ClCompile Include="..\common\regexp.cpp">
     </ClCompile>
     <ClCompile Include="..\common\sheets.cpp">
@@ -707,6 +718,7 @@
     </ClInclude>
     <ClInclude Include="..\common\multimon.h">
     </ClInclude>
+    <ClInclude Include="..\common\numutils.h" />
     <ClInclude Include="..\common\regexp.h">
     </ClInclude>
     <ClInclude Include="..\common\sheets.h">

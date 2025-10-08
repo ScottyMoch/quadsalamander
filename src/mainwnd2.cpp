@@ -152,6 +152,7 @@ const DWORD THIS_CONFIG_VERSION = 104;
 // !!! Keep the corresponding lines in SalamanderConfigurationVersions up to date
 const char* SalamanderConfigurationRoots[SALCFG_ROOTS_COUNT + 1] =
     {
+        "Software\\Quad Salamander\\5.0",
         "Software\\Open Salamander\\5.0",
         "Software\\Altap\\Altap Salamander 4.0",
         "Software\\Altap\\Altap Salamander 4.0 beta 1 (DB177)",
@@ -338,12 +339,18 @@ const char* WINDOW_RIGHT_REG = "Right";
 const char* WINDOW_TOP_REG = "Top";
 const char* WINDOW_BOTTOM_REG = "Bottom";
 const char* WINDOW_SPLIT_REG = "Split Position";
+const char* WINDOW_SPLIT_HLEFT_REG = "Split Position Left";
+const char* WINDOW_SPLIT_HRIGHT_REG = "Split Position Right";
 const char* WINDOW_BEFOREZOOMSPLIT_REG = "Before Zoom Split Position";
+const char* WINDOW_BEFOREZOOMSPLIT_HLEFT_REG = "Before Zoom Split Position Left";
+const char* WINDOW_BEFOREZOOMSPLIT_HRIGHT_REG = "Before Zoom Split Position Right";
 const char* WINDOW_SHOW_REG = "Show";
 const char* FINDDIALOG_NAMEWIDTH_REG = "Name Width";
 
 const char* SALAMANDER_LEFTP_REG = "Left Panel";
 const char* SALAMANDER_RIGHTP_REG = "Right Panel";
+const char* SALAMANDER_BOTTOMLEFTP_REG = "Bottom Left Panel";
+const char* SALAMANDER_BOTTOMRIGHTP_REG = "Bottom Right Panel";
 const char* PANEL_PATH_REG = "Path";
 const char* PANEL_VIEW_REG = "View Type";
 const char* PANEL_SORT_REG = "Sort Type";
@@ -400,7 +407,8 @@ const char* CONFIG_COPYFINDTEXT_REG = "Copy Find Text";
 const char* CONFIG_CLEARREADONLY_REG = "Clear Readonly Attribute";
 const char* CONFIG_PRIMARYCONTEXTMENU_REG = "Primary Context Menu";
 const char* CONFIG_NOTHIDDENSYSTEM_REG = "Hide Hidden and System Files and Directories";
-const char* CONFIG_RIGHT_FOCUS_REG = "Right Panel Focused";
+const char* CONFIG_RIGHT_FOCUS_REG = "Right Panel Focused"; //  obsolete for quad salamander
+const char* CONFIG_FOCUSED_PANEL_ID_REG = "Focused Panel Id";
 const char* CONFIG_SHOWCHDBUTTON_REG = "Show Change Drive Button";
 const char* CONFIG_ALWAYSONTOP_REG = "Always On Top";
 //const char *CONFIG_FASTDIRMOVE_REG = "Fast Directory Move";
@@ -430,6 +438,8 @@ const char* CONFIG_TOPTOOLBAR_REG = "Top ToolBar";
 const char* CONFIG_MIDDLETOOLBAR_REG = "Middle ToolBar";
 const char* CONFIG_LEFTTOOLBAR_REG = "Left ToolBar";
 const char* CONFIG_RIGHTTOOLBAR_REG = "Right ToolBar";
+const char* CONFIG_BOTTOMLEFTTOOLBAR_REG = "Bottom Left ToolBar";
+const char* CONFIG_BOTTOMRIGHTTOOLBAR_REG = "Bottom Right ToolBar";
 const char* CONFIG_TOPTOOLBARVISIBLE_REG = "Show Top ToolBar";
 const char* CONFIG_PLGTOOLBARVISIBLE_REG = "Show Plugins Bar";
 const char* CONFIG_MIDDLETOOLBARVISIBLE_REG = "Show Middle ToolBar";
@@ -451,6 +461,11 @@ const char* CONFIG_HOTPATH_AUTOCONFIG = "Auto Configurate Hot Paths";
 const char* CONFIG_LASTUSEDSPEEDLIM_REG = "Speed Limit";
 const char* CONFIG_QUICKSEARCHENTER_REG = "Quick Search Enter Alt";
 const char* CONFIG_CHD_SHOWMYDOC = "Change Drive Show My Documents";
+const char* CONFIG_CHD_SHOWMYVID = "Change Drive Show My Videos";
+const char* CONFIG_CHD_SHOWMYMUS = "Change Drive Show My Music";
+const char* CONFIG_CHD_SHOWMYPIC = "Change Drive Show My Pictures";
+const char* CONFIG_CHD_SHOWDESKTOP = "Change Drive Show Desktop";
+const char* CONFIG_CHD_SHOWDOWNLOADS = "Change Drive Show Downloads";
 const char* CONFIG_CHD_SHOWANOTHER = "Change Drive Show Another";
 const char* CONFIG_CHD_SHOWCLOUDSTOR = "Change Drive Show Cloud Storages";
 const char* CONFIG_CHD_SHOWNET = "Change Drive Network";
@@ -780,7 +795,7 @@ const char* SALAMANDER_PWDMNGR_REG = "Password Manager";
 // GetUpgradeInfo
 //
 // Tries to find "AutoImportConfig" in the configuration key of this version of Salamander.
-// If it is not found or if the key stored in AutoImportConfig does not exist
+// If it is not found or if the key stored in AutoImportConfig does not exist 
 // (points to the key of this version, which makes no sense)
 // or if it contains a corrupted (incomplete save) or empty configuration, it returns
 // FALSE in 'autoImportConfig'. Otherwise it returns TRUE in 'autoImportConfig' and
@@ -789,10 +804,10 @@ const char* SALAMANDER_PWDMNGR_REG = "Password Manager";
 // for another key. We simply follow the "target" key and leave intermediate keys untouched-
 // if the import succeeds, the target key will be removed anyway. Returns FALSE only if the application should exit.
 //
-// If the configuration key of this version contains, besides AutoImportConfig, also the "Configuration"
+// If the configuration key of this version contains, besides AutoImportConfig, also the "Configuration" 
 // key (expected to be a saved configuration),
 // we ask the user whether to:
-//   - Use the current configuration and ignore the old one (we do not delete it so the user does not lose data,
+//   - Use the current configuration and ignore the old one (we do not delete it so the user does not lose data, 
 //     and it does not require that much space anyway). In this case delete AutoImportConfig immediately.
 //     This is done silently, if AutoImportConfig points to this version of Salamander`s key
 //     (DEFAULT OFFER because it does not cause data loss and users may dismiss the message box without reading).
@@ -1454,11 +1469,22 @@ void CMainWindow::SaveConfig(HWND parent)
                          &(place.rcNormalPosition.bottom), sizeof(DWORD));
                 SetValue(actKey, WINDOW_SHOW_REG, REG_DWORD,
                          &(place.showCmd), sizeof(DWORD));
+
                 char buf[20];
-                sprintf(buf, "%.1lf", SplitPosition * 100);
+                sprintf(buf, "%.1lf", midSplitter.SplitPosition * 100);
                 SetValue(actKey, WINDOW_SPLIT_REG, REG_SZ, buf, -1);
-                sprintf(buf, "%.1lf", BeforeZoomSplitPosition * 100);
+                sprintf(buf, "%.1lf", midSplitter.BeforeZoomSplitPosition * 100);
                 SetValue(actKey, WINDOW_BEFOREZOOMSPLIT_REG, REG_SZ, buf, -1);
+
+                sprintf(buf, "%.1lf", leftSplitter.SplitPosition * 100);
+                SetValue(actKey, WINDOW_SPLIT_HLEFT_REG, REG_SZ, buf, -1);
+                sprintf(buf, "%.1lf", leftSplitter.BeforeZoomSplitPosition * 100);
+                SetValue(actKey, WINDOW_BEFOREZOOMSPLIT_HLEFT_REG, REG_SZ, buf, -1);
+
+                sprintf(buf, "%.1lf", rightSplitter.SplitPosition * 100);
+                SetValue(actKey, WINDOW_SPLIT_HRIGHT_REG, REG_SZ, buf, -1);
+                sprintf(buf, "%.1lf", rightSplitter.BeforeZoomSplitPosition * 100);
+                SetValue(actKey, WINDOW_BEFOREZOOMSPLIT_HRIGHT_REG, REG_SZ, buf, -1);
 
                 CloseKey(actKey);
             }
@@ -1488,6 +1514,8 @@ void CMainWindow::SaveConfig(HWND parent)
 
             SavePanelConfig(LeftPanel, salamander, SALAMANDER_LEFTP_REG);
             SavePanelConfig(RightPanel, salamander, SALAMANDER_RIGHTP_REG);
+            SavePanelConfig(BottomLeftPanel, salamander, SALAMANDER_BOTTOMLEFTP_REG);
+            SavePanelConfig(BottomRightPanel, salamander, SALAMANDER_BOTTOMRIGHTP_REG);
 
             //---  default directories
 
@@ -1742,9 +1770,11 @@ void CMainWindow::SaveConfig(HWND parent)
                          &Configuration.MinBeepWhenDone, sizeof(DWORD));
                 SetValue(actKey, CONFIG_CLOSESHELL_REG, REG_DWORD,
                          &Configuration.CloseShell, sizeof(DWORD));
-                DWORD rightPanelFocused = (GetActivePanel() == RightPanel);
-                SetValue(actKey, CONFIG_RIGHT_FOCUS_REG, REG_DWORD,
-                         &rightPanelFocused, sizeof(DWORD));
+
+                DWORD focusedPanelId = (GetPanelId(GetActivePanel()) - PANEL_LEFT + 1); // panel ids - 1,2,3,4
+                SetValue(actKey, CONFIG_FOCUSED_PANEL_ID_REG, REG_DWORD,                //  quad salamander specific
+                         &focusedPanelId, sizeof(DWORD));
+
                 SetValue(actKey, CONFIG_ALWAYSONTOP_REG, REG_DWORD,
                          &Configuration.AlwaysOnTop, sizeof(DWORD));
                 //      SetValue(actKey, CONFIG_FASTDIRMOVE_REG, REG_DWORD,
@@ -1803,6 +1833,16 @@ void CMainWindow::SaveConfig(HWND parent)
                          &Configuration.QuickSearchEnterAlt, sizeof(DWORD));
                 SetValue(actKey, CONFIG_CHD_SHOWMYDOC, REG_DWORD,
                          &Configuration.ChangeDriveShowMyDoc, sizeof(DWORD));
+                SetValue(actKey, CONFIG_CHD_SHOWDOWNLOADS, REG_DWORD,
+                         &Configuration.ChangeDriveShowDownloads, sizeof(DWORD));
+                SetValue(actKey, CONFIG_CHD_SHOWMYVID, REG_DWORD,
+                         &Configuration.ChangeDriveShowMyVideos, sizeof(DWORD));
+                SetValue(actKey, CONFIG_CHD_SHOWMYPIC, REG_DWORD,
+                         &Configuration.ChangeDriveShowMyPictures, sizeof(DWORD));
+                SetValue(actKey, CONFIG_CHD_SHOWMYMUS, REG_DWORD,
+                         &Configuration.ChangeDriveShowMyMusic, sizeof(DWORD));
+                SetValue(actKey, CONFIG_CHD_SHOWDESKTOP, REG_DWORD,
+                         &Configuration.ChangeDriveShowDesktop, sizeof(DWORD));
                 SetValue(actKey, CONFIG_CHD_SHOWCLOUDSTOR, REG_DWORD,
                          &Configuration.ChangeDriveCloudStorage, sizeof(DWORD));
                 SetValue(actKey, CONFIG_CHD_SHOWANOTHER, REG_DWORD,
@@ -1996,6 +2036,8 @@ void CMainWindow::SaveConfig(HWND parent)
 
                 SetValue(actKey, CONFIG_LEFTTOOLBAR_REG, REG_SZ, Configuration.LeftToolBar, -1);
                 SetValue(actKey, CONFIG_RIGHTTOOLBAR_REG, REG_SZ, Configuration.RightToolBar, -1);
+                SetValue(actKey, CONFIG_BOTTOMLEFTTOOLBAR_REG, REG_SZ, Configuration.BottomLeftToolBar, -1);
+                SetValue(actKey, CONFIG_BOTTOMRIGHTTOOLBAR_REG, REG_SZ, Configuration.BottomRightToolBar, -1);
 
                 SetValue(actKey, CONFIG_TOPTOOLBARVISIBLE_REG, REG_DWORD,
                          &Configuration.TopToolBarVisible, sizeof(DWORD));
@@ -2730,21 +2772,59 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                 char buf[20];
                 if (GetValue(actKey, WINDOW_SPLIT_REG, REG_SZ, buf, 20))
                 {
-                    sscanf(buf, "%lf", &SplitPosition);
-                    SplitPosition /= 100;
-                    if (SplitPosition < 0)
-                        SplitPosition = 0;
-                    if (SplitPosition > 1)
-                        SplitPosition = 1;
+                    sscanf(buf, "%lf", &(midSplitter.SplitPosition));
+                    midSplitter.SplitPosition /= 100;
+                    if (midSplitter.SplitPosition < 0)
+                        midSplitter.SplitPosition = 0;
+                    if (midSplitter.SplitPosition > 1)
+                        midSplitter.SplitPosition = 1;
                 }
                 if (GetValue(actKey, WINDOW_BEFOREZOOMSPLIT_REG, REG_SZ, buf, 20))
                 {
-                    sscanf(buf, "%lf", &BeforeZoomSplitPosition);
-                    BeforeZoomSplitPosition /= 100;
-                    if (BeforeZoomSplitPosition < 0)
-                        BeforeZoomSplitPosition = 0;
-                    if (BeforeZoomSplitPosition > 1)
-                        BeforeZoomSplitPosition = 1;
+                    sscanf(buf, "%lf", &(midSplitter.BeforeZoomSplitPosition));
+                    midSplitter.BeforeZoomSplitPosition /= 100;
+                    if (midSplitter.BeforeZoomSplitPosition < 0)
+                        midSplitter.BeforeZoomSplitPosition = 0;
+                    if (midSplitter.BeforeZoomSplitPosition > 1)
+                        midSplitter.BeforeZoomSplitPosition = 1;
+                }
+
+                if (GetValue(actKey, WINDOW_SPLIT_HLEFT_REG, REG_SZ, buf, 20))
+                {
+                    sscanf(buf, "%lf", &(leftSplitter.SplitPosition));
+                    leftSplitter.SplitPosition /= 100;
+                    if (leftSplitter.SplitPosition < 0)
+                        leftSplitter.SplitPosition = 0;
+                    if (leftSplitter.SplitPosition > 1)
+                        leftSplitter.SplitPosition = 1;
+                }
+                if (GetValue(actKey, WINDOW_BEFOREZOOMSPLIT_HLEFT_REG, REG_SZ, buf, 20))
+                {
+                    sscanf(buf, "%lf", &(leftSplitter.BeforeZoomSplitPosition));
+                    leftSplitter.BeforeZoomSplitPosition /= 100;
+                    if (leftSplitter.BeforeZoomSplitPosition < 0)
+                        leftSplitter.BeforeZoomSplitPosition = 0;
+                    if (leftSplitter.BeforeZoomSplitPosition > 1)
+                        leftSplitter.BeforeZoomSplitPosition = 1;
+                }
+
+                if (GetValue(actKey, WINDOW_SPLIT_HRIGHT_REG, REG_SZ, buf, 20))
+                {
+                    sscanf(buf, "%lf", &(rightSplitter.SplitPosition));
+                    rightSplitter.SplitPosition /= 100;
+                    if (rightSplitter.SplitPosition < 0)
+                        rightSplitter.SplitPosition = 0;
+                    if (rightSplitter.SplitPosition > 1)
+                        rightSplitter.SplitPosition = 1;
+                }
+                if (GetValue(actKey, WINDOW_BEFOREZOOMSPLIT_HRIGHT_REG, REG_SZ, buf, 20))
+                {
+                    sscanf(buf, "%lf", &(rightSplitter.BeforeZoomSplitPosition));
+                    rightSplitter.BeforeZoomSplitPosition /= 100;
+                    if (rightSplitter.BeforeZoomSplitPosition < 0)
+                        rightSplitter.BeforeZoomSplitPosition = 0;
+                    if (rightSplitter.BeforeZoomSplitPosition > 1)
+                        rightSplitter.BeforeZoomSplitPosition = 1;
                 }
                 useWinPlacement = TRUE;
             }
@@ -3154,7 +3234,9 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
         //---  configuration
 
         DWORD cmdLine = 0, cmdLineFocus = 0;
-        DWORD rightPanelFocused = FALSE;
+        DWORD focusedPanelId = 0;
+        CFilesWindow* focusPanel = NULL;
+
         if (OpenKey(salamander, SALAMANDER_CONFIG_REG, actKey))
         {
             if (importingOldConfig)
@@ -3239,8 +3321,10 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                      &Configuration.MinBeepWhenDone, sizeof(DWORD));
             GetValue(actKey, CONFIG_CLOSESHELL_REG, REG_DWORD,
                      &Configuration.CloseShell, sizeof(DWORD));
-            GetValue(actKey, CONFIG_RIGHT_FOCUS_REG, REG_DWORD,
-                     &rightPanelFocused, sizeof(DWORD));
+
+            GetValue(actKey, CONFIG_FOCUSED_PANEL_ID_REG, REG_DWORD, //  quad salamander specific
+                     &focusedPanelId, sizeof(DWORD));
+
             GetValue(actKey, CONFIG_ALWAYSONTOP_REG, REG_DWORD,
                      &Configuration.AlwaysOnTop, sizeof(DWORD));
             //      GetValue(actKey, CONFIG_FASTDIRMOVE_REG, REG_DWORD,
@@ -3317,6 +3401,16 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                      &Configuration.QuickSearchEnterAlt, sizeof(DWORD));
             GetValue(actKey, CONFIG_CHD_SHOWMYDOC, REG_DWORD,
                      &Configuration.ChangeDriveShowMyDoc, sizeof(DWORD));
+            GetValue(actKey, CONFIG_CHD_SHOWDOWNLOADS, REG_DWORD,
+                     &Configuration.ChangeDriveShowDownloads, sizeof(DWORD));
+            GetValue(actKey, CONFIG_CHD_SHOWMYVID, REG_DWORD,
+                     &Configuration.ChangeDriveShowMyVideos, sizeof(DWORD));
+            GetValue(actKey, CONFIG_CHD_SHOWMYPIC, REG_DWORD,
+                     &Configuration.ChangeDriveShowMyPictures, sizeof(DWORD));
+            GetValue(actKey, CONFIG_CHD_SHOWMYMUS, REG_DWORD,
+                     &Configuration.ChangeDriveShowMyMusic, sizeof(DWORD));
+            GetValue(actKey, CONFIG_CHD_SHOWDESKTOP, REG_DWORD,
+                     &Configuration.ChangeDriveShowDesktop, sizeof(DWORD));
             GetValue(actKey, CONFIG_CHD_SHOWCLOUDSTOR, REG_DWORD,
                      &Configuration.ChangeDriveCloudStorage, sizeof(DWORD));
             GetValue(actKey, CONFIG_CHD_SHOWANOTHER, REG_DWORD,
@@ -3419,6 +3513,8 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                      &Configuration.ThumbnailSize, sizeof(DWORD));
             LeftPanel->SetThumbnailSize(Configuration.ThumbnailSize);
             RightPanel->SetThumbnailSize(Configuration.ThumbnailSize);
+            BottomLeftPanel->SetThumbnailSize(Configuration.ThumbnailSize);
+            BottomRightPanel->SetThumbnailSize(Configuration.ThumbnailSize);
 
             GetValue(actKey, CONFIG_KEEPPLUGINSSORTED_REG, REG_DWORD,
                      &Configuration.KeepPluginsSorted, sizeof(DWORD));
@@ -3543,8 +3639,12 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                      Configuration.LeftToolBar, 100);
             GetValue(actKey, CONFIG_RIGHTTOOLBAR_REG, REG_SZ,
                      Configuration.RightToolBar, 100);
-            // there used to be only one change drive button - now we introduce two buttons
-            // and merge all bitmaps into one
+            GetValue(actKey, CONFIG_BOTTOMLEFTTOOLBAR_REG, REG_SZ,
+                     Configuration.BottomLeftToolBar, 100);
+            GetValue(actKey, CONFIG_BOTTOMRIGHTTOOLBAR_REG, REG_SZ,
+                     Configuration.BottomRightToolBar, 100);
+            // change drive button byl pouze jeden - ted zavadim dve tlacitka
+            // a slucuji vsechny bitmapy do jedne
 
             if (Configuration.ConfigVersion <= 3 && Configuration.RightToolBar[0] != 0)
             {
@@ -3582,6 +3682,10 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                 LeftPanel->DirectoryLine->ToolBar->Load(Configuration.LeftToolBar);
             if (RightPanel->DirectoryLine->ToolBar != NULL)
                 RightPanel->DirectoryLine->ToolBar->Load(Configuration.RightToolBar);
+            if (BottomLeftPanel->DirectoryLine->ToolBar != NULL)
+                BottomLeftPanel->DirectoryLine->ToolBar->Load(Configuration.BottomLeftToolBar);
+            if (BottomRightPanel->DirectoryLine->ToolBar != NULL)
+                BottomRightPanel->DirectoryLine->ToolBar->Load(Configuration.BottomRightToolBar);
 
             GetValue(actKey, CONFIG_TOPTOOLBARVISIBLE_REG, REG_DWORD,
                      &Configuration.TopToolBarVisible, sizeof(DWORD));
@@ -3704,6 +3808,10 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                     LeftPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
                 if (RightPanel != NULL)
                     RightPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
+                if (BottomLeftPanel != NULL)
+                    BottomLeftPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
+                if (BottomRightPanel != NULL)
+                    BottomRightPanel->DirectoryLine->SetHistory(DirHistory->HasPaths());
             }
 
             if (OpenKey(actKey, CONFIG_COPYMOVEOPTIONS_REG, actSubKey))
@@ -3811,12 +3919,16 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
 
         char leftPanelPath[MAX_PATH];
         char rightPanelPath[MAX_PATH];
+        char bottomLeftPanelPath[MAX_PATH];
+        char bottomRightPanelPath[MAX_PATH];
         GetSystemDirectory(leftPanelPath, MAX_PATH);
         strcpy(rightPanelPath, leftPanelPath);
         char sysDefDir[MAX_PATH];
         lstrcpyn(sysDefDir, DefaultDir[LowerCase[leftPanelPath[0]] - 'a'], MAX_PATH);
         LoadPanelConfig(leftPanelPath, LeftPanel, salamander, SALAMANDER_LEFTP_REG);
         LoadPanelConfig(rightPanelPath, RightPanel, salamander, SALAMANDER_RIGHTP_REG);
+        LoadPanelConfig(bottomLeftPanelPath, BottomLeftPanel, salamander, SALAMANDER_BOTTOMLEFTP_REG);
+        LoadPanelConfig(bottomRightPanelPath, BottomRightPanel, salamander, SALAMANDER_BOTTOMRIGHTP_REG);
 
         CloseKey(salamander);
         salamander = NULL;
@@ -3838,15 +3950,34 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
         // set the active panel according to command line parameters
         if (ret && cmdLineParams != NULL)
         {
-            if (cmdLineParams->ActivatePanel == 1 && rightPanelFocused ||
-                cmdLineParams->ActivatePanel == 2 && !rightPanelFocused)
-            {
-                rightPanelFocused = !rightPanelFocused;
-            }
+            if (cmdLineParams->ActivatePanel != 0)
+                focusedPanelId = cmdLineParams->ActivatePanel; // override panel id from cmd line - 1,2,3,4
         }
 
-        FocusPanel(rightPanelFocused ? RightPanel : LeftPanel);
-        (rightPanelFocused ? RightPanel : LeftPanel)->SetCaretIndex(0, FALSE);
+        switch (focusedPanelId)
+        {
+        case 1:
+            focusPanel = LeftPanel;
+            break;
+        case 2:
+            focusPanel = RightPanel;
+            break;
+        case 3:
+            focusPanel = BottomLeftPanel;
+            break;
+        case 4:
+            focusPanel = BottomRightPanel;
+            break;
+
+        default:
+            TRACE_I("no loaded focus id");
+            focusPanel = LeftPanel;
+            focusedPanelId = 1;
+            break;
+        }
+
+        FocusPanel(focusPanel);
+        focusPanel->SetCaretIndex(0, FALSE);
         if (cmdLineFocus)
             SendMessage(HWindow, WM_COMMAND, CM_EDITLINE, 0);
 
@@ -3958,51 +4089,95 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
         }
         LeftPanel->SetupListBoxScrollBars();
         RightPanel->SetupListBoxScrollBars();
+        BottomLeftPanel->SetupListBoxScrollBars();
+        BottomRightPanel->SetupListBoxScrollBars();
+
+        
 
         UpdateWindow(HWindow);
 
         // set panel paths according to command line parameters (all path types, including archives and FS)
         BOOL leftPanelPathSet = FALSE;
         BOOL rightPanelPathSet = FALSE;
+        BOOL bottomLeftPanelPathSet = FALSE;
+        BOOL bottomRightPanelPathSet = FALSE;
+
         if (ret && cmdLineParams != NULL)
         {
-            if (cmdLineParams->LeftPath[0] == 0 && cmdLineParams->RightPath[0] == 0 && cmdLineParams->ActivePath[0] != 0)
+            if (cmdLineParams->LeftPath[0] == 0 &&
+                cmdLineParams->RightPath[0] == 0 &&
+                cmdLineParams->BottomLeftPath[0] == 0 &&
+                cmdLineParams->BottomRightPath[0] == 0 &&
+                cmdLineParams->ActivePath[0] != 0)
             {
                 if (GetActivePanel()->ChangeDirLite(cmdLineParams->ActivePath)) // no point in combining this with left/right panel settings
                 {
-                    if (rightPanelFocused)
-                        rightPanelPathSet = TRUE;
+                    if (focusedPanelId != 0) //  not sure about that - it is always!=0, see above
+                    {
+                        switch (focusedPanelId)
+                        {
+                        case 1:
+                            leftPanelPathSet = TRUE;
+                            break;
+                        case 2:
+                            rightPanelPathSet = TRUE;
+                            break;
+                        case 3:
+                            bottomLeftPanelPathSet = TRUE;
+                            break;
+                        case 4:
+                            bottomRightPanelPathSet = TRUE;
+                            break;
+                        }
+                    }
                     else
                     {
                         leftPanelPathSet = TRUE;
                         LeftPanel->RefreshVisibleItemsArray(); // see "RefreshVisibleItemsArray" comment below
                     }
                 }
-            }
-            else
-            {
-                if (cmdLineParams->LeftPath[0] != 0)
+                else
                 {
-                    if (LeftPanel->ChangeDirLite(cmdLineParams->LeftPath))
+                    if (cmdLineParams->LeftPath[0] != 0)
                     {
-                        leftPanelPathSet = TRUE;
+                        if (LeftPanel->ChangeDirLite(cmdLineParams->LeftPath))
+                        {
+                            leftPanelPathSet = TRUE;
                         LeftPanel->RefreshVisibleItemsArray(); // see "RefreshVisibleItemsArray" comment below
+                        }
+                    }
+                    if (cmdLineParams->RightPath[0] != 0)
+                    {
+                        if (RightPanel->ChangeDirLite(cmdLineParams->RightPath))
+                            rightPanelPathSet = TRUE;
+                    }
+                    if (cmdLineParams->BottomLeftPath[0] != 0)
+                    {
+                        if (BottomLeftPanel->ChangeDirLite(cmdLineParams->BottomLeftPath))
+                        {
+                            bottomLeftPanelPathSet = TRUE;
+                        }
+                    }
+                    if (cmdLineParams->BottomRightPath[0] != 0)
+                    {
+                        if (BottomRightPanel->ChangeDirLite(cmdLineParams->BottomRightPath))
+                            bottomRightPanelPathSet = TRUE;
                     }
                 }
-                if (cmdLineParams->RightPath[0] != 0)
-                {
-                    if (RightPanel->ChangeDirLite(cmdLineParams->RightPath))
-                        rightPanelPathSet = TRUE;
-                }
             }
-        }
 
-        // save the array of visible items; normally this is done in idle time, but if it
-        // should be ready so that icon reading for user menu entries has priority over icons
-        // outside the visible part of the panel, we must handle it manually (icon loading
-        // is already running, but sooner is better than later, this minimal delay should not hurt)
-        if (rightPanelPathSet)
-            RightPanel->RefreshVisibleItemsArray();
+            // save the array of visible items; normally this is done in idle time, but if it
+            // should be ready so that icon reading for user menu entries has priority over icons
+            // outside the visible part of the panel, we must handle it manually (icon loading
+            // is already running, but sooner is better than later, this minimal delay should not hurt)
+            if (leftPanelPathSet)
+                LeftPanel->RefreshVisibleItemsArray();
+            if (rightPanelPathSet)
+                RightPanel->RefreshVisibleItemsArray();
+            if (bottomLeftPanelPathSet)
+                BottomLeftPanel->RefreshVisibleItemsArray();
+            if (bottomRightPanelPathSet)
+                BottomRightPanel->RefreshVisibleItemsArray();
 
         // leftPanelPath and rightPanelPath are only disk paths; we don't store archives or FS paths
         DWORD err, lastErr;
@@ -4017,7 +4192,7 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
             }
             else
                 LeftPanel->ChangeToRescuePathOrFixedDrive(LeftPanel->HWindow);
-            LeftPanel->RefreshVisibleItemsArray(); // see comment "RefreshVisibleItemsArray" above
+            LeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
         }
         UpdateWindow(LeftPanel->HWindow); // ensures dir/info line is drawn immediately after the panel content
 
@@ -4031,19 +4206,50 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
             }
             else
                 RightPanel->ChangeToRescuePathOrFixedDrive(RightPanel->HWindow);
-            RightPanel->RefreshVisibleItemsArray(); // see comment "RefreshVisibleItemsArray" above
+            RightPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
         }
         UpdateWindow(RightPanel->HWindow); // ensures dir/info line is drawn immediately after the panel content
 
-        // restore default-dir on the system drive (damaged - system root was in both panels)
-        lstrcpyn(DefaultDir[LowerCase[sysDefDir[0]] - 'a'], sysDefDir, MAX_PATH);
-        // restore DefaultDir
-        MainWindow->UpdateDefaultDir(TRUE);
+            tryNet = TRUE;
+            if (!bottomLeftPanelPathSet)
+            {
+                if (SalCheckAndRestorePathWithCut(BottomLeftPanel->HWindow, bottomLeftPanelPath, tryNet,
+                                                  err, lastErr, pathInvalid, cut, TRUE))
+                {
+                    BottomLeftPanel->ChangePathToDisk(BottomLeftPanel->HWindow, bottomLeftPanelPath);
+                }
+                else
+                    BottomLeftPanel->ChangeToRescuePathOrFixedDrive(BottomLeftPanel->HWindow);
+                BottomLeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
+            }
+            UpdateWindow(BottomLeftPanel->HWindow); // zajisti vykresleni dir/info line hned po vykresleni obsahu panelu
+            tryNet = TRUE;
+            if (!bottomRightPanelPathSet)
+            {
+                if (SalCheckAndRestorePathWithCut(BottomRightPanel->HWindow, bottomRightPanelPath, tryNet,
+                    err, lastErr, pathInvalid, cut, TRUE))
+                {
+                    BottomRightPanel->ChangePathToDisk(BottomRightPanel->HWindow, bottomRightPanelPath);
+                }
+                else
+                    BottomRightPanel->ChangeToRescuePathOrFixedDrive(BottomRightPanel->HWindow);
+                BottomRightPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
+            }
+            UpdateWindow(BottomRightPanel->HWindow); // zajisti vykresleni dir/info line hned po vykresleni obsahu panelu
 
-        return ret;
+            // restore default-dir on the system drive (damaged - system root was in both panels)
+            lstrcpyn(DefaultDir[LowerCase[sysDefDir[0]] - 'a'], sysDefDir, MAX_PATH);
+            // obnova DefaultDir
+            MainWindow->UpdateDefaultDir(TRUE);
+
+            return ret;
+        }
+
+        LoadSaveToRegistryMutex.Leave();
+
+        return FALSE;
     }
-
-    LoadSaveToRegistryMutex.Leave();
-
-    return FALSE;
+    return FALSE;// false or or true??
 }
+
+

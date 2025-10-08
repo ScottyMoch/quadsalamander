@@ -1185,7 +1185,10 @@ BOOL CFilesWindow::OnSysKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT
 
     if (wParam == VK_TAB)
     {
-        MainWindow->ChangePanel();
+        if (shiftPressed)
+            MainWindow->ChangePanel(MainWindow->GetPrevPanel(MainWindow->GetActivePanel()));
+        else
+            MainWindow->ChangePanel(MainWindow->GetNextPanel(MainWindow->GetActivePanel()));
         return TRUE;
     }
 
@@ -1665,7 +1668,7 @@ BOOL CFilesWindow::OnSysKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT
             if (controlPressed && shiftPressed && !altPressed)
             {
                 // focusing the focused directory/file in the second panel
-                BOOL leftPanel = this == MainWindow->LeftPanel;
+                BOOL leftPanel = this->IsLeftPanel();
                 if (wParam == VK_LEFT)
                 {
                     SendMessage(MainWindow->HWindow, WM_COMMAND, leftPanel ? CM_OPEN_IN_OTHER_PANEL : CM_OPEN_IN_OTHER_PANEL_ACT, 0);
@@ -2257,7 +2260,7 @@ void CFilesWindow::RefreshDirectory(BOOL probablyUselessRefresh, BOOL forceReloa
 #ifdef _DEBUG
     char t_path[2 * MAX_PATH];
     GetGeneralPath(t_path, 2 * MAX_PATH);
-    TRACE_I("RefreshDirectory: " << (MainWindow->LeftPanel == this ? "left" : "right") << ": " << t_path);
+    TRACE_I("RefreshDirectory: " << (this->IsLeftPanel() ? "left" : "right") << ": " << t_path);
 #endif // _DEBUG
 
     // show wait cursor
@@ -2654,9 +2657,9 @@ void CFilesWindow::RefreshDirectory(BOOL probablyUselessRefresh, BOOL forceReloa
     }
 
     // we have a new version of the listing for the same path; now we'll enrich it with parts from the old listing
-    // !!! ATTENTION: refresh in an archive that hasn't changed — oldFiles and oldDirs point to
+    // !!! ATTENTION: refresh in an archive that hasn't changed — oldFiles and oldDirs point to 
     // ArchiveDir+PluginData (see above in ChangePathToArchive), oldArchiveDir+oldPluginData
-    // are empty.
+    // are empty. 
 
     // the main window is inactive, only icons/thumbnails/overlays from the visible part of the panel are loaded, we save CPU time
     if (isInactiveRefresh)

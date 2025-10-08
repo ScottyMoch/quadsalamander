@@ -361,7 +361,7 @@ CEditLine::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
         case '\t': // change panel
         {
-            MainWindow->ChangePanel();
+            MainWindow->ChangePanel(MainWindow->GetNextPanel(MainWindow->GetActivePanel()));
             return 0;
         }
 
@@ -957,6 +957,10 @@ CEditLine::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case VK_RBRACKET:
         case VK_SPACE:
         {
+
+            
+            //  bottom commands missing
+
             if (controlPressed && !altPressed)
             {
                 SkipCharacter = TRUE;

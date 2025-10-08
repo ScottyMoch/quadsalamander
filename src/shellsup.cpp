@@ -636,6 +636,10 @@ int CountNumberOfItemsOnPath(const char* path)
 
 void DropEnd(BOOL drop, BOOL shortcuts, void* param, BOOL ownRutine, BOOL isFakeDataObject, int tgtType)
 {
+
+    
+
+
     CFilesWindow* panel = (CFilesWindow*)param;
     if (drop && GetActiveWindow() == NULL)
         SetForegroundWindow(MainWindow->HWindow);
@@ -645,14 +649,20 @@ void DropEnd(BOOL drop, BOOL shortcuts, void* param, BOOL ownRutine, BOOL isFake
     panel->SetDropTarget(-1); // hide the marker
     if (tgtType == idtttWindows &&
         !isFakeDataObject && (!ownRutine || shortcuts) && drop && // refresh panels
-        (!MainWindow->LeftPanel->AutomaticRefresh ||
-         !MainWindow->RightPanel->AutomaticRefresh ||
+       (!MainWindow->LeftPanel->AutomaticRefresh ||
+        !MainWindow->RightPanel->AutomaticRefresh ||
          MainWindow->LeftPanel->GetNetworkDrive() ||
-         MainWindow->RightPanel->GetNetworkDrive()))
+         MainWindow->RightPanel->GetNetworkDrive()) ||
+        !MainWindow->BottomLeftPanel->AutomaticRefresh ||
+        !MainWindow->BottomRightPanel->AutomaticRefresh ||
+         MainWindow->BottomLeftPanel->GetNetworkDrive() ||
+         MainWindow->BottomRightPanel->GetNetworkDrive())
     {
         BOOL again = TRUE; // keep loading while files are still appearing
         int numLeft = MainWindow->LeftPanel->NumberOfItemsInCurDir;
         int numRight = MainWindow->RightPanel->NumberOfItemsInCurDir;
+        int numBottomLeft = MainWindow->BottomLeftPanel->NumberOfItemsInCurDir;
+        int numBottomRight = MainWindow->BottomRightPanel->NumberOfItemsInCurDir;
         while (again)
         {
             again = FALSE;
@@ -672,17 +682,37 @@ void DropEnd(BOOL drop, BOOL shortcuts, void* param, BOOL ownRutine, BOOL isFake
                 again |= newNum != numRight;
                 numRight = newNum;
             }
+            if ((!MainWindow->BottomLeftPanel->AutomaticRefresh || MainWindow->BottomLeftPanel->GetNetworkDrive()) &&
+                MainWindow->BottomLeftPanel->Is(ptDisk))
+            {
+                int newNum = CountNumberOfItemsOnPath(MainWindow->BottomLeftPanel->GetPath());
+                again |= newNum != numBottomLeft;
+                numBottomLeft = newNum;
+            }
+            if ((!MainWindow->BottomRightPanel->AutomaticRefresh || MainWindow->BottomRightPanel->GetNetworkDrive()) &&
+                MainWindow->BottomRightPanel->Is(ptDisk))
+            {
+                int newNum = CountNumberOfItemsOnPath(MainWindow->BottomRightPanel->GetPath());
+                again |= newNum != numBottomRight;
+                numBottomRight = newNum;
+            }
         }
 
         // let the panels refresh
         HANDLES(EnterCriticalSection(&TimeCounterSection));
         int t1 = MyTimeCounter++;
         int t2 = MyTimeCounter++;
+        int t3 = MyTimeCounter++;
+        int t4 = MyTimeCounter++;
         HANDLES(LeaveCriticalSection(&TimeCounterSection));
         if (!MainWindow->LeftPanel->AutomaticRefresh || MainWindow->LeftPanel->GetNetworkDrive())
             PostMessage(MainWindow->LeftPanel->HWindow, WM_USER_REFRESH_DIR, 0, t1);
         if (!MainWindow->RightPanel->AutomaticRefresh || MainWindow->RightPanel->GetNetworkDrive())
             PostMessage(MainWindow->RightPanel->HWindow, WM_USER_REFRESH_DIR, 0, t2);
+        if (!MainWindow->BottomLeftPanel->AutomaticRefresh || MainWindow->BottomLeftPanel->GetNetworkDrive())
+            PostMessage(MainWindow->BottomLeftPanel->HWindow, WM_USER_REFRESH_DIR, 0, t3);
+        if (!MainWindow->BottomRightPanel->AutomaticRefresh || MainWindow->BottomRightPanel->GetNetworkDrive())
+            PostMessage(MainWindow->BottomRightPanel->HWindow, WM_USER_REFRESH_DIR, 0, t4);
         MainWindow->RefreshDiskFreeSpace();
     }
 }
@@ -1415,7 +1445,7 @@ void ShellAction(CFilesWindow* panel, CShellAction action, BOOL useSelection,
                                                         // for COPY clear the CutToClip flag
                                                         if (panel->CutToClipChanged)
                                                             panel->ClearCutToClipFlag(TRUE);
-                                                        CFilesWindow* anotherPanel = MainWindow->LeftPanel == panel ? MainWindow->RightPanel : MainWindow->LeftPanel;
+                                                        CFilesWindow* anotherPanel = MainWindow->GetOtherPanel(panel);
                                                         // for COPY clear the CutToClip flag on the other panel as well
                                                         if (anotherPanel->CutToClipChanged)
                                                             anotherPanel->ClearCutToClipFlag(TRUE);
@@ -1463,7 +1493,7 @@ void ShellAction(CFilesWindow* panel, CShellAction action, BOOL useSelection,
         // lower the thread priority to "normal" (so the operations do not overload the machine)
         SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
 
-        int panelID = MainWindow->LeftPanel == panel ? PANEL_LEFT : PANEL_RIGHT;
+        int panelID = MainWindow->GetPanelId(panel);
 
         int selectedDirs = 0;
         if (count > 0)
@@ -1721,7 +1751,7 @@ void ShellAction(CFilesWindow* panel, CShellAction action, BOOL useSelection,
                         panel->ClearCutToClipFlag(FALSE);
                         repaint = TRUE;
                     }
-                    CFilesWindow* anotherPanel = MainWindow->LeftPanel == panel ? MainWindow->RightPanel : MainWindow->LeftPanel;
+                    CFilesWindow* anotherPanel = MainWindow->GetOtherPanel(panel);
                     BOOL samePaths = panel->Is(ptDisk) && anotherPanel->Is(ptDisk) &&
                                      IsTheSamePath(panel->GetPath(), anotherPanel->GetPath());
                     if (anotherPanel->CutToClipChanged)
@@ -2224,6 +2254,8 @@ MENU_TEMPLATE_ITEM PanelBkgndMenu[] =
                             {
                                 BOOL releaseLeft = FALSE;                  // disconnect the left panel from the drive?
                                 BOOL releaseRight = FALSE;                 // disconnect the right panel from the drive?
+                                BOOL releaseBottomLeft = FALSE;            // odpojit levy panel od disku?
+                                BOOL releaseBottomRight = FALSE;           // odpojit pravy panel od disku?
                                 if (!useSelection && cmd < 5000 &&         // this is a context menu for a directory
                                     stricmp(cmdName, "properties") != 0 && // not necessary for properties
                                     stricmp(cmdName, "find") != 0 &&       // not necessary for Find
@@ -2235,18 +2267,21 @@ MENU_TEMPLATE_ITEM PanelBkgndMenu[] =
                                     GetRootPath(root, panel->GetPath());
                                     if (strlen(root) >= strlen(panel->GetPath())) // menu for the whole drive - because of commands like
                                     {                                             // for "format..." we must "take our hands off" the media
-                                        CFilesWindow* win;
-                                        int i;
-                                        for (i = 0; i < 2; i++)
+                                        if (HasTheSameRootPath(MainWindow->LeftPanel->GetPath(), root)) // stejny disk (UNC i normal)
                                         {
-                                            win = i == 0 ? MainWindow->LeftPanel : MainWindow->RightPanel;
-                                            if (HasTheSameRootPath(win->GetPath(), root)) // the same drive (UNC and normal)
-                                            {
-                                                if (i == 0)
-                                                    releaseLeft = TRUE;
-                                                else
-                                                    releaseRight = TRUE;
-                                            }
+                                            releaseLeft = TRUE;
+                                        }
+                                        if (HasTheSameRootPath(MainWindow->RightPanel->GetPath(), root)) // stejny disk (UNC i normal)
+                                        {
+                                            releaseRight = TRUE;
+                                        }
+                                        if (HasTheSameRootPath(MainWindow->BottomLeftPanel->GetPath(), root)) // stejny disk (UNC i normal)
+                                        {
+                                            releaseBottomLeft = TRUE;
+                                        }
+                                        if (HasTheSameRootPath(MainWindow->BottomRightPanel->GetPath(), root)) // stejny disk (UNC i normal)
+                                        {
+                                            releaseBottomRight = TRUE;
                                         }
                                     }
                                 }
@@ -2303,6 +2338,24 @@ MENU_TEMPLATE_ITEM PanelBkgndMenu[] =
                                         else
                                             MainWindow->RightPanel->HandsOff(TRUE);
                                     }
+                                    if (releaseBottomLeft)
+                                    {
+                                        if (changeToFixedDrv)
+                                        {
+                                            MainWindow->BottomLeftPanel->ChangeToFixedDrive(MainWindow->BottomLeftPanel->HWindow);
+                                        }
+                                        else
+                                            MainWindow->BottomLeftPanel->HandsOff(TRUE);
+                                    }
+                                    if (releaseBottomRight)
+                                    {
+                                        if (changeToFixedDrv)
+                                        {
+                                            MainWindow->BottomRightPanel->ChangeToFixedDrive(MainWindow->BottomRightPanel->HWindow);
+                                        }
+                                        else
+                                            MainWindow->BottomRightPanel->HandsOff(TRUE);
+                                    }
 
                                     AuxInvokeCommand(panel, (CMINVOKECOMMANDINFO*)&ici);
 
@@ -2314,6 +2367,10 @@ MENU_TEMPLATE_ITEM PanelBkgndMenu[] =
                                         MainWindow->LeftPanel->HandsOff(FALSE);
                                     if (releaseRight && !changeToFixedDrv)
                                         MainWindow->RightPanel->HandsOff(FALSE);
+                                    if (releaseBottomLeft && !changeToFixedDrv)
+                                        MainWindow->BottomLeftPanel->HandsOff(FALSE);
+                                    if (releaseBottomRight && !changeToFixedDrv)
+                                        MainWindow->BottomRightPanel->HandsOff(FALSE);
 
                                     //---  refresh directories that are not refreshed automatically
                                     // report the change in the current directory and its subdirectories (just to be safe)
@@ -2337,6 +2394,10 @@ MENU_TEMPLATE_ITEM PanelBkgndMenu[] =
                                         MainWindow->LeftPanel->ChangeToRescuePathOrFixedDrive(MainWindow->LeftPanel->HWindow);
                                     if (MainWindow->RightPanel->CheckPath(FALSE) != ERROR_SUCCESS)
                                         MainWindow->RightPanel->ChangeToRescuePathOrFixedDrive(MainWindow->RightPanel->HWindow);
+                                    if (MainWindow->BottomLeftPanel->CheckPath(FALSE) != ERROR_SUCCESS)
+                                        MainWindow->BottomLeftPanel->ChangeToRescuePathOrFixedDrive(MainWindow->BottomLeftPanel->HWindow);
+                                    if (MainWindow->BottomRightPanel->CheckPath(FALSE) != ERROR_SUCCESS)
+                                        MainWindow->BottomRightPanel->ChangeToRescuePathOrFixedDrive(MainWindow->BottomRightPanel->HWindow);
                                 }
                             }
                         }

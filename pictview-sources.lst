@@ -1,0 +1,16 @@
+  buildsetup
+* development
+  getinst2work
+  main
++ qs-pictviews-mods
+  remotes/lejcikSal/HEAD -> lejcikSal/main
+  remotes/lejcikSal/codeql-analysis
+  remotes/lejcikSal/github-ci
+  remotes/lejcikSal/main
+  remotes/lejcikSal/plugin-ftp-openssl-upgrade
+  remotes/lejcikSal/plugin-pictview-support-for-heif-and-webp
+  remotes/lejcikSal/plugin-tar-added-zstd-and-lzma-support
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/development
+  remotes/origin/getqs2build
+  remotes/origin/main

@@ -297,7 +297,7 @@ BOOL SalmonInit()
 }
 
 // the notification that Salmon is not running only needs to be shown once
-static BOOL SalmonNotRunningReported = FALSE;
+static BOOL SalmonNotRunningReported = TRUE; //  disamble diagnostic checking at startup
 
 void SalmonSetSLG(const char* slgName)
 {

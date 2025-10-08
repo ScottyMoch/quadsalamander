@@ -62,10 +62,20 @@ void CFilesWindow::Activate(BOOL shares)
                         if (!ChangeLeftPanelToFixedWhenIdleInProgress)
                             ChangeLeftPanelToFixedWhenIdle = TRUE;
                     }
-                    else
+                    if (MainWindow->RightPanel == this)
                     {
                         if (!ChangeRightPanelToFixedWhenIdleInProgress)
                             ChangeRightPanelToFixedWhenIdle = TRUE;
+                    }
+                    if (MainWindow->BottomLeftPanel == this)
+                    {
+                        if (!ChangeBottomLeftPanelToFixedWhenIdleInProgress)
+                            ChangeBottomLeftPanelToFixedWhenIdle = TRUE;
+                    }
+                    if (MainWindow->BottomRightPanel == this)
+                    {
+                        if (!ChangeBottomRightPanelToFixedWhenIdleInProgress)
+                            ChangeBottomRightPanelToFixedWhenIdle = TRUE;
                     }
                 }
                 else // another path error, schedule a refresh

@@ -68,6 +68,8 @@ LPWSTR _sal_lstrcatW(LPWSTR lpString1, LPCWSTR lpString2)
 
 #pragma warning(pop)
 
+
+
 #ifdef LSTRFIX_WITHOUT_RTL
 
 // When building small utils with default CRT libs ignored, provide
@@ -150,5 +152,106 @@ wchar_t * __cdecl wcscat (
         return( dst );                  /* return dst */
 
 }
+
+// #elif defined(COMPILING_SALOPEN)
+#elif COMPILING_SALOPEN
+
+//#error inside COMPILING_SALOPEN defined for lstrfix.include 'file';
+#pragma message("inside COMPILING_SALOPEN defined for lstrfix.inc include 'file'")
+
+extern "C" size_t __cdecl strlen(const char* str);
+#pragma intrinsic(strlen)
+#pragma function(strlen)
+size_t __cdecl strlen(
+    const char* str)
+{
+    const char* eos = str;
+
+    while (*eos++)
+        ;
+
+    return (eos - str - 1);
+}
+
+extern "C" size_t __cdecl wcslen(const wchar_t* str);
+#pragma intrinsic(wcslen)
+#pragma function(wcslen)
+size_t __cdecl wcslen(
+    const wchar_t* wcs)
+{
+    const wchar_t* eos = wcs;
+
+    while (*eos++)
+        ;
+
+    return ((size_t)(eos - wcs - 1));
+}
+
+extern "C" char* __cdecl strcpy(char* dst, const char* src);
+#pragma intrinsic(strcpy)
+#pragma function(strcpy)
+char* __cdecl strcpy(char* dst, const char* src)
+{
+    char* cp = dst;
+
+    while (*cp++ = *src++)
+        ; /* Copy src over dst */
+
+    return (dst);
+}
+
+extern "C" wchar_t* __cdecl wcscpy(wchar_t* dst, const wchar_t* src);
+#pragma intrinsic(wcscpy)
+#pragma function(wcscpy)
+wchar_t* __cdecl wcscpy(wchar_t* dst, const wchar_t* src)
+{
+    wchar_t* cp = dst;
+
+    while (*cp++ = *src++)
+        ; /* Copy src over dst */
+
+    return (dst);
+}
+
+extern "C" char* __cdecl strcat(char* dst, const char* src);
+#pragma intrinsic(strcat)
+#pragma function(strcat)
+char* __cdecl strcat(
+    char* dst,
+    const char* src)
+{
+    char* cp = dst;
+
+    while (*cp)
+        cp++; /* find end of dst */
+
+    while (*cp++ = *src++)
+        ; /* Copy src to end of dst */
+
+    return (dst); /* return dst */
+}
+
+extern "C" wchar_t* __cdecl wcscat(wchar_t* dst, const wchar_t* src);
+#pragma intrinsic(wcscat)
+#pragma function(wcscat)
+wchar_t* __cdecl wcscat(
+    wchar_t* dst,
+    const wchar_t* src)
+{
+    wchar_t* cp = dst;
+
+    while (*cp)
+        cp++; /* find end of dst */
+
+    while (*cp++ = *src++)
+        ; /* Copy src to end of dst */
+
+    return (dst); /* return dst */
+}
+
+#else
+
+//#error compiling lstrfix.inc with lstrfix_without_rtl NOT defined or COMPILING_SALOPEN NOT defined
+#pragma message("******** compiling lstrfix.inc with lstrfix_without_rtl NOT defined or COMPILING_SALOPEN NOT defined")
 
 #endif // LSTRFIX_WITHOUT_RTL

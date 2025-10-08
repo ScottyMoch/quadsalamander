@@ -894,6 +894,13 @@ public:
     BOOL IconOvrRefreshTimerSet;              // TRUE if the timer for icon-overlay refresh is running (see IconOverlaysChangedOnPath())
     DWORD NextIconOvrRefreshTime;             // time when tracking icon-overlay changes makes sense again for this panel (see IconOverlaysChangedOnPath())
 
+    
+    //
+
+    int GetWindowPanelType();       // returns RIGHT_PANEL, LEFT_PANEL, etc. based on current object
+    bool IsLeftPanel();             // gets whether a left panel : TODO: kamen check whether left right panelS is working or need specification which exactly!
+    bool IsTopPanel();
+
 public:
     CFilesWindow(CMainWindow* parent);
     ~CFilesWindow();
