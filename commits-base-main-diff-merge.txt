@@ -3,6 +3,11 @@ git log base/main...development --oneline --decorate
 
 
 
+
+
+
+::::::: cherry picks completed:
+
 4886f81 (base/main, base/HEAD) GitHub workflow Code Guard fixed for ZIP plugin
 d89c1a1 Tools/Code Guard: Add --sub-path option to code_guard for scanning specific subdirectories
 4799080 Normalized source code
@@ -88,11 +93,6 @@ b221d99 translated mainwnd.h
 0060d53 till line 1055
 e1e0e5d till line 390
 b321ba7 translated_mainwnd3.cpp
-
-
-
-::::::: cherry picks completed:
-
 3e56fca GitHub PR build: Simplified names
 41a6cfd GitHub PR action: Simplified name
 01b3214 GitHub PR action refactored, fixed warning reporting as errors
