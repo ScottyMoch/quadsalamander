@@ -3030,8 +3030,8 @@ void CMainWindow_RefreshCommandStates(CMainWindow* obj)
     BOOL archive = FALSE;                            // je v panelu archiv?
     BOOL targetArchive = FALSE;                      // je v druhem panelu archiv?
     BOOL archiveEdit = FALSE;                        // je v panelu archiv, ktery umime editovat?
-    BOOL onDisk = FALSE;                             // je v panelu disk?
-
+    
+    BOOL onDisk = FALSE;                             // is the panel on a disk?
     BOOL upDir = FALSE;                              // pritomnost ".."
     BOOL leftUpDir = FALSE;                          // pritomnost ".."
     BOOL rightUpDir = FALSE;                         // pritomnost ".."
@@ -3060,7 +3060,7 @@ void CMainWindow_RefreshCommandStates(CMainWindow* obj)
     BOOL pasteSimpleFiles = EnablerPasteSimpleFiles; // jsou na clipboardu soubory/adresare z jedine cesty? (aneb: je sance na Paste do archivu nebo FS?)
     DWORD pasteDefEffect = EnablerPasteDefEffect;    // jaky je defaultni paste-effect, muze byt i kombinace DROPEFFECT_COPY+DROPEFFECT_MOVE (aneb: slo o Copy nebo Cut?)
     BOOL pasteFilesToArcOrFS = FALSE;                // je mozny Paste souboru do archivu/FS v aktualnim panelu?
-    BOOL onDisk = FALSE;                             // is the panel on a disk?
+
     BOOL customizeLeftView = FALSE;                  // lze konfigurovat sloupce pro levy panel?
     BOOL customizeRightView = FALSE;                 // lze konfigurovat sloupce pro pravy panel?
     BOOL customizeBottomLeftView = FALSE;  // lze konfigurovat sloupce pro levy panel?
