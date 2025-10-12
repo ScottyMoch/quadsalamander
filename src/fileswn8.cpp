@@ -480,6 +480,7 @@ void CFilesWindow::FilesAction(CActionType type, CFilesWindow* target, int count
                      (path[0] == '/' || path[0] == '\\') && (path[1] == '/' || path[1] == '\\') || // UNC cesty
                      Is(ptDisk) || Is(ptZIPArchive)))                                              // disk+archiv relativni cesty
                    // it's a disk path (absolute or relative) - convert all '/' to '\' and remove duplicate '\'
+                {
                     SlashesToBackslashesAndRemoveDups(path);
                 }
 
