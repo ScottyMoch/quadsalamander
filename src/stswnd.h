@@ -180,6 +180,8 @@ public:
 
     BOOL IsTop() { return Top; }
 
+    BOOL IsTop() { return Top; }
+
     BOOL SetDriveIcon(HICON hIcon);     // ikona se okopiruje do imagelistu - destrukci musi zajistit volajici kod
     void SetDrivePressed(BOOL pressed); // zamackne drive ikonku
 

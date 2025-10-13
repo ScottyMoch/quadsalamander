@@ -130,7 +130,11 @@
 #define IDC_VIEW_LEFT_FIXED             325
 #define IDC_VIEW_RIGHT_FIXED            326
 #define IDC_VIEW_LEFT_WIDTH             327
+<<<<<<< HEAD
 #define IDC_VIEW_RIGHT_WIDTH            328
+=======
+#define IDC_VIEW_RIGHT_WIDTH            328
+>>>>>>> origin/development
 #define IDC_VIEW_BOTTOMLEFT_FIXED             1325
 #define IDC_VIEW_BOTTOMRIGHT_FIXED            1326
 #define IDC_VIEW_BOTTOMLEFT_WIDTH             1327
@@ -141,7 +145,11 @@
 #define IDC_VIEW_TEXT4                  332
 #define IDC_VIEW_TEXT5                  333
 #define IDC_VIEW_TEXT6                  334
+<<<<<<< HEAD
 #define IDC_VIEW_TEXT7                  335
+=======
+#define IDC_VIEW_TEXT7                  335
+>>>>>>> origin/development
 #define IDC_VIEW_TEXT8                      1332
 #define IDC_VIEW_TEXT9                      1333
 #define IDC_VIEW_LEFT_SMARTMODE         336

@@ -633,6 +633,10 @@ BOOL CMainWindow::CanUnloadPlugin(HWND parent, CPluginInterfaceAbstract* plugin)
         return FALSE;
     if (BottomRightPanel != NULL && !BottomRightPanel->CanUnloadPlugin(parent, plugin))
         return FALSE;
+    if (BottomLeftPanel != NULL && !BottomLeftPanel->CanUnloadPlugin(parent, plugin))
+        return FALSE;
+    if (BottomRightPanel != NULL && !BottomRightPanel->CanUnloadPlugin(parent, plugin))
+        return FALSE;
 
     // find detached FS belonging to the plug-in 'plugin' and attempt to close them
     int i;

@@ -444,7 +444,11 @@ typedef const char*(WINAPI* SalEnumSelection2)(HWND parent, int enumFiles, const
 #define COLUMN_ID_DATE 6        // zarovnano vpravo
 #define COLUMN_ID_TIME 7        // zarovnano vpravo
 #define COLUMN_ID_ATTRIBUTES 8  // zarovnano vpravo
+<<<<<<< HEAD
 #define COLUMN_ID_DESCRIPTION 9 // zarovnano vlevo, podporuje FixedWidth
+=======
+#define COLUMN_ID_DESCRIPTION 9 // zarovnano vlevo, podporuje FixedWidth
+>>>>>>> origin/development
 #define COLUMN_ID_AGE 10        //  newly added
 
 // Callback pro naplneni bufferu znakama, ktere se maji zobrazit v prislusnem sloupci.

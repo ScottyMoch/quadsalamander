@@ -295,7 +295,8 @@ void CFilesWindow::Execute(int index)
                                 s++;
                             if (*s == '\\')
                                 *s = 0;
-                            nethoodPlugin->EnsureShareExistsOnServer(HWindow, this == MainWindow->LeftPanel ? PANEL_LEFT : PANEL_RIGHT,
+                            
+                            nethoodPlugin->EnsureShareExistsOnServer(HWindow, GetWindowPanelType(),
                                                                      path + 2, focusName);
                             ChangePathToPluginFS(doublePath, path, -1, focusName);
                             if (Is(ptPluginFS))
@@ -3458,7 +3459,7 @@ void CFilesWindow::RefreshDiskFreeSpace(BOOL check, BOOL doNotRefreshOtherPanel)
                 // disk-free-space there as well (it is not perfect - ideally we would
                 // test whether both paths are on the same volume, but that would be too slow;
                 // this simplification should be more than enough for normal use)
-                CFilesWindow* otherPanel = (MainWindow->LeftPanel == this) ? MainWindow->RightPanel : MainWindow->LeftPanel;
+                CFilesWindow* otherPanel = MainWindow->GetOtherPanel(this);
                 if (otherPanel->Is(ptDisk) && HasTheSameRootPath(GetPath(), otherPanel->GetPath()))
                     otherPanel->RefreshDiskFreeSpace(TRUE, TRUE /* otherwise we'd recurse endlessly */);
             }
@@ -4008,6 +4009,9 @@ void CFilesWindow::RefreshListBox(int suggestedXOffset,
                     break;
                 case COLUMN_ID_TIME:
                     column->Width = (WORD)columnWidthTime;
+                    break;
+                case COLUMN_ID_AGE:
+                    column->Width = (WORD)columnWidthAge;
                     break;
                 case COLUMN_ID_AGE:
                     column->Width = (WORD)columnWidthAge;

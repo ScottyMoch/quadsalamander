@@ -381,10 +381,16 @@ struct CDynString
 
 
 
+
+
 class CMainWindow : public CMainWindowAncestor
 {
     const int MIN_WIN_WIDTH = 2;  // minimalni sirka panelu
+<<<<<<< HEAD
     const int MIN_WIN_HEIGHT = 2; // minimalni sirka panelu
+=======
+    const int MIN_WIN_HEIGHT = 2; // minimalni sirka panelu
+>>>>>>> origin/development
 
 public:
     BOOL EditMode;             // aktivni editwindow, zbytek jen simuluje
@@ -404,7 +410,11 @@ public:
     CDriveBar* DriveBar;
     CDriveBar* DriveBar2;
     CBottomToolBar* BottomToolBar;  // bottom toolbar
+<<<<<<< HEAD
     CMainToolBar *LeftSplitBar, 
+=======
+    CMainToolBar *LeftSplitBar, 
+>>>>>>> origin/development
              *RightSplitBar;
     //CAnimate       *AnimateBar;
 
@@ -444,9 +454,15 @@ public:
     BOOL WaitInEndSession;            // TRUE = ve WM_ENDSESSION se ma pockat na dokonceni diskovych operaci
     BOOL DisableIdleProcessing;       // TRUE = nebudeme provadet IDLE processing (soft jiz konci, jen by zdrzoval a vse komplikoval)
                                       //    CTipOfTheDayDialog *TipOfTheDayDialog;
+<<<<<<< HEAD
 
     enum DragModeType
     {
+=======
+
+    enum DragModeType
+    {
+>>>>>>> origin/development
         DRAG_MODE_OFF,
         DRAG_MODE_LEFT,
         DRAG_MODE_MIDDLE,
@@ -490,6 +506,8 @@ public:
 
     CFilesWindow* otherPanels[3];
 
+    CFilesWindow* otherPanels[3];
+
 protected:
     
     int WindowWidth, // kvuli zmene splitu
@@ -497,6 +515,7 @@ protected:
         TopRebarHeight,
         BottomToolBarHeight,
         EditHeight,
+<<<<<<< HEAD
         PanelsTotalHeight;
 
     int LeftWidth,
@@ -506,6 +525,17 @@ protected:
         BottomLeftHeight,
         BottomRightHeight;
 
+=======
+        PanelsTotalHeight;
+
+    int LeftWidth,
+        RightWidth;
+    int LeftHeight,
+        RightHeight,
+        BottomLeftHeight,
+        BottomRightHeight;
+
+>>>>>>> origin/development
     struct Splitter
     {
         int SplitPositionPix;
@@ -513,7 +543,11 @@ protected:
         double SplitPosition;
         double BeforeZoomSplitPosition;
         double DragSplitPosition;
+<<<<<<< HEAD
     } midSplitter, leftSplitter, rightSplitter;
+=======
+    } midSplitter, leftSplitter, rightSplitter;
+>>>>>>> origin/development
            
     CToolTipWindow ToolTipWindow;
 
@@ -535,6 +569,7 @@ public:
     void GetSplitRect(RECT& r);
     BOOL SplitBarDragBegin(POINT p, BOOL leftButtonDown, BOOL leftButtonClick);
     void SplitBarDragMove(POINT p);
+<<<<<<< HEAD
     BOOL SplitBarDragEnd(BOOL leftButtonUp);
 
     BOOL GetLeftHorizSplitRect(RECT& r);
@@ -542,6 +577,15 @@ public:
     BOOL HorizSplitBarDragBegin(POINT p, BOOL leftButtonDown, BOOL leftButtonClick);
     void HorizSplitBarDragMove(POINT p);
     BOOL HorizSplitBarDragEnd(BOOL leftButtonUp);
+=======
+    BOOL SplitBarDragEnd(BOOL leftButtonUp);
+
+    BOOL GetLeftHorizSplitRect(RECT& r);
+    BOOL GetRightHorizSplitRect(RECT& r);
+    BOOL HorizSplitBarDragBegin(POINT p, BOOL leftButtonDown, BOOL leftButtonClick);
+    void HorizSplitBarDragMove(POINT p);
+    BOOL HorizSplitBarDragEnd(BOOL leftButtonUp);
+>>>>>>> origin/development
 
     BOOL IsGood();
 
@@ -551,7 +595,11 @@ public:
     // can be called from any thread
     void PostChangeOnPathNotification(const char* path, BOOL includingSubdirs);
 
+<<<<<<< HEAD
     // these functions have no effect if CFilesWindow::CanBeFocused is not satisfied
+=======
+    // tyto funkce nedopadnou, pokud neni splnena podminka CFilesWindow::CanBeFocused
+>>>>>>> origin/development
     void ChangePanel(CFilesWindow* newActivePanel, BOOL force = FALSE);     // cti EditMode; aktivuje neaktivni panel; (pokud je force==TRUE, ignoruje ZOOM)
     void FocusPanel(CFilesWindow* focus, BOOL testIfMainWndActive = FALSE); // sejme EditMode, protoze do panelu umisti focus
     void FocusLeftPanel();                                                  // vola FocusPanel pro levy panel
@@ -647,11 +695,44 @@ public:
         return NULL;
     }
 
+    CFilesWindow* GetNextPanel(CFilesWindow* panel)
+    {
+        if (panel == LeftPanel)
+            return RightPanel;
+        if (panel == RightPanel)
+            return BottomLeftPanel;
+
+        if (panel == BottomLeftPanel)
+            return BottomRightPanel;
+        if (panel == BottomRightPanel)
+            return LeftPanel;
+
+        TRACE_E("Invalid panel - other panel return value: " << panel);
+        return NULL;
+    }
+
+    CFilesWindow* GetPrevPanel(CFilesWindow* panel)
+    {
+        if (panel == LeftPanel)
+            return BottomRightPanel;
+        if (panel == RightPanel)
+            return LeftPanel;
+
+        if (panel == BottomLeftPanel)
+            return RightPanel;
+        if (panel == BottomRightPanel)
+            return BottomLeftPanel;
+
+        TRACE_E("Invalid panel - other panel return value: " << panel);
+        return NULL;
+    }
+
     CFilesWindow* GetOtherPanel(CFilesWindow* panel)
     {
         if (panel == LeftPanel)
             return RightPanel;
         if (panel == RightPanel)
+<<<<<<< HEAD
             return LeftPanel;
 
         if (panel == BottomLeftPanel)
@@ -666,6 +747,22 @@ public:
     CFilesWindow** GetOtherPanels(CFilesWindow* panel)
     {
         int i = 0;
+=======
+            return LeftPanel;
+
+        if (panel == BottomLeftPanel)
+            return BottomRightPanel;
+        if (panel == BottomRightPanel)
+            return BottomLeftPanel;
+
+        TRACE_E("Invalid panel - other panel return value: " << panel);
+        return NULL;
+    }
+
+    CFilesWindow** GetOtherPanels(CFilesWindow* panel)
+    {
+        int i = 0;
+>>>>>>> origin/development
 
         if (panel != LeftPanel)
         {
@@ -676,8 +773,13 @@ public:
         {
             otherPanels[i] = RightPanel;
             i++;
+<<<<<<< HEAD
         }
 
+=======
+        }
+
+>>>>>>> origin/development
         if (panel != BottomLeftPanel)
         {
             otherPanels[i] = BottomLeftPanel;
@@ -690,8 +792,13 @@ public:
         }
 
         return otherPanels;
+<<<<<<< HEAD
     }
     
+=======
+    }
+    
+>>>>>>> origin/development
     unsigned int GetPanelId(CFilesWindow* panel)
     {
         if (panel == LeftPanel)
@@ -726,6 +833,9 @@ public:
     BOOL ToggleDriveBar(BOOL twoDriveBars, BOOL storePos = TRUE);
 
     void ToggleToolBarGrips();
+
+    void HorizontalPanelsSwap(BOOL topPanels);
+    void VerticalPanelsSwap(BOOL leftPanels);
 
     void HorizontalPanelsSwap(BOOL topPanels);
     void VerticalPanelsSwap(BOOL leftPanels);
@@ -786,6 +896,16 @@ public:
 
     CFilesWindow** GetNonActivePanels()
     {
+<<<<<<< HEAD
+        
+        return GetOtherPanel(GetActivePanel());
+        //return (GetActivePanel() == LeftPanel) ? RightPanel : LeftPanel;
+    }
+
+    CFilesWindow** GetNonActivePanels()
+    {
+=======
+>>>>>>> origin/development
         return GetOtherPanels(GetActivePanel());
     }
 
@@ -863,7 +983,13 @@ public:
     BOOL IsPanelZoomed(BOOL topPanel, BOOL leftPanel);
     CFilesWindow* GetZoomedPanel();
     void ZoomPanel(CFilesWindow* panel);
+<<<<<<< HEAD
     void RestoreZoomedPanel(CFilesWindow* panel);
+=======
+    void RestoreZoomedPanel(CFilesWindow* panel);
+
+
+>>>>>>> origin/development
 
 
 
