@@ -1333,33 +1333,6 @@ bool CFilesWindow::IsTopPanel()
     return MainWindow->LeftPanel == this || MainWindow->RightPanel == this;
 }
 
-int CFilesWindow::GetWindowPanelType()
-{
-    if (MainWindow->LeftPanel == this)
-        return PANEL_LEFT;
-    if (MainWindow->RightPanel == this)
-        return PANEL_RIGHT;
-    if (MainWindow->BottomLeftPanel == this)
-        return PANEL_BOTTOM_LEFT;
-    if (MainWindow->BottomRightPanel == this)
-        return PANEL_BOTTOM_RIGHT;
-    
-    TRACE_E("GetWindowPanelType");
-    return -1;
-}
-
-bool CFilesWindow::IsLeftPanel()
-{
-    //  this concept has problems 
-    return MainWindow->LeftPanel == this || MainWindow->BottomLeftPanel == this;
-}
-
-bool CFilesWindow::IsTopPanel()
-{
-    //  this concept has problems
-    return MainWindow->LeftPanel == this || MainWindow->RightPanel == this;
-}
-
 CFilesWindow::CFilesWindow(CMainWindow* parent)
     : Columns(20, 10), ColumnsTemplate(20, 10), VisibleItemsArray(FALSE), VisibleItemsArraySurround(TRUE)
 {

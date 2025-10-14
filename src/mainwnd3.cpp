@@ -3693,7 +3693,7 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
             IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
                 return 0;
             }
-            // zapinani/vypinani directory liny leveho panelu
+            // zapinani/vypinani status liny leveho panelu
             case CM_BOTTOMLEFTSTATUS:
             {
                 BottomLeftPanel->ToggleStatusLine();

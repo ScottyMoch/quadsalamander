@@ -489,8 +489,6 @@ public:
 
     CITaskBarList3 TaskBarList3; // controls progress on the taskbar since Windows 7
 
-    CFilesWindow* otherPanels[3];
-
 protected:
     
     int WindowWidth, // due to split change
