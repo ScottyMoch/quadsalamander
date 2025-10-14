@@ -3693,21 +3693,6 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
                 return 0;
             }
 
-            // zapinani/vypinani directory liny leveho panelu
-            case CM_BOTTOMLEFTSTATUS:
-            {
-                BottomLeftPanel->ToggleStatusLine();
-                IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
-                return 0;
-            }
-                // zapinani/vypinani status liny praveho panelu
-            case CM_BOTTOMRIGHTSTATUS:
-            {
-                BottomRightPanel->ToggleStatusLine();
-                IdleRefreshStates = TRUE; // pri pristim Idle vynutime kontrolu stavovych promennych
-                return 0;
-            }
-
             // enabling/disabling the left panel directory line
             case CM_LEFTDIRLINE:
             {

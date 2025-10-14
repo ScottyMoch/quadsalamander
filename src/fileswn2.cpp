@@ -4013,9 +4013,6 @@ void CFilesWindow::RefreshListBox(int suggestedXOffset,
                 case COLUMN_ID_AGE:
                     column->Width = (WORD)columnWidthAge;
                     break;
-                case COLUMN_ID_AGE:
-                    column->Width = (WORD)columnWidthAge;
-                    break;
                 case COLUMN_ID_ATTRIBUTES:
                     column->Width = (WORD)columnWidthAttr;
                     break;

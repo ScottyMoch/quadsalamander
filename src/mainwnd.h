@@ -492,8 +492,6 @@ public:
 
     CFilesWindow* otherPanels[3];
 
-    CFilesWindow* otherPanels[3];
-
 protected:
     
     int WindowWidth, // kvuli zmene splitu
@@ -651,38 +649,6 @@ public:
         return NULL;
     }
 
-    CFilesWindow* GetNextPanel(CFilesWindow* panel)
-    {
-        if (panel == LeftPanel)
-            return RightPanel;
-        if (panel == RightPanel)
-            return BottomLeftPanel;
-
-        if (panel == BottomLeftPanel)
-            return BottomRightPanel;
-        if (panel == BottomRightPanel)
-            return LeftPanel;
-
-        TRACE_E("Invalid panel - other panel return value: " << panel);
-        return NULL;
-    }
-
-    CFilesWindow* GetPrevPanel(CFilesWindow* panel)
-    {
-        if (panel == LeftPanel)
-            return BottomRightPanel;
-        if (panel == RightPanel)
-            return LeftPanel;
-
-        if (panel == BottomLeftPanel)
-            return RightPanel;
-        if (panel == BottomRightPanel)
-            return BottomLeftPanel;
-
-        TRACE_E("Invalid panel - other panel return value: " << panel);
-        return NULL;
-    }
-
     CFilesWindow* GetOtherPanel(CFilesWindow* panel)
     {
         if (panel == LeftPanel)
@@ -762,9 +728,6 @@ public:
     BOOL ToggleDriveBar(BOOL twoDriveBars, BOOL storePos = TRUE);
 
     void ToggleToolBarGrips();
-
-    void HorizontalPanelsSwap(BOOL topPanels);
-    void VerticalPanelsSwap(BOOL leftPanels);
 
     void HorizontalPanelsSwap(BOOL topPanels);
     void VerticalPanelsSwap(BOOL leftPanels);
