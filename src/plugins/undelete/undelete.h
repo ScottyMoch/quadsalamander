@@ -235,10 +235,6 @@ class CFileList;
 class CPluginFSInterface : public CPluginFSInterfaceAbstract
 {
 protected:
-<<<<<<< HEAD
-=======
-    // friend static BOOL WINAPI EncryptedProgress(int inc, void* ctx);
->>>>>>> origin/development
     friend BOOL WINAPI EncryptedProgress(int inc, void* ctx);
     friend void WINAPI CPluginInterfaceForFS::ExecuteOnFS(int panel, CPluginFSInterfaceAbstract* pluginFS,
                                                           const char* pluginFSName, int pluginFSNameIndex,

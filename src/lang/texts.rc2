@@ -149,7 +149,6 @@ STRINGTABLE
  IDS_MENU_OPT_SAVECONFIG,     "&Save Configuration"
  IDS_MENU_OPT_EXPORTCONFIG,   "&Export Configuration..."
  IDS_MENU_OPT_IMPORTCONFIG,   "&Import Configuration..."
-<<<<<<< HEAD
  IDS_MENU_OPT_CST_BOTTOMLEFT, "&Bottom Left Panel Toolbar..." 
  IDS_MENU_OPT_CST_BOTTOMRIGHT,"&Bottom Right Panel Toolbar..."
 
@@ -160,18 +159,6 @@ STRINGTABLE
  IDS_MENU_BOTTOMRIGHT,             "BottomRight" 
  IDS_MENU_BOTTOMRIGHT_CHANGEDRIVE, "&Change Drive\tAlt+F4"
 
-=======
- IDS_MENU_OPT_CST_BOTTOMLEFT, "&Bottom Left Panel Toolbar..." 
- IDS_MENU_OPT_CST_BOTTOMRIGHT,"&Bottom Right Panel Toolbar..."
-
- IDS_MENU_RIGHT,             "&TopRight"
- IDS_MENU_RIGHT_CHANGEDRIVE, "&Change Drive\tAlt+F2"
- IDS_MENU_BOTTOMLEFT,             "BottomLeft"
- IDS_MENU_BOTTOMLEFT_CHANGEDRIVE, "&Change Drive\tAlt+F3" 
- IDS_MENU_BOTTOMRIGHT,             "BottomRight" 
- IDS_MENU_BOTTOMRIGHT_CHANGEDRIVE, "&Change Drive\tAlt+F4"
-
->>>>>>> origin/development
 
  IDS_MENU_HELP,              "&Help"
  IDS_MENU_HELP_CONTENTS,     "&Contents\tF1"
@@ -578,11 +565,7 @@ STRINGTABLE
  IDS_EMPTYPLUGINSMENU2, "(There are no configurable plugins)"
 
  IDS_MYDOCUMENTS, "Documents"
-<<<<<<< HEAD
  IDS_DOWNLOADS, "Downloads" 
-=======
- IDS_DOWNLOADS, "Downloads" 
->>>>>>> origin/development
  IDS_DESKTOP, "Desktop"
  IDS_MYVIDEOS, "My Videos"
  IDS_MYPICTURES, "My Pictures"
@@ -1008,11 +991,7 @@ STRINGTABLE
  IDS_COLUMN_NAME_DATE, "Date"
  IDS_COLUMN_NAME_TIME, "Time"
  IDS_COLUMN_NAME_ATTR, "Attr"
-<<<<<<< HEAD
  IDS_COLUMN_NAME_DESC, "Description"
-=======
- IDS_COLUMN_NAME_DESC, "Description"
->>>>>>> origin/development
  IDS_COLUMN_NAME_AGE,  "Age"
 
 // column names in view configuration dialog
@@ -1024,11 +1003,7 @@ STRINGTABLE
  IDS_COLUMN_CFG_DATE,    "Last Write Date"
  IDS_COLUMN_CFG_TIME,    "Last Write Time"
  IDS_COLUMN_CFG_ATTR,    "Attributes"
-<<<<<<< HEAD
  IDS_COLUMN_CFG_DESC,    "Description" 
-=======
- IDS_COLUMN_CFG_DESC,    "Description" 
->>>>>>> origin/development
  IDS_COLUMN_CFG_AGE,     "Time since Last Write"
 
 // column descriptions in panel
@@ -1040,7 +1015,6 @@ STRINGTABLE
  IDS_COLUMN_DESC_DATE,   "Last Write Date"
  IDS_COLUMN_DESC_TIME,   "Last Write Time"
  IDS_COLUMN_DESC_ATTR,   "Attributes"
-<<<<<<< HEAD
  IDS_COLUMN_DESC_DESC,   "Description" 
  IDS_COLUMN_DESC_AGE,    "Time since Last Write"
 
@@ -1049,16 +1023,6 @@ STRINGTABLE
  IDS_COLUMN_AGE_DAY,     "d" 
  IDS_COLUMN_AGE_MONTH,   "M" 
  IDS_COLUMN_AGE_YEAR,    "y"
-=======
- IDS_COLUMN_DESC_DESC,   "Description" 
- IDS_COLUMN_DESC_AGE,    "Time since Last Write"
-
- IDS_COLUMN_AGE_MIN,     "m" 
- IDS_COLUMN_AGE_HOUR,    "h" 
- IDS_COLUMN_AGE_DAY,     "d" 
- IDS_COLUMN_AGE_MONTH,   "M" 
- IDS_COLUMN_AGE_YEAR,    "y"
->>>>>>> origin/development
 
 // column name in menu
  IDS_COLUMN_MENU_NAME, "&Name\tCtrl+F3"
@@ -1773,13 +1737,8 @@ STRINGTABLE
 
  IDS_PATHMENU_BROWSE, "&Browse...\tCtrl+B"
  IDS_PATHMENU_LEFT, "Top &Left Panel Path\tCtrl+["
-<<<<<<< HEAD
  IDS_PATHMENU_RIGHT, "Top &Right Panel Path\tCtrl+]" 
  IDS_PATHMENU_BOTTOM_LEFT, "Bottom Left Panel Path" 
-=======
- IDS_PATHMENU_RIGHT, "Top &Right Panel Path\tCtrl+]" 
- IDS_PATHMENU_BOTTOM_LEFT, "Bottom Left Panel Path" 
->>>>>>> origin/development
  IDS_PATHMENU_BOTTOM_RIGHT, "Bottom Right Panel Path"
 
  IDS_NETWORK_NONE, "(none)"

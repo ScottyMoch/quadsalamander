@@ -40,13 +40,8 @@
 #define IDH_MINMAXCLOSEBTNS 139
 #define IDH_VIEWERINTRO     140
 #define IDH_GROUPPOLICY     141
-<<<<<<< HEAD
 #define IDH_PWDMANAGER      142
 #define IDH_LEFT_HORIZ_SPLITBAR    143
-=======
-#define IDH_PWDMANAGER      142
-#define IDH_LEFT_HORIZ_SPLITBAR    143
->>>>>>> origin/development
 #define IDH_RIGHT_HORIZ_SPLITBAR   144
 // virtualni IDcka - END
 
@@ -113,11 +108,7 @@
 #define CM_ACTIVETYPE       705
 
 #define CM_LCHANGEDRIVE     707
-<<<<<<< HEAD
 #define CM_RCHANGEDRIVE     708
-=======
-#define CM_RCHANGEDRIVE     708
->>>>>>> origin/development
 #define CM_BLCHANGEDRIVE        1707
 #define CM_BRCHANGEDRIVE        1708
 
@@ -221,7 +212,6 @@
 #define CM_OPENHOTPATHS     780
 #define CM_OPENHOTPATHSDROP 781
 #define CM_OPEN_FOLDER_DROP 782
-<<<<<<< HEAD
 #define CM_SWAPPANELS       783   //  still needed for plugin compatibility
 #define CM_VSWAP_LEFT           11783
 #define CM_VSWAP_RIGHT          11784
@@ -230,16 +220,6 @@
 #define CM_HSWAP_LEFT           11787
 #define CM_HSWAP_RIGHT          11788
 #define CM_HSWAP_BOTTOMLEFT     11789
-=======
-#define CM_SWAPPANELS       783   //  still needed for plugin compatibility
-#define CM_VSWAP_LEFT           11783
-#define CM_VSWAP_RIGHT          11784
-#define CM_VSWAP_BOTTOMLEFT     11785
-#define CM_VSWAP_BOTTOMRIGHT    11786
-#define CM_HSWAP_LEFT           11787
-#define CM_HSWAP_RIGHT          11788
-#define CM_HSWAP_BOTTOMLEFT     11789
->>>>>>> origin/development
 #define CM_HSWAP_BOTTOMRIGHT    11790
 #define CM_ALWAYSONTOP      784
 
@@ -304,11 +284,7 @@
 #define CM_RPARENTDIR          826
 #define CM_RROOTDIR            827
 #define CM_LDRIVEINFO          828
-<<<<<<< HEAD
 #define CM_RDRIVEINFO          829
-=======
-#define CM_RDRIVEINFO          829
->>>>>>> origin/development
 #define CM_BLPARENTDIR          1824
 #define CM_BLROOTDIR            1825
 #define CM_BRPARENTDIR          1826
@@ -319,11 +295,7 @@
 #define CM_LEFTHEADER          830
 #define CM_RIGHTHEADER         831
 #define CM_BOTTOMLEFTHEADER          1830
-<<<<<<< HEAD
 #define CM_BOTTOMRIGHTHEADER         1831
-=======
-#define CM_BOTTOMRIGHTHEADER         1831
->>>>>>> origin/development
 
 #define CM_ACTIVEBACK          832
 #define CM_ACTIVEFORWARD       833
@@ -334,11 +306,7 @@
 #define CM_BLBACK               1834
 #define CM_BLFORWARD            1835
 #define CM_BRBACK               1836
-<<<<<<< HEAD
 #define CM_BRFORWARD            1837
-=======
-#define CM_BRFORWARD            1837
->>>>>>> origin/development
 
 #define CM_AFOCUSSHORTCUT      838
 
@@ -547,22 +515,14 @@
 #define CM_BOTTOMLEFTHOTPATH_MIN       12430    // goto hot path X (rezervace pro HOT_PATHS_COUNT)
 #define CM_BOTTOMLEFTHOTPATH_MAX       12469
 #define CM_BOTTOMRIGHTHOTPATH_MIN      12470    // goto hot path X (rezervace pro HOT_PATHS_COUNT)
-<<<<<<< HEAD
 #define CM_BOTTOMRIGHTHOTPATH_MAX      12499
-=======
-#define CM_BOTTOMRIGHTHOTPATH_MAX      12499
->>>>>>> origin/development
 
 //#define IDD_TIPOFTHEDAY            2720
 
 #define CM_LEFTHISTORYPATH_MIN     2840    // historie adresaru pro menu Go To
 #define CM_LEFTHISTORYPATH_MAX     2849
 #define CM_RIGHTHISTORYPATH_MIN    2850    // historie adresaru pro menu Go To
-<<<<<<< HEAD
 #define CM_RIGHTHISTORYPATH_MAX    2859
-=======
-#define CM_RIGHTHISTORYPATH_MAX    2859
->>>>>>> origin/development
 #define CM_BOTTOMLEFTHISTORYPATH_MIN     12840    // historie adresaru pro menu Go To
 #define CM_BOTTOMLEFTHISTORYPATH_MAX     12849
 #define CM_BOTTOMRIGHTHISTORYPATH_MIN    12850    // historie adresaru pro menu Go To
@@ -574,11 +534,7 @@
 #define CM_LEFTSORTBY_MIN          2890
 #define CM_LEFTSORTBY_MAX          2909
 #define CM_RIGHTSORTBY_MIN         2910
-<<<<<<< HEAD
 #define CM_RIGHTSORTBY_MAX         2929
-=======
-#define CM_RIGHTSORTBY_MAX         2929
->>>>>>> origin/development
 #define CM_BOTTOMLEFTSORTBY_MIN          12890
 #define CM_BOTTOMLEFTSORTBY_MAX          12909
 #define CM_BOTTOMRIGHTSORTBY_MIN         12910
@@ -600,19 +556,11 @@
 #define CM_LEFTZOOMPANEL           2935
 #define CM_RIGHTZOOMPANEL          2936
 #define CM_LEFTZOOMPANEL           2935
-<<<<<<< HEAD
 #define CM_RIGHTZOOMPANEL          2936
 #define CM_BOTTOMLEFTZOOMPANEL           12935
 #define CM_BOTTOMRIGHTZOOMPANEL          12936
 #define CM_BOTTOMLEFTZOOMPANEL           12935
 #define CM_BOTTOMRIGHTZOOMPANEL          12936
-=======
-#define CM_RIGHTZOOMPANEL          2936
-#define CM_BOTTOMLEFTZOOMPANEL           12935
-#define CM_BOTTOMRIGHTZOOMPANEL          12936
-#define CM_BOTTOMLEFTZOOMPANEL           12935
-#define CM_BOTTOMRIGHTZOOMPANEL          12936
->>>>>>> origin/development
 
 #define CM_FULLSCREEN              2937  // maximalizuje hlavni okno a vraci ho zpet
 
@@ -685,11 +633,7 @@
 #define CML_LEFT_SORTBY         5505
 #define CML_LEFT_VISIBLE        5506
 #define CML_LEFT_GO             5507
-<<<<<<< HEAD
 
-=======
-
->>>>>>> origin/development
 #define CML_BOTTOMLEFT                15501
 #define CML_BOTTOMLEFT_CHANGEDRIVE    15502
 #define CML_BOTTOMLEFT_VIEWS1         15503

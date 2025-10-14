@@ -60,12 +60,7 @@ public:
     BOOL MakeFilesList(TDirectArray<int>& offsets, SalEnumSelection next, void* nextParam, const char* targetDir);
     BOOL ConstructMaskArray(TIndirectArray<char>& maskArray, const char* masks);
 
-<<<<<<< HEAD
     friend BOOL ProgressCallback(int);
-=======
-    // friend static BOOL ProgressCallback(int);
-    friend /* static */ BOOL ProgressCallback(int);
->>>>>>> origin/development
 };
 
 class CPluginInterface : public CPluginInterfaceAbstract
