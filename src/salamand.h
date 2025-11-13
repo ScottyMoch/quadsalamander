@@ -334,7 +334,7 @@ int WINAPI InternalGetPluginIconIndex();
 // CViews
 //
 
-#define STANDARD_COLUMNS_COUNT 10 // pocet standardnich sloupcu pro rozsah
+#define STANDARD_COLUMNS_COUNT 10 // number of standard columns for the view
 #define VIEW_TEMPLATES_COUNT 10
 #define VIEW_NAME_MAX 30
 // column Name is always visible and if the flag VIEW_SHOW_EXTENSION is not set, it also contains the extension
@@ -396,9 +396,9 @@ struct CViewTemplate
     CColumnConfig Columns[STANDARD_COLUMNS_COUNT]; // stores widths and elasticity of columns
 
     BOOL LeftSmartMode;  // smart mode for the left panel (only the elastic Name column: the column narrows so a horizontal scrollbar is not needed)
-    BOOL RightSmartMode; // smart mode pro pravy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)BOOL LeftSmartMode;  // smart mode pro levy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)
-    BOOL BottomRightSmartMode; // smart mode pro pravy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)BOOL LeftSmartMode;  // smart mode pro levy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)
-    BOOL BottomLeftSmartMode;  // smart mode pro levy panel (jen elasticky sloupec Name: sloupec se zuzuje, aby nebyla potreba horizontalni scrollbara)
+    BOOL RightSmartMode; // smart mode for the right panel (only the elastic Name column: the column narrows so a horizontal scrollbar is not needed)
+    BOOL BottomRightSmartMode; // smart mode for the bottom right panel (only the elastic Name column: the column narrows so a horizontal scrollbar is not needed)
+    BOOL BottomLeftSmartMode;  // smart mode for the bottom left panel (only the elastic Name column: the column narrows so a horizontal scrollbar is not needed)
 };
 
 class CViewTemplates
