@@ -13,6 +13,7 @@ extern "C"
 }
 #include "salshlib.h"
 
+/* quad dev: are they necessary?
 #include <windows.h>
 #include <KnownFolders.h>
 #include <shlobj.h>
@@ -20,6 +21,7 @@ extern "C"
 #include <windows.h>
 #include <KnownFolders.h>
 #include <shlobj.h>
+*/
 
 // original location in fileswnd.h (kept here only because of MakeCopyOfName in CImpDropTarget::ProcessClipboardData)
 extern BOOL OurClipDataObject; // TRUE when "paste" is done with our IDataObject
