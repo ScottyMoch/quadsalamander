@@ -1,3 +1,5 @@
+# develop files to keep separate
+.QuadStuff
 # OS files
 .DS_Store
 .cache
