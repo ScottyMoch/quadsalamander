@@ -599,19 +599,7 @@ void CMainWindow::FillViewModeMenu(CMenuPopup* popup, int firstIndex, int type)
         break;
     }
 
-    case 3:
-    {
-        fistCMID = CM_BOTTOMLEFTMODE_1;
-        panel = BottomLeftPanel;
-        break;
-    }
 
-    case 4:
-    {
-        fistCMID = CM_BOTTOMRIGHTMODE_1;
-        panel = BottomRightPanel;
-        break;
-    }
 
     default:
     {
