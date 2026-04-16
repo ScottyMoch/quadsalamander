@@ -1,12 +1,13 @@
 ﻿// SPDX-FileCopyrightText: 2023 Open Salamander Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
+// CommentsTranslationProject: TRANSLATED
 
 #include "precomp.h"
 
 #include <windows.h>
 
-// modul MS_INIT zajistuje volani konstruktoru statickych objektu ve spravnem poradi
-// a na urovni "lib" (pred "user")
+// MS_INIT ensures that constructors of static objects are called in the correct order
+// and at the "lib" level (before "user")
 
 #pragma warning(3 : 4706) // warning C4706: assignment within conditional expression
 

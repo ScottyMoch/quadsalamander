@@ -263,10 +263,10 @@ void CFilesWindow::Execute(int index)
 
             // launch of the default context menu item (association)
             HCURSOR oldCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
-            MainWindow->SetDefaultDirectories(); // aby startujici process zdedil spravne akt. adresare
+            MainWindow->SetDefaultDirectories(); // to ensure the launching process inherits the correct current directories
             ExecuteAssociation(GetListBoxHWND(), GetPath(), fileName);
 
-            // pridame soubor do historie
+            // we add the file to history
             if (fullPath[0] != 0)
                 MainWindow->FileHistory->AddFile(fhitOpen, 0, fullPath);
 
@@ -436,7 +436,7 @@ void CFilesWindow::Execute(int index)
                         // we split zip-path into new zip-path and prev-dir
                         strcpy(path, GetZIPPath());
                         char* prevDir;
-                        char* s = strrchr(path, '\\'); // zip-path neobsahuje zbytecne backslashe (zacatek/konec)
+                        char* s = strrchr(path, '\\'); // zip-path has no redundant backslashes (start/end)
                         if (s != NULL)                 // format: "beg-path\\dir"
                         {
                             *s = 0;
@@ -482,7 +482,7 @@ void CFilesWindow::Execute(int index)
                         BOOL noChange;
                         if (ChangePathToArchive(GetZIPArchive(), fullName, -1, NULL, FALSE, &noChange)) // "always true"
                         {
-                            TopIndexMem.Push(doublePath, topIndex); // we remember top index for return
+                        TopIndexMem.Push(doublePath, topIndex); // we remember top index for return
                         }
                         else
                         {
@@ -3455,8 +3455,8 @@ void CFilesWindow::RefreshDiskFreeSpace(BOOL check, BOOL doNotRefreshOtherPanel)
 
             if (!doNotRefreshOtherPanel)
             {
-                // if the other panel uses a path with the same root, we refresh
-                // disk-free-space there as well (it is not perfect - ideally we would
+                // if the other panel uses a path with the same root, we refresh 
+                // disk-free-space there as well (it is not perfect - ideally we would 
                 // test whether both paths are on the same volume, but that would be too slow;
                 // this simplification should be more than enough for normal use)
                 CFilesWindow* otherPanel = MainWindow->GetOtherPanel(this);
@@ -4107,7 +4107,7 @@ void CFilesWindow::RefreshListBox(int suggestedXOffset,
     if (suggestedFocusIndex != -1)
     {
         FocusedIndex = suggestedFocusIndex;
-        // if no TopIndex is suggested or focus visibility
+        // if no TopIndex is suggested or focus visibility 
         // is required, compute a new TopIndex
         // -- clearer version with support for vmIcons and vmThumbnails
         // -- change for partially visible items: previously TopIndex was recalculated

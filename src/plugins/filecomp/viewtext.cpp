@@ -1041,6 +1041,5 @@ void TTextFileViewWindow<CChar>::Paint()
 }
 
 // 20250706: Explicit template instantiations
-// 20250706:
 template class TTextFileViewWindow<char>;
 template class TTextFileViewWindow<wchar_t>;

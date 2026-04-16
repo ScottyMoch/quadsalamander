@@ -3680,6 +3680,7 @@ MENU_TEMPLATE_ITEM CopyMoveBrowseMenu[] =
     mii.String = LoadStr(IDS_PATHMENU_RIGHT);
     popup.InsertItem(0xFFFFFFFF, TRUE, &mii);
 
+
     mii.ID = DIRECTORY_COMMAND_BOTTOM_LEFT;
     mii.String = LoadStr(IDS_PATHMENU_BOTTOM_LEFT);
     popup.InsertItem(0xFFFFFFFF, TRUE, &mii);

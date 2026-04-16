@@ -1,5 +1,6 @@
 ﻿// SPDX-FileCopyrightText: 2023 Open Salamander Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
+// CommentsTranslationProject: TRANSLATED
 
 //****************************************************************************
 //
@@ -12,7 +13,7 @@
 #pragma once
 
 #ifdef _MSC_VER
-#pragma pack(push, enter_include_spl_arc) // aby byly struktury nezavisle na nastavenem zarovnavani
+#pragma pack(push, enter_include_spl_arc) // to make the structures independent of the current alignment setting
 #pragma pack(4)
 #endif // _MSC_VER
 #ifdef __BORLANDC__
@@ -31,7 +32,7 @@ class CPluginDataInterfaceAbstract;
 class CPluginInterfaceForArchiverAbstract
 {
 #ifdef INSIDE_SALAMANDER
-private: // ochrana proti nespravnemu primemu volani metod (viz CPluginInterfaceForArchiverEncapsulation)
+private: // guards against incorrect direct method calls (see CPluginInterfaceForArchiverEncapsulation)
     friend class CPluginInterfaceForArchiverEncapsulation;
 #else  // INSIDE_SALAMANDER
 public:

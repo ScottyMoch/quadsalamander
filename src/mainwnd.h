@@ -50,7 +50,7 @@ class CAnimate;
 //
 
 class CToolTipWindow : public CWindow
-{ // zobrazuje tool-tip nezavisle na pozici kurzoru
+{ // displays the tooltip independently of the cursor position
 public:
     CToolTipWindow() : CWindow(ooStatic) { ToolWindow = NULL; }
 
@@ -59,7 +59,7 @@ public:
 protected:
     virtual LRESULT WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam);
 
-    HWND ToolWindow; // TTM_WINDOWFROMPOINT vraci stale toto okno
+    HWND ToolWindow; // TTM_WINDOWFROMPOINT always returns this window
 };
 
 //****************************************************************************
@@ -67,18 +67,18 @@ protected:
 // CHotPathItem
 //
 
-// slouzi pro konfiguracni dialog a udava maximalni zadatelnou delku CHotPathItem::Path
-// nechavame rezervu, protoze cesta muze obsahovat dlouhe promenne, ktere se po "expanzi" smrsknou na par znaku,
-// napriklad $[SystemDrive] -> C:
+// used in the configuration dialog and specifies the maximum allowed length of CHotPathItem::Path
+// we keep some margin because the path may contain long variables that will "shrink" to just a few characters after expansion,
+// for example $[SystemDrive] -> C:
 #define HOTPATHITEM_MAXPATH (4 * MAX_PATH)
 
 struct CHotPathItem
 {
-    // Name a Path jsou alokovane, aby nezraly pamet (lide po nas chteji neomezeny pocet hot paths)
-    // Navic v pripade Path by bylo MAX_PATH malo (escapovani + promenne)
-    char* Name;   // jmeno, pod kterym cesta vystupuje v menu
-    char* Path;   // cesta, escapovana (zdvojene '$' znaky) kvuli promennym jako $(SalDir), atd
-    BOOL Visible; // bude cesta pritomna v ChangeDrive menu
+    // Name and Path are allocated to save memory (people expect unlimited hot paths)
+    // moreover, in the case of Path, MAX_PATH would be too small (escaping + variables)
+    char* Name;   // name under which the path appears in the menu
+    char* Path;   // path escaped (double '$' characters) for variables like $(SalDir), etc.
+    BOOL Visible; // is the path present in the ChangeDrive menu
 
     CHotPathItem()
     {
@@ -127,7 +127,7 @@ public:
         Empty();
     }
 
-    // dealokace drzenych dat
+    // deallocates held data
     void Empty()
     {
         int i;
@@ -135,7 +135,7 @@ public:
             Items[i].Empty();
     }
 
-    // nastavi atributy
+    // sets the attributes
     void Set(DWORD index, const char* name, const char* path)
     {
         if (Items[index].Name != NULL)
@@ -208,25 +208,25 @@ public:
             return 0;
     }
 
-    // vrati index neprirazene hot path nebo -1 pokud jsou vsechny prirazene
+    // returns the index of an unassigned hot path or -1 if all are assigned
     int GetUnassignedHotPathIndex();
 
     BOOL GetVisible(int index) { return Items[index].Visible; }
-    BOOL CleanName(char* name); // oreze mezery a vrati TRUE, je-li name ok
+    BOOL CleanName(char* name); // trims spaces and returns TRUE if the name is valid
 
-    BOOL SwapItems(int index1, int index2); // prohodi dve polozky v poli
+    BOOL SwapItems(int index1, int index2); // swaps two items in the array
 
-    // 'emptyItems' - prida i neprirazene cesty (pro assign)
-    // 'emptyEcho' - pokud bude menu prazdne, volzi informaci, ze je prazdne
-    // 'customize' - pripoji separator a customize
-    // 'topSeparator' - pokud vlozi nejake cestu, soupne nad ne separator
-    // 'forAssign' - volano z Assign Hot Path z context menu v directory line
+    // 'emptyItems' - also add unassigned paths (for assignment)
+    // 'emptyEcho' - if the menu is empty, it outputs information that it is empty
+    // 'customize' - append a separator and customize option
+    // 'topSeparator' - if it inserts some path, it puts a separator above it
+    // 'forAssign' - called from Assign Hot Path in the directory line context menu
     void FillHotPathsMenu(CMenuPopup* menu, int minCommand, BOOL emptyItems = FALSE, BOOL emptyEcho = TRUE,
                           BOOL customize = TRUE, BOOL topSeparator = FALSE, BOOL forAssign = FALSE);
 
-    BOOL Save(HKEY hKey);     // ulozi cele pole
-    BOOL Load(HKEY hKey);     // nacte cele pole
-    BOOL Load1_52(HKEY hKey); // nacte cele pole verze 1.52
+    BOOL Save(HKEY hKey);     // saves the entire array
+    BOOL Load(HKEY hKey);     // loads the entire array
+    BOOL Load1_52(HKEY hKey); // loads the entire array from version 1.52
 
     void Load(CHotPathItems& source)
     {
@@ -238,14 +238,14 @@ public:
 
 //*****************************************************************************
 //
-// UM_GetNextFileName - typ funkce, ktera postupne vraci nazvy souboru pro U.M.
+// UM_GetNextFileName - function type that gradually returns file names for U.M.
 //
-// index - poradi dalsiho jmena (postupne jde od nuly vyse po jedne)
-// path  - buffer pro cestu [MAX_PATH]
-// name  - buffer pro jmeno [MAX_PATH]
-// param - pomocny pointer pro user-data
+// index - order of the next name (starting from zero and increasing by one)
+// path  - buffer for the path [MAX_PATH]
+// name  - buffer for the file name [MAX_PATH]
+// param - helper pointer for user data
 //
-// vraci uspech - pokracovat v ziskavani dalsich jmen? (vrati FALSE -> konec)
+// returns success - continue retrieving more names? (returns FALSE - ends the enumeration)
 
 typedef BOOL (*UM_GetNextFileName)(int index, char* path, char* name, void* param);
 
@@ -276,11 +276,12 @@ struct IContextMenu2;
 class CMainWindowAncestor : public CWindow
 {
 private:
-    CFilesWindow* ActivePanel; // bud LeftPanel nebo RightPanel
+    CFilesWindow* ActivePanel; // either LeftPanel or RightPanel
 
 public:
-    // POZOR: volat az pokud nejde pozadavek resit pomoci FocusPanel a ChangePanel (hodi se
-    // je-li EditMode TRUE); pri volani zjistit jestli je dost siroky panel, atd. (viz FocusPanel)
+    // NOTE: call this only when the request cannot be handled via FocusPanel
+    // and ChangePanel (useful when EditMode is TRUE). When calling, verify that
+    // the panel is wide enough and so on (see FocusPanel)
     void SetActivePanel(CFilesWindow* active)
     {
         ActivePanel = active;
@@ -298,15 +299,15 @@ class CPathHistory;
 enum CMainWindowsHitTestEnum
 {
     mwhteNone,
-    mwhteTopRebar,      // je to v rebaru, ale na zadnem bandu
-    mwhteMenu,          // v rebaru na bendu Menu
-    mwhteTopToolbar,    // v rebaru na bendu TopToolbar
-    mwhtePluginsBar,    // v rebaru na bendu PluginsBar
-    mwhteMiddleToolbar, // Middle Bar na split bare
-    mwhteUMToolbar,     // v rebaru na bendu UserMenuBar
-    mwhteHPToolbar,     // v rebaru na bendu HotPathsBar
-    mwhteDriveBar,      // v rebaru na bendu Drive Bar
-    mwhteWorker,        // v rebaru na bendu Worker
+    mwhteTopRebar,      // it's in the rebar but on no band
+    mwhteMenu,          // in the rebar on the Menu band
+    mwhteTopToolbar,    // in the rebar on the TopToolbar band
+    mwhtePluginsBar,    // in the rebar on the PluginsBar band
+    mwhteMiddleToolbar, // Middle Bar on the split bar
+    mwhteUMToolbar,     // in the rebar on the UserMenuBar band
+    mwhteHPToolbar,     // in the rebar on the HotPathsBar band
+    mwhteDriveBar,      // in the rebar on the Drive Bar band
+    mwhteWorker,        // in the rebar on the Worker band
     mwhteCmdLine,
     mwhteBottomToolbar,
     mwhteSplitLine,
@@ -342,7 +343,7 @@ typedef TDirectArray<CChangeNotifData> CChangeNotifArray;
 // ****************************************************************************
 // CDynString
 //
-// pomocny objekt pro dynamicky alokovany string
+// helper object for a dynamically allocated string
 
 struct CDynString
 {
@@ -363,21 +364,23 @@ struct CDynString
             free(Buffer);
     }
 
-    BOOL Append(const char* str, int len); // vraci TRUE pri uspechu; je-li 'len' -1, bere se "len=strlen(str)"
+    BOOL Append(const char* str, int len); // returns TRUE on success; if 'len' is -1 the length is calculated using "len = strlen(str)"
 
     const char* GetString() const { return Buffer; }
 };
 
-// flagy pro metody CompareDirectories
-#define COMPARE_DIRECTORIES_BYTIME 0x00000001       // porovname podle datumu a casu
-#define COMPARE_DIRECTORIES_BYCONTENT 0x00000002    // porovname podle obsahu
-#define COMPARE_DIRECTORIES_BYATTR 0x00000004       // porovname podle atributu
-#define COMPARE_DIRECTORIES_SUBDIRS 0x00000008      // vcetne podadresaru
-#define COMPARE_DIRECTORIES_SUBDIRS_ATTR 0x00000010 // atributy podadresaru
-#define COMPARE_DIRECTORIES_BYSIZE 0x00000020       // porovname velikosti
-#define COMPARE_DIRECTORIES_ONEPANELDIRS 0x00000040 // oznaci adresare existujici jen v jednom panelu (nezaleza dovnitr podadresaru)
-#define COMPARE_DIRECTORIES_IGNFILENAMES 0x00000080 // ignorovat soubory, jejichz jmena odpovidajici masce Configuration.CompareIgnoreFilesMasks
-#define COMPARE_DIRECTORIES_IGNDIRNAMES 0x00000100  // ignorovat adresare, jejichz jmena odpovidajici masce Configuration.CompareIgnoreDirsMasks
+// flags for CompareDirectories methods
+#define COMPARE_DIRECTORIES_BYTIME 0x00000001       // compare by date and time
+#define COMPARE_DIRECTORIES_BYCONTENT 0x00000002    // compare file contents
+#define COMPARE_DIRECTORIES_BYATTR 0x00000004       // compare attributes
+#define COMPARE_DIRECTORIES_SUBDIRS 0x00000008      // include subdirectories
+#define COMPARE_DIRECTORIES_SUBDIRS_ATTR 0x00000010 // subdirectory attributes
+#define COMPARE_DIRECTORIES_BYSIZE 0x00000020       // compare file sizes
+#define COMPARE_DIRECTORIES_ONEPANELDIRS 0x00000040 // mark directories that exist only in one panel (does not check subdirectories)
+#define COMPARE_DIRECTORIES_IGNFILENAMES 0x00000080 // ignore file names matching Configuration.CompareIgnoreFilesMasks
+#define COMPARE_DIRECTORIES_IGNDIRNAMES 0x00000100  // ignore directory names matching Configuration.CompareIgnoreDirsMasks
+
+
 
 
 
@@ -389,8 +392,8 @@ class CMainWindow : public CMainWindowAncestor
     const int MIN_WIN_HEIGHT = 2; // minimalni sirka panelu
 
 public:
-    BOOL EditMode;             // aktivni editwindow, zbytek jen simuluje
-    BOOL EditPermanentVisible; // editwindow je stale viditelne
+    BOOL EditMode;             // the edit window is active, the rest just simulates
+    BOOL EditPermanentVisible; // the edit window is always visible
     BOOL HelpMode;             // if TRUE, then Shift+F1 help mode is active
     
     CFilesWindow *LeftPanel,
@@ -412,9 +415,9 @@ public:
 
     HWND HTopRebar;
     CMenuBar* MenuBar;
-    UINT TaskbarRestartMsg; // toto rozesila explorer, kdyz je potreba naplnit ikonky
+    UINT TaskbarRestartMsg; // sent by Explorer when taskbar icons need to be restored
 
-    CToolTip* ToolTip; // vzdy existuje a je vytvoreny - vsechny controly pouzivaji tento jeden tooltip
+    CToolTip* ToolTip; // always exists and is created-all controls use this single tooltip
 
     BOOL Created;
 
@@ -423,28 +426,28 @@ public:
 
     CUserMenuItems* UserMenuItems;
     CViewerMasks* ViewerMasks;
-    CRITICAL_SECTION ViewerMasksCS; // sekce pouzita jen pro synchronizaci pristupu do 'ViewerMasks' (jen zapis kdekoliv a cteni v jinem nez hlavnim threadu)
+    CRITICAL_SECTION ViewerMasksCS; // section used only for synchronizing access to 'ViewerMasks' (writes anywhere and reads outside the main thread)
     CViewerMasks* AltViewerMasks;
     CEditorMasks* EditorMasks;
     CHighlightMasks* HighlightMasks;
 
-    CDetachedFSList* DetachedFSList; // seznam "odpojenych" FS pro Alt+F1/F2 (pro opetovne pripojeni)
+    CDetachedFSList* DetachedFSList; // list of "detached" FS for Alt+F1/F2 (for reattachment)
 
-    CFileHistory* FileHistory; // historie souboru, nad kterymi probehlo View nebo Edit
+    CFileHistory* FileHistory; // history of files that were viewed or edited
 
-    CPathHistory* DirHistory; // historie navstivenych adresaru
-    BOOL CanAddToDirHistory;  // TRUE az po nahozeni Salamandera (aby se neregistrovaly zmeny cest pri nacitani konfigurace)
+    CPathHistory* DirHistory; // history of visited directories
+    BOOL CanAddToDirHistory;  // TRUE only after Salamander starts (to avoid registering path changes while loading the configuration)
 
-    CMenuNew* ContextMenuNew;          // pro obsluhu prikazu z menu New
-    IContextMenu2* ContextMenuChngDrv; // pro obsluhu prikazu z Change Drive Menu
+    CMenuNew* ContextMenuNew;          // handles commands from the New menu
+    IContextMenu2* ContextMenuChngDrv; // handles commands from the Change Drive Menu
 
-    char SelectionMask[MAX_PATH]; // maska pro select/deselect
+    char SelectionMask[MAX_PATH]; // mask for select/deselect
 
-    BOOL CanClose;                    // je mozne zavrit hl. okno? (probehl kompletni start aplikace?)
-    BOOL CanCloseButInEndSuspendMode; // TRUE pokud CanClose bylo TRUE a je FALSE jen kvuli tomu, ze probiha message-loopa ve zpracovani WM_USER_END_SUSPMODE
-    BOOL SaveCfgInEndSession;         // TRUE = ve WM_ENDSESSION se ma ulozit konfigurace
-    BOOL WaitInEndSession;            // TRUE = ve WM_ENDSESSION se ma pockat na dokonceni diskovych operaci
-    BOOL DisableIdleProcessing;       // TRUE = nebudeme provadet IDLE processing (soft jiz konci, jen by zdrzoval a vse komplikoval)
+    BOOL CanClose;                    // can the main window be closed? (has the application fully started?)
+    BOOL CanCloseButInEndSuspendMode; // TRUE if CanClose was TRUE but is temporarily FALSE because a message loop is running while processing WM_USER_END_SUSPMODE
+    BOOL SaveCfgInEndSession;         // TRUE = configuration should be saved in WM_ENDSESSION
+    BOOL WaitInEndSession;            // TRUE = WM_ENDSESSION should wait for disk operations to finish
+    BOOL DisableIdleProcessing;       // TRUE = skip idle processing (the app is shutting down and it would only slow things down)
                                       //    CTipOfTheDayDialog *TipOfTheDayDialog;
 
     enum DragModeType
@@ -458,43 +461,42 @@ public:
     int DragSplitX;
     int DragSplitY;
 
-    // tuto funkci jsem zatim vyradil - implmenetace by znamenala modifikaci zobrazeneho menu
-    //    HWND           DrivesControlHWnd;   // pokud je zobrazeno Alt+F1/F2 okno, je zde jeho handle, jinak NULL
+    // this function is disabled for now-the implementation would require modifying the displayed menu
+    //    HWND           DrivesControlHWnd;   // handle of the Alt+F1/F2 window if displayed, otherwise NULL
 
-    HWND HDisabledKeyboard; // handle okna, ktere zakazalo zpracovani klavesnice
-                            // pokud dojde ke stisteni klavesy Escape, je tomuto
-                            // oknu zaslana message WM_CANCELMODE
+    HWND HDisabledKeyboard; // handle of the window that disabled keyboard processing
+                            // if the Escape key is pressed this window
+                            // receives the WM_CANCELMODE message
 
-    int CmdShow; // to nam prislo do WinMain
+    int CmdShow; // value received in WinMain
 
-    int ActivateSuspMode; // pocitadlo wm_activateapp aktivaci/deaktivaci, asi se ztraci zpravy ...
+    int ActivateSuspMode; // counter of WM_ACTIVATEAPP activations/deactivations; some messages may get lost
 
-    RECT WindowRect; // aktualni pozice okna
+    RECT WindowRect; // current window position
 
-    BOOL CaptionIsActive; // je caption hlavniho okna aktivni?
+    BOOL CaptionIsActive; // is the main window caption active?
 
-    // promenne tykajici se rozesilani zprav o zmenach na cestach (jak FS, tak diskove cesty)
-    CChangeNotifArray ChangeNotifArray;    // pole se zpravami o zmenach na cestach
-    CRITICAL_SECTION DispachChangeNotifCS; // kriticka sekce pro praci s ChangeNotifArray
-    int LastDispachChangeNotifTime;        // cas posledniho rozeslani zprav
-    BOOL NeedToResentDispachChangeNotif;   // TRUE = je treba znovu postnout WM_USER_DISPACHCHANGENOTIF
+    // variables related to sending notifications about path changes (both FS and disk paths)
+    CChangeNotifArray ChangeNotifArray;    // array of messages about path changes
+    CRITICAL_SECTION DispachChangeNotifCS; // critical section for work with ChangeNotifArray
+    int LastDispachChangeNotifTime;        // time of the last message dispatch
+    BOOL NeedToResentDispachChangeNotif;   // TRUE = WM_USER_DISPACHCHANGENOTIF must be posted again
 
-    BOOL DoNotLoadAnyPlugins; // TRUE = neloadit zadne pluginy (napr. thumbnail loadery); POZOR: menit pres SetDoNotLoadAnyPlugins()
+    BOOL DoNotLoadAnyPlugins; // TRUE = do not load any plugins (e.g. thumbnail loaders); WARNING: modify via SetDoNotLoadAnyPlugins()
 
-    DWORD SHChangeNotifyRegisterID; // vraceno funkci SHChangeNotifyRegister
+    DWORD SHChangeNotifyRegisterID; // returned by SHChangeNotifyRegister
     BOOL IgnoreWM_SETTINGCHANGE;
 
     BOOL LockedUI;
     HWND LockedUIToolWnd;
     char* LockedUIReason;
 
-    CITaskBarList3 TaskBarList3; // pro ovladani progress na taskbar od W7
+    CITaskBarList3 TaskBarList3; // controls progress on the taskbar since Windows 7
 
     CFilesWindow* otherPanels[3];
-
 protected:
     
-    int WindowWidth, // kvuli zmene splitu
+    int WindowWidth, // due to split change
         WindowHeight,
         TopRebarHeight,
         BottomToolBarHeight,
@@ -532,7 +534,7 @@ public:
     void LeaveViewerMasksCS() { HANDLES(LeaveCriticalSection(&ViewerMasksCS)); }
     BOOL GetViewersAssoc(int wantedViewerType, CDynString* strViewerMasks); // helper: collects all masks associated with the given viewer type "wantedViewerType"; returns TRUE on success (when enough memory for the string)
 
-    void ClearHistory(); // promaze vsechny historie
+    void ClearHistory(); // clears all histories
 
     void GetSplitRect(RECT& r);
     BOOL SplitBarDragBegin(POINT p, BOOL leftButtonDown, BOOL leftButtonClick);
@@ -555,8 +557,8 @@ public:
 
     // these functions have no effect if CFilesWindow::CanBeFocused is not satisfied
     void ChangePanel(CFilesWindow* newActivePanel, BOOL force = FALSE);     // cti EditMode; aktivuje neaktivni panel; (pokud je force==TRUE, ignoruje ZOOM)
-    void FocusPanel(CFilesWindow* focus, BOOL testIfMainWndActive = FALSE); // sejme EditMode, protoze do panelu umisti focus
-    void FocusLeftPanel();                                                  // vola FocusPanel pro levy panel
+    void FocusPanel(CFilesWindow* focus, BOOL testIfMainWndActive = FALSE); // clears EditMode because focus is put into the panel
+    void FocusLeftPanel();                                                  // calls FocusPanel for the left panel
 
     // compares directories in the left and right panels
     void CompareDirectories(DWORD flags); // flags are a combination of COMPARE_DIRECTORIES_xxx
@@ -830,7 +832,7 @@ public:
     DWORD MapClientArea(POINT point);
     DWORD MapNonClientArea(int iHit);
 
-    CMainWindowsHitTestEnum HitTest(int xPos, int yPos); // scree souradnice
+    CMainWindowsHitTestEnum HitTest(int xPos, int yPos); // screen coordinates
 
     // Presses drive bar buttons according to the panel paths
     void UpdateDriveBars();
@@ -856,12 +858,12 @@ public:
     void CancelPanelsUI();          // cancels any QuickSearch or QuickRename
     BOOL QuickRenameWindowActive(); // returns TRUE if QuickRenameWindow is active in any panel
 
-    // prejmenovat podle QuickRenameWindow; vraci TRUE v pripade uspech nebo pokud zadne prejmenovani neprobiha
-    // pokud vrati FALSE, je treba okenko nezavirat (nevolat CancelPanelsUI) a nemenit focus (je v editline)
+    // rename according to QuickRenameWindow; returns TRUE on success or when no renaming is in progress
+    // if it returns FALSE, do not close the window (do not call CancelPanelsUI) and do not change focus (focus is in the edit line)
     BOOL DoQuickRename();
 
-    // vraci TRUE, pokud je panel maximalizovan na ukor druheho panelu
-    // a prikaz Zoom povede k nastaveni obou panelu v pomeru 50 ku 50 procentum
+    // returns TRUE if a panel is maximized at the expense of the other panel
+    // and the Zoom command would set both panels to a 50/50 ratio
     BOOL IsPanelZoomed(BOOL topPanel, BOOL leftPanel);
     CFilesWindow* GetZoomedPanel();
     void ZoomPanel(CFilesWindow* panel);
@@ -944,9 +946,8 @@ extern C__MainWindowCS MainWindowCS;
 //
 // ****************************************************************************
 
-// Ochrana pred ShellExtensions, ktere nam strileji MainWindow pres DestroyWindow
-// pokud je CanDestroyMainWindow==FALSE a MainWindow obdrzi WM_DESTROY, spusti
-// reportici mechanismus.
+// Protection against ShellExtensions that try to destroy MainWindow via DestroyWindow
+// if CanDestroyMainWindow==FALSE and MainWindow receives WM_DESTROY, the reporting mechanism starts.
 extern BOOL CanDestroyMainWindow;
 
 extern CMainWindow* MainWindow;

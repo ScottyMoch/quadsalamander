@@ -636,7 +636,7 @@ BOOL CMainWindow::CanUnloadPlugin(HWND parent, CPluginInterfaceAbstract* plugin)
 
     // find detached FS belonging to the plug-in 'plugin' and attempt to close them
     int i;
-    for (i = DetachedFSList->Count - 1; i >= 0; i--) // odzadu, budeme mazat z pole (kvadr. slozitost)
+    for (i = DetachedFSList->Count - 1; i >= 0; i--) // iterate backwards; as we will be deleting from the array (quadratic complexity)
     {
         CPluginFSInterfaceEncapsulation* detachedFS = DetachedFSList->At(i);
         if (detachedFS->GetPluginInterface() == plugin) // belongs to plug-in 'plugin'

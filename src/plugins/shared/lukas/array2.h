@@ -1,5 +1,6 @@
 ﻿// SPDX-FileCopyrightText: 2023 Open Salamander Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
+// CommentsTranslationProject: TRANSLATED
 
 #pragma once
 
@@ -14,11 +15,11 @@ template <class DATA_TYPE>
 class TDirectArray2
 {
 protected:
-    DATA_TYPE** Blocks; // ukazatel na pole bloku
-    int BlockSize;      // velikost jednoho bloku
+    DATA_TYPE** Blocks; // pointer to the block array
+    int BlockSize;      // block size
 
 public:
-    int Count; // pocet prvku v poli
+    int Count; // number of elements in the array
 
     TDirectArray2<DATA_TYPE>(int blockSize)
     {
@@ -31,15 +32,15 @@ public:
 
     virtual void Destructor(int) {}
 
-    void Destroy();                    // vycisti pole
-    BOOL Add(const DATA_TYPE& member); // prida prvek na posledni pozici
-    BOOL Delete(int index);            // zrusi prvek na dane pozici, na jeho misto
-                                       // soupne prvek z posledniho mista a zmensi pole
+    void Destroy();                    // clears the array
+    BOOL Add(const DATA_TYPE& member); // adds an element at the end
+    BOOL Delete(int index);            // deletes the element at the given position;
+                                       // moves the last element into its place and shrinks the array
                                        /*
-    CDynamicArray * const &operator[](float index); // funkce se nikdy nevola, ale kdyz tu neni
-                                                    // tak dela MSVC strasny veci
-*/
-    DATA_TYPE& operator[](int index)   //vraci prvek na pozici
+                                        * this function is never called, but without it
+                                        * MSVC does terrible things
+                                        */
+    DATA_TYPE& operator[](int index)   // returns the element at the given index
     {
         return Blocks[index / BlockSize][index % BlockSize];
     }
@@ -115,8 +116,8 @@ void TDirectArray2<DATA_TYPE>::Destroy()
         for (int i = 0; i < Count; i++)
             Destructor(i);
 
-        //byl-li Count == BlockSize delalo to problemy
-        //proto je zde Count - 1
+        //if Count == BlockSize, it caused problems,
+        //so Count - 1 is used here
         for (DATA_TYPE** block = Blocks; block <= Blocks + (Count - 1) / BlockSize; block++)
         {
             free(*block);

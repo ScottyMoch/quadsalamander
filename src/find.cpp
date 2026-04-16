@@ -1011,7 +1011,7 @@ void CDuplicateCandidates::Examine(CGrepData* data)
     if (Count == 0)
         return;
 
-    // dostali jsme seznam nalezenych souboru, odpovidajicich kriteriim
+    // we received a list of found files matching the criteria
 
     // extract criteria for duplicate search
     BOOL byName = (data->FindDupFlags & FIND_DUPLICATES_NAME) != 0;
@@ -1533,6 +1533,8 @@ they are only destroyed, but not removed from the array. Therefore, the 'dirStac
 If 'duplicateCandidates' != NULL, found items will be added to this array instead of data->FoundFilesListView
 */
 
+// 'dirStack' stores directories for late grepping. Otherwise,
+// during searching in the current directory, recursive searching in subdirectories would occur. With this
 // trick all files and directories matching the criteria are found first and
 // then this function is called for all discovered directories.
 // 'dirStack' only grows. When items are removed from it, they are just destroyed but

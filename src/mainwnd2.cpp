@@ -4143,7 +4143,7 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                         if (LeftPanel->ChangeDirLite(cmdLineParams->LeftPath))
                         {
                             leftPanelPathSet = TRUE;
-                        LeftPanel->RefreshVisibleItemsArray(); // komentar nize viz "RefreshVisibleItemsArray"
+                        LeftPanel->RefreshVisibleItemsArray(); // see "RefreshVisibleItemsArray" comment below
                         }
                     }
                     if (cmdLineParams->RightPath[0] != 0)
@@ -4166,10 +4166,10 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                 }
             }
 
-        // ulozime pole viditelnych polozek, normalne se to dela v idle, ale jestli to ma
-        // byt pripravene pro priorizaci cteni ikon usermenu pred ikonami mimo viditelnou
-        // cast panelu, musime se o to postarat "rucne" (nacitani ikon uz teda davno bezi,
-        // ale lepsi ted nez jeste pozdeji, tohle minimalni zpozdeni se snad moc neprojevi)
+            // save the array of visible items; normally this is done in idle time, but if it
+            // should be ready so that icon reading for user menu entries has priority over icons
+            // outside the visible part of the panel, we must handle it manually (icon loading
+            // is already running, but sooner is better than later, this minimal delay should not hurt)
             if (leftPanelPathSet)
                 LeftPanel->RefreshVisibleItemsArray();
             if (rightPanelPathSet)
@@ -4179,25 +4179,14 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
             if (bottomRightPanelPathSet)
                 BottomRightPanel->RefreshVisibleItemsArray();
 
-        // leftPanelPath a rightPanelPath jsou jen diskove cesty, ani archivy, ani FS neukladame
-            DWORD err, lastErr;
-            BOOL pathInvalid, cut;
-            BOOL tryNet = TRUE;
-            if (!leftPanelPathSet)
-            {
-                if (SalCheckAndRestorePathWithCut(LeftPanel->HWindow, leftPanelPath, tryNet,
-                                                  err, lastErr, pathInvalid, cut, TRUE))
-                {
-                    LeftPanel->ChangePathToDisk(LeftPanel->HWindow, leftPanelPath);
-                }
-                else
-                    LeftPanel->ChangeToRescuePathOrFixedDrive(LeftPanel->HWindow);
-                LeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
-            }
-        UpdateWindow(LeftPanel->HWindow); // zajisti vykresleni dir/info line hned po vykresleni obsahu panelu
-
-            tryNet = TRUE;
-            if (!rightPanelPathSet)
+        // leftPanelPath and rightPanelPath are only disk paths; we don't store archives or FS paths
+        DWORD err, lastErr;
+        BOOL pathInvalid, cut;
+        BOOL tryNet = TRUE;
+        if (!leftPanelPathSet)
+        {
+            if (SalCheckAndRestorePathWithCut(LeftPanel->HWindow, leftPanelPath, tryNet,
+                                              err, lastErr, pathInvalid, cut, TRUE))
             {
                 if (SalCheckAndRestorePathWithCut(RightPanel->HWindow, rightPanelPath, tryNet,
                                                   err, lastErr, pathInvalid, cut, TRUE))
@@ -4208,7 +4197,28 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                     RightPanel->ChangeToRescuePathOrFixedDrive(RightPanel->HWindow);
                 RightPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
             }
-        UpdateWindow(RightPanel->HWindow); // zajisti vykresleni dir/info line hned po vykresleni obsahu panelu
+            else
+                LeftPanel->ChangeToRescuePathOrFixedDrive(LeftPanel->HWindow);
+            LeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
+        }
+        UpdateWindow(LeftPanel->HWindow); // ensures dir/info line is drawn immediately after the panel content
+
+            tryNet = TRUE;
+            if (!bottomLeftPanelPathSet)
+            {
+                if (SalCheckAndRestorePathWithCut(BottomLeftPanel->HWindow, bottomLeftPanelPath, tryNet,
+                                                  err, lastErr, pathInvalid, cut, TRUE))
+                {
+                    BottomLeftPanel->ChangePathToDisk(BottomLeftPanel->HWindow, bottomLeftPanelPath);
+                }
+                else
+                    BottomLeftPanel->ChangeToRescuePathOrFixedDrive(BottomLeftPanel->HWindow);
+                BottomLeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
+            }
+            else
+                RightPanel->ChangeToRescuePathOrFixedDrive(RightPanel->HWindow);
+            RightPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
+        }
 
             tryNet = TRUE;
             if (!bottomLeftPanelPathSet)
@@ -4238,7 +4248,7 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
             }
             UpdateWindow(BottomRightPanel->HWindow); // zajisti vykresleni dir/info line hned po vykresleni obsahu panelu
 
-        // obnova default-dir na systemovem disku (poskozeno - syst. root byl v obou panelech)
+            // restore default-dir on the system drive (damaged - system root was in both panels)
             lstrcpyn(DefaultDir[LowerCase[sysDefDir[0]] - 'a'], sysDefDir, MAX_PATH);
             // obnova DefaultDir
             MainWindow->UpdateDefaultDir(TRUE);

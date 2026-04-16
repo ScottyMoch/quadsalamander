@@ -34,8 +34,8 @@ CColumDataItem StdColumnsPrivate[STANDARD_COLUMNS_COUNT] =
         /*3*/ {VIEW_SHOW_SIZE, IDS_COLUMN_NAME_SIZE, IDS_COLUMN_DESC_SIZE, InternalGetSize, 1, 0, COLUMN_ID_SIZE},
         /*4*/ {VIEW_SHOW_TYPE, IDS_COLUMN_NAME_TYPE, IDS_COLUMN_DESC_TYPE, InternalGetType, 0, 1, COLUMN_ID_TYPE},
         /*5*/ {VIEW_SHOW_AGE, IDS_COLUMN_NAME_AGE, IDS_COLUMN_DESC_AGE, NULL /* viz nize */, 1, 0, COLUMN_ID_AGE},
-        /*5*/ {VIEW_SHOW_DATE, IDS_COLUMN_NAME_DATE, IDS_COLUMN_DESC_DATE, NULL /* viz nize */, 1, 0, COLUMN_ID_DATE},
-        /*6*/ {VIEW_SHOW_TIME, IDS_COLUMN_NAME_TIME, IDS_COLUMN_DESC_TIME, NULL /* viz nize */, 1, 0, COLUMN_ID_TIME},
+        /*5*/ {VIEW_SHOW_DATE, IDS_COLUMN_NAME_DATE, IDS_COLUMN_DESC_DATE, NULL /* see below */, 1, 0, COLUMN_ID_DATE},
+        /*6*/ {VIEW_SHOW_TIME, IDS_COLUMN_NAME_TIME, IDS_COLUMN_DESC_TIME, NULL /* see below */, 1, 0, COLUMN_ID_TIME},
         /*8*/ {VIEW_SHOW_ATTRIBUTES, IDS_COLUMN_NAME_ATTR, IDS_COLUMN_DESC_ATTR, InternalGetAttr, 1, 0, COLUMN_ID_ATTRIBUTES},
         /*9*/ {VIEW_SHOW_DESCRIPTION, IDS_COLUMN_NAME_DESC, IDS_COLUMN_DESC_DESC, InternalGetDescr, 0, 1, COLUMN_ID_DESCRIPTION},
 };
@@ -345,8 +345,7 @@ BOOL CFilesWindow::ClipboardPaste(BOOL onlyLinks, BOOL onlyTest, const char* pas
                 Sleep(100);
                 // announce a change in the target directory and its subdirectories
                 MainWindow->PostChangeOnPathNotification(GetPath(), TRUE);
-                // postneme refreshe do obou panelu (pokud nejsou auto-refreshovane - tedy do panelu
-                // s FS to nedojde)
+                // post refreshes to both panels (unless they auto-refresh - it won't reach FS panels)
                 if (!MainWindow->LeftPanel->AutomaticRefresh || !MainWindow->RightPanel->AutomaticRefresh || 
                     !MainWindow->BottomLeftPanel->AutomaticRefresh || !MainWindow->BottomRightPanel->AutomaticRefresh)
                 {
