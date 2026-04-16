@@ -480,7 +480,7 @@ public:
 
     // called before the plugin is unloaded (naturally only if SalamanderPluginEntry returned
     // this object and not NULL); returns TRUE if the unload may proceed,
-    // 'parent' je parent messageboxu, 'force' je TRUE pokud se nebere ohled na navratovou
+    // 'parent' is the parent window for message boxes, 'force' is TRUE if the return
     // value is ignored; if it returns TRUE, this object and all other objects obtained from it
     // will no longer be used and the plugin will be unloaded; if a critical shutdown is in progress (see
     // CSalamanderGeneralAbstract::IsCriticalShutdown), nema smysl se usera na cokoliv ptat
@@ -490,19 +490,19 @@ public:
     // have nothing left to execute => usually neither a bug report nor Windows exception info is generated)
     virtual BOOL WINAPI Release(HWND parent, BOOL force) = 0;
 
-    // funkce pro load defaultni konfigurace a pro "load/save configuration" (load ze soukromeho klice
-    // pluginu v registry), 'parent' je parent messageboxu, je-li 'regKey' == NULL, jde o
-    // defaultni konfiguraci, 'registry' je objekt pro praci s registry, tato metoda se vola vzdy
-    // po SalamanderPluginEntry a pred ostatnimi volanimi (vola se load ze soukromeho klice, je-li
-    // tato funkce pluginem poskytovana a klic v registry existuje, jinak vola jen load defaultni
-    // konfigurace)
+    // method for loading the default configuration and for "load/save configuration" (loading from the plugin's private
+    // registry key), 'parent' is the parent window for message boxes; if 'regKey' == NULL, the default
+    // configuration is being loaded; 'registry' is the object used to work with the registry; this method is always called
+    // after SalamanderPluginEntry and before other calls (loading from the private key is performed if
+    // this function is provided by the plugin and the registry key exists; otherwise only the default
+    // configuration is loaded)
     virtual void WINAPI LoadConfiguration(HWND parent, HKEY regKey, CSalamanderRegistryAbstract* registry) = 0;
 
-    // funkce pro "load/save configuration", vola se pro ulozeni konfigurace pluginu do jeho soukromeho
-    // klice v registry, 'parent' je parent messageboxu, 'registry' je objekt pro praci s registry,
-    // uklada-li Salamander konfiguraci, vola take tuto metodu (je-li pluginem poskytovana); Salamander
-    // tez nabizi ukladani konfigurace pluginu pri jeho unloadu (napr. rucne z Plugins Manageru),
-    // v tomto pripade se ulozeni provede jen pokud v registry existuje klic Salamandera
+    // method for "load/save configuration"; called to save the plugin configuration to its private
+    // registry key, 'parent' is the parent window for message boxes, 'registry' is the object used to work with the registry;
+    // when Salamander saves its configuration, it also calls this method (if the plugin provides it); Salamander
+    // also supports saving the plugin configuration when the plugin is unloaded (for example, manually from Plugins Manager);
+    // in that case, saving is performed only if Salamander's registry key exists
     virtual void WINAPI SaveConfiguration(HWND parent, HKEY regKey, CSalamanderRegistryAbstract* registry) = 0;
 
     // called in response to the Configuration button in the Plugins window
@@ -641,14 +641,14 @@ public:
     // releases the 'pluginData' interface that Salamander obtained from the plugin by calling
     // CPluginInterfaceForArchiverAbstract::ListArchive nebo
     // CPluginFSInterfaceAbstract::ListCurrentPath; pred timto volanim jeste
-    // file and directory data (CFileData::PluginData) are also released by the methods of
+    // file and directory data (CFileData::PluginData) are released using methods of
     // CPluginDataInterfaceAbstract
     virtual void WINAPI ReleasePluginDataInterface(CPluginDataInterfaceAbstract* pluginData) = 0;
 
     // returns the archiver interface; the plugin must return this interface if it has
     // at least one of the following functions (see SetBasicPluginData): FUNCTION_PANELARCHIVERVIEW,
-    // FUNCTION_PANELARCHIVEREDIT, FUNCTION_CUSTOMARCHIVERPACK a/nebo FUNCTION_CUSTOMARCHIVERUNPACK;
-    // pokud plugin archivator neobsahuje, vraci NULL
+    // FUNCTION_PANELARCHIVEREDIT, FUNCTION_CUSTOMARCHIVERPACK, and/or FUNCTION_CUSTOMARCHIVERUNPACK;
+    // if the plugin does not contain an archiver, it returns NULL
     virtual CPluginInterfaceForArchiverAbstract* WINAPI GetInterfaceForArchiver() = 0;
 
     // returns the viewer interface; the plugin must return this interface if it has the function
@@ -656,22 +656,22 @@ public:
     virtual CPluginInterfaceForViewerAbstract* WINAPI GetInterfaceForViewer() = 0;
 
     // returns the menu-extension interface; the plugin must return this interface if it adds
-    // polozky do menu (viz CSalamanderConnectAbstract::AddMenuItem) nebo pokud ma
-    // funkci (viz SetBasicPluginData) FUNCTION_DYNAMICMENUEXT; v opacnem pripade vraci NULL
+    // menu items (see CSalamanderConnectAbstract::AddMenuItem) or if it has the
+    // FUNCTION_DYNAMICMENUEXT function (see SetBasicPluginData); otherwise it returns NULL
     virtual CPluginInterfaceForMenuExtAbstract* WINAPI GetInterfaceForMenuExt() = 0;
 
     // returns the file-system interface; the plugin must return this interface if it has the function
     // (see SetBasicPluginData) FUNCTION_FILESYSTEM; if the plugin does not contain a file system, it returns NULL
     virtual CPluginInterfaceForFSAbstract* WINAPI GetInterfaceForFS() = 0;
 
-    // returns the thumbnail-loader interface; the plugin must return this interface if it informed
-    // Salamandera, ze umi nacitat thumbnaily (viz CSalamanderConnectAbstract::SetThumbnailLoader);
-    // pokud plugin neumi nacitat thumbnaily, vraci NULL
+    // returns the thumbnail-loader interface; the plugin must return this interface if it notified
+    // Salamander that it can load thumbnails (see CSalamanderConnectAbstract::SetThumbnailLoader);
+    // if the plugin cannot load thumbnails, it returns NULL
     virtual CPluginInterfaceForThumbLoaderAbstract* WINAPI GetInterfaceForThumbLoader() = 0;
 
-    // prijem ruznych udalosti, viz kody udalosti PLUGINEVENT_XXX; vola se jen pokud je plugin
-    // nacteny; 'param' je parametr udalosti
-    // POZOR: muze se zavolat kdykoliv po dokonceni entry-pointu pluginu (SalamanderPluginEntry)
+    // receives various events; see the PLUGINEVENT_XXX event codes; called only when the plugin is
+    // loaded; 'param' is the event parameter
+    // WARNING: it may be called at any time after the plugin entry point (SalamanderPluginEntry) completes
     virtual void WINAPI Event(int event, DWORD param) = 0;
 
     // user requested that all histories be cleared (by running Clear History from the configuration
@@ -683,10 +683,10 @@ public:
     // clear the histories there as well
     virtual void WINAPI ClearHistory(HWND parent) = 0;
 
-    // prijem informace o zmene na ceste 'path' (je-li 'includingSubdirs' TRUE, tak
-    // zahrnuje i zmenu v podadresarich cesty 'path'); teto metody je mozne vyuzit napr.
-    // k invalidovani/cisteni cache souboru/adresaru; POZNAMKA: pro pluginove file-systemy (FS)
-    // existuje metoda CPluginFSInterfaceAbstract::AcceptChangeOnPathNotification()
+    // receives notification of a change on the path 'path' (if 'includingSubdirs' is TRUE, it also
+    // includes changes in subdirectories of 'path'); this method can be used, for example,
+    // to invalidate or clear file/directory caches; NOTE: plugin file systems (FS) have the
+    // CPluginFSInterfaceAbstract::AcceptChangeOnPathNotification() method
     virtual void WINAPI AcceptChangeOnPathNotification(const char* path, BOOL includingSubdirs) = 0;
 
     // this method is called only for a plugin that uses Password Manager (see
@@ -696,11 +696,10 @@ public:
     virtual void WINAPI PasswordManagerEvent(HWND parent, int event) = 0;
 };
 
-//
 // ****************************************************************************
 // CSalamanderPluginEntryAbstract
 //
-// sada metod ze Salamandera, ktere se pouzivaji v SalamanderPluginEntry
+// set of Salamander methods used in SalamanderPluginEntry
 
 // flags indicating the reason for plugin load (see CSalamanderPluginEntryAbstract::GetLoadInformation)
 #define LOADINFO_INSTALL 0x0001          // first plugin load (installation into Salamander)

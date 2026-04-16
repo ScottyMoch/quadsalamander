@@ -243,7 +243,7 @@ DWORD
 C__TraceThreadCache::GetUniqueThreadId(DWORD tid)
 {
     if (CacheUID[__TraceCacheGetIndex(tid)] != -1 && // je-li platny zaznam
-        CacheTID[__TraceCacheGetIndex(tid)] == tid)  // a je-li shodny s tid
+        CacheTID[__TraceCacheGetIndex(tid)] == tid)  // and the TID matches
     {
         return CacheUID[__TraceCacheGetIndex(tid)]; // UID is in the cache
     }
@@ -488,7 +488,7 @@ BOOL C__Trace::Connect(BOOL onUserRequest)
 
     BOOL ret = FALSE;
     if (HWritePipe != NULL)
-        ret = TRUE; // pokud je jiz spojeni navazano
+        ret = TRUE; // if the connection is already established
     else
     {
         // try to open the mutex for access to the shared memory
@@ -596,7 +596,7 @@ BOOL C__Trace::Connect(BOOL onUserRequest)
                                                                                         *(DWORD*)&mapAddress[4] /* ClientOrServerProcessId (here it is the server PID) */);
                                                     // get the pipe and semaphore handles
                                                     if (hServerProcess != NULL &&
-                                                        DuplicateHandle(hServerProcess, (HANDLE)(DWORD_PTR)(*(DWORD*)&mapAddress[8]) /* HReadOrWritePipe (here it is HWritePipe) */, // server
+                                                        DuplicateHandle(hServerProcess, (HANDLE)(DWORD_PTR)(*(DWORD*)&mapAddress[8]) /* HReadOrWritePipe (here it is HWritePipe) */, // client
                                                                         GetCurrentProcess(), &hWritePipeFromSrv,                                                                     // client
                                                                         GENERIC_WRITE, FALSE, 0) &&
                                                         DuplicateHandle(hServerProcess, (HANDLE)(DWORD_PTR)(*(DWORD*)&mapAddress[12]) /* HPipeSemaphore */, // server
@@ -604,11 +604,11 @@ BOOL C__Trace::Connect(BOOL onUserRequest)
                                                                         0, FALSE, DUPLICATE_SAME_ACCESS))
                                                     {
                                                         *((int*)mapAddress) = 3;                         // write result -> 3 = success, we have the handles
-                                                        *(DWORD*)&mapAddress[4] = GetCurrentProcessId(); // ClientOrServerProcessId (tady jde o PID klienta)
+                                                        *(DWORD*)&mapAddress[4] = GetCurrentProcessId(); // ClientOrServerProcessId (client PID here)
                                                     }
                                                     else
                                                     {
-                                                        *((BOOL*)mapAddress) = FALSE; // write result -> failed
+                                                        *((BOOL*)mapAddress) = FALSE; // write result -> failure
                                                     }
                                                     if (hServerProcess != NULL)
                                                         CloseHandle(hServerProcess);
@@ -627,7 +627,7 @@ BOOL C__Trace::Connect(BOOL onUserRequest)
                                                         CloseHandle(HWritePipe);
                                                         HWritePipe = hWritePipeFromSrv; // use the pipe from the server (close the client one)
 
-                                                        if (expectedServerVer == TRACE_CLIENT_VERSION) // hura, povedlo se pripojit na novy Trace Server!
+                                                        if (expectedServerVer == TRACE_CLIENT_VERSION) // successfully connected to the new Trace Server!
                                                         {
 #ifdef TRACE_IGNORE_AUTOCLEAR
                                                             ret = SendIgnoreAutoClear(TRUE); // ignore; disconnect on error
@@ -1069,19 +1069,19 @@ C__Trace::SendMessageToServer(C__MessageType type, BOOL crash)
             CloseWritePipeAndSemaphore();
         }
     }
-    // jen je-li crash==TRUE:
-    // vyrobime kopii dat, start threadu pro msgbox totiz muze vyvolat dalsi TRACE
-    // hlasky (napr. v DllMain reakce na DLL_THREAD_ATTACH), pokud bysme neopustili
-    // CriticalSection, nastal by deadlock;
-    // v DllMain se nesmi pouzivat TRACE_C, jinak dojde k deadlocku:
-    //   - pokud se da do DLL_THREAD_ATTACH: chce si otevrit novy thread pro msgbox
-    //     a to je z DllMainu blokovane
-    //   - pokud se da do DLL_THREAD_DETACH: pri cekani na zavreni threadu s msgboxem
-    //     predesleho TRACE_C zachytime TRACE_C z DLL_THREAD_DETACH a nechame ho
-    //     cekat v nekonecnem cyklu, viz nize
-    // navic zavadime obranu proti mnozeni msgboxu pri vice TRACE_C zaroven, pusobilo
-    // by to jen zmatky, ted se otevre msgbox jen pro prvni a ten po uzavreni vyvola
-    // padacku, ostatni TRACE_C zustanou chyceny v nekonecne cekaji smycce, viz nize
+    // only if crash==TRUE:
+    // make a copy of the data, because starting the msgbox thread can trigger more TRACE
+    // messages (for example, DllMain reacting to DLL_THREAD_ATTACH); if we did not leave
+    // the CriticalSection, a deadlock would occur;
+    // TRACE_C must not be used in DllMain, otherwise a deadlock occurs:
+    //   - if TRACE_C is used in DLL_THREAD_ATTACH: it tries to open a new thread for the msgbox
+    //     and DllMain blocks that
+    //   - if TRACE_C is used in DLL_THREAD_DETACH: while waiting for the msgbox thread of the
+    //     previous TRACE_C to close, we catch TRACE_C from DLL_THREAD_DETACH and leave it
+    //     waiting in an infinite loop, see below
+    // in addition, we guard against multiple msgboxes when several TRACE_C occur at once;
+    // that would only cause confusion, so now a msgbox is opened only for the first one and it
+    // triggers a crash after it closes; the other TRACE_C remain stuck in an infinite waiting loop, see below
     static BOOL msgBoxOpened = FALSE;
     C__TraceMsgBoxThreadData threadData;
     C__TraceMsgBoxThreadDataW threadDataW;
@@ -1136,7 +1136,7 @@ C__Trace::SendMessageToServer(C__MessageType type, BOOL crash)
                                                unicode ? (void*)&threadDataW : (void*)&threadData, 0, &id);
             if (msgBoxThread != NULL)
             {
-                WaitForSingleObject(msgBoxThread, INFINITE); // pokud se da TRACE_C do DllMain do DLL_THREAD_ATTACH, dojde k deadlocku - silne nepravdepodobne, neresime
+                WaitForSingleObject(msgBoxThread, INFINITE); // if TRACE_C is used in DllMain during DLL_THREAD_ATTACH, a deadlock occurs - very unlikely, we do not handle it
                 CloseHandle(msgBoxThread);
             }
             msgBoxOpened = FALSE;
@@ -1146,7 +1146,7 @@ C__Trace::SendMessageToServer(C__MessageType type, BOOL crash)
             // after this method finishes
         }
         else // block other threads with TRACE_C until the msgbox opened for
-        {    // the first TRACE_C is closed; it will crash there too, to keep things tidy
+        {    // the first TRACE_C closes; then the first TRACE_C crashes there too, to avoid confusion
             if (msgBoxOpened)
             {
                 while (1)

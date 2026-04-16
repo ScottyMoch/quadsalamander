@@ -111,12 +111,11 @@ BOOL WinLibIsWindowsVersionOrGreater(WORD wMajorVersion, WORD wMinorVersion, WOR
     return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR, dwlConditionMask) != FALSE;
 }
 
-//
 // ****************************************************************************
 // CWindow
 //
-// lpvParam - v pripade, ze se pri CreateWindow zavola CWindow::CWindowProc
-//            (je v tride okna), musi obsahovat adresu objektu vytvareneho okna
+// lpvParam - if CWindow::CWindowProc is called during CreateWindow
+//            (it is in the window class), it must contain the address of the window object being created
 
 HWND CWindow::CreateEx(DWORD dwExStyle,        // extended window style
                        LPCTSTR lpszClassName,  // address of registered class name
@@ -329,7 +328,7 @@ CWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
             return TRUE;
         }
         if (GetWindowLongPtr(HWindow, GWL_STYLE) & WS_CHILD)
-            break;   // pokud F1 nezpracujeme a pokud je to child okno, nechame F1 propadnout do parenta
+            break;   // if we do not handle F1 and this is a child window, let F1 fall through to the parent
         return TRUE; // if it is not a child, stop processing F1
     }
     }
@@ -402,8 +401,8 @@ CWindow::CWindowProcInt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL
 #endif // _UNICODE
         if (wnd != NULL && wnd->Is(otWindow))
         {
-            // Petr: posunul jsem dolu pod wnd->WindowProc(), aby behem WM_DESTROY
-            //       jeste dochazely zpravy (potreboval Lukas)
+            // Petr: moved this below wnd->WindowProc() so messages are still delivered during WM_DESTROY
+            //       (Lukas needed this)
             // WindowsManager.DetachWindow(hwnd);
 
             LRESULT res = wnd->WindowProc(uMsg, wParam, lParam);
@@ -411,8 +410,8 @@ CWindow::CWindowProcInt(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL
             // now back to the old procedure again (because of subclassing)
             WindowsManager.DetachWindow(hwnd);
 
-            // pokud aktualni WndProc je jina nez nase, nebudeme ji menit,
-            // protoze nekdo v rade subclasseni uz vratil puvodni WndProc
+            // if the current WndProc is different from ours, do not change it,
+            // because someone else in the subclass chain has already restored the original WndProc
 #ifdef _UNICODE
             WNDPROC currentWndProc = (WNDPROC)GetWindowLongPtr(wnd->HWindow, GWLP_WNDPROC);
             if (currentWndProc == CWindow::CWindowProc)
@@ -735,8 +734,8 @@ CDialog::CDialogProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
         INT_PTR ret = FALSE; // in case the dialog does not handle it
         if (dlg != NULL && dlg->Is(otDialog))
         {
-            // Petr: posunul jsem dolu pod dlg->DialogProc(), aby behem WM_DESTROY
-            //       jeste dochazely zpravy (potreboval Lukas)
+            // Petr: moved this below dlg->DialogProc() so messages are still delivered during WM_DESTROY
+            //       (Lukas needed this)
             // WindowsManager.DetachWindow(hwndDlg);
 
             ret = dlg->DialogProc(uMsg, wParam, lParam);
@@ -850,7 +849,7 @@ void CWindowsManager::DetachWindow(HWND hWnd)
         {
             ResetState();
             TRACE_ET(_T("Unable to detach window from WindowsManager. hwnd = ") << hWnd);
-            At(i).Wnd = NULL; // alespon takhle ...
+            At(i).Wnd = NULL; // at least this way...
         }
     }
     else
@@ -1140,7 +1139,7 @@ void CTransferInfo::EditLine(int ctrlID, double& value, TCHAR* format, BOOL sele
             if (*s == 0)
             {
                 TCHAR* stopString;                  // dummy
-                value = _tcstod(buff, &stopString); // jen pokud je cislo
+                value = _tcstod(buff, &stopString); // only if the string is a number
             }
             else
                 value = 0; // on error, set zero
