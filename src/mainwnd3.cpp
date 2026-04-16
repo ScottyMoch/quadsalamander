@@ -1600,10 +1600,6 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
                             if (LastDriveSelectErrDlgHWnd != NULL)
                                 PostMessage(LastDriveSelectErrDlgHWnd, WM_COMMAND, IDRETRY, 0);
                         }
-                        if (panel != GetNonActivePanel())
-                            panel = GetNonActivePanel();
-                        else
-                            break;
                     }
 
                 // if the Alt+F1/F2 menu is open, refresh (read the volume name)
@@ -7061,7 +7057,6 @@ MENU_TEMPLATE_ITEM AddToSystemMenu[] =
                     else
                     return 0; // refuse close/shutdown/logoff; a forced shutdown will be detected in WM_ENDSESSION
                 }
-                break;
             }
 
             if (!endAfterCleanup && CannotCloseSalMainWnd)

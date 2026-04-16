@@ -382,10 +382,6 @@ struct CDynString
 
 
 
-
-
-
-
 class CMainWindow : public CMainWindowAncestor
 {
     const int MIN_WIN_WIDTH = 2;  // minimalni sirka panelu
