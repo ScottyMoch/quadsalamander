@@ -4188,6 +4188,16 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
             if (SalCheckAndRestorePathWithCut(LeftPanel->HWindow, leftPanelPath, tryNet,
                                               err, lastErr, pathInvalid, cut, TRUE))
             {
+                    LeftPanel->ChangePathToDisk(LeftPanel->HWindow, leftPanelPath);
+                }
+                else
+                    LeftPanel->ChangeToRescuePathOrFixedDrive(LeftPanel->HWindow);
+                LeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
+            }
+            UpdateWindow(LeftPanel->HWindow); // zajisti vykresleni dir/info line hned po vykresleni obsahu panelu
+            tryNet = TRUE;
+            if (!rightPanelPathSet)
+            {
                 if (SalCheckAndRestorePathWithCut(RightPanel->HWindow, rightPanelPath, tryNet,
                                                   err, lastErr, pathInvalid, cut, TRUE))
                 {
@@ -4197,28 +4207,7 @@ BOOL CMainWindow::LoadConfig(BOOL importingOldConfig, const CCommandLineParams* 
                     RightPanel->ChangeToRescuePathOrFixedDrive(RightPanel->HWindow);
                 RightPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
             }
-            else
-                LeftPanel->ChangeToRescuePathOrFixedDrive(LeftPanel->HWindow);
-            LeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
-        }
-        UpdateWindow(LeftPanel->HWindow); // ensures dir/info line is drawn immediately after the panel content
-
-            tryNet = TRUE;
-            if (!bottomLeftPanelPathSet)
-            {
-                if (SalCheckAndRestorePathWithCut(BottomLeftPanel->HWindow, bottomLeftPanelPath, tryNet,
-                                                  err, lastErr, pathInvalid, cut, TRUE))
-                {
-                    BottomLeftPanel->ChangePathToDisk(BottomLeftPanel->HWindow, bottomLeftPanelPath);
-                }
-                else
-                    BottomLeftPanel->ChangeToRescuePathOrFixedDrive(BottomLeftPanel->HWindow);
-                BottomLeftPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
-            }
-            else
-                RightPanel->ChangeToRescuePathOrFixedDrive(RightPanel->HWindow);
-            RightPanel->RefreshVisibleItemsArray(); // komentar vyse viz "RefreshVisibleItemsArray"
-        }
+            UpdateWindow(RightPanel->HWindow); // zajisti vykresleni dir/info line hned po vykresleni obsahu panelu
 
             tryNet = TRUE;
             if (!bottomLeftPanelPathSet)
