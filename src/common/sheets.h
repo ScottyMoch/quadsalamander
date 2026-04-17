@@ -35,11 +35,11 @@ protected:
     // divider line from which controls start moving (lies on the bottom edge of ResizeCtrls)
     // client coordinates, in pixels
     int SplitY;
-    // prvky ktere s velikosti natahujeme (typicky listview)
+    // controls that resize with the dialog (typically list views)
     TDirectArray<CElasticLayoutCtrl> ResizeCtrls;
     // temporary array populated by FindMoveCtrls; ideally this would be a local variable, but
-    // for easier calls to the FindMoveControls callback (which needs it passed in)
-    // I keep it as a class member
+    // for convenient calls to the FindMoveControls callback (to which it must be passed)
+    // it is stored as a class member
     TDirectArray<CElasticLayoutCtrl> MoveCtrls;
 };
 
@@ -179,7 +179,7 @@ protected:
     CPropSheetPage* ChildDialog;
     int ExitButton; // ID of the button that closed the dialog
 
-    // dimensions in pixels
+    // dimensions in points
     SIZE MinWindowSize;  // minimum dialog size (determined by the largest child dialog)
     DWORD* WindowHeight; // current dialog height
     int TreeWidth;       // tree view width, calculated from the contents
