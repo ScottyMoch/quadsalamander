@@ -3541,58 +3541,6 @@ void CMainWindow_RefreshCommandStates(CMainWindow* obj)
             toolbar->CheckItem(CM_BOTTOMRIGHT_SMARTMODE, FALSE, CheckerBottomRightSmartMode == TRUE);
         }
     }
-
-    toolbar = obj->BottomLeftPanel->DirectoryLine->ToolBar;
-    if (toolbar != NULL && toolbar->HWindow != NULL)
-    {
-        if (bottomLeftViewMode != CheckerBottomLeftViewMode || IdleForceRefresh)
-        {
-            CheckerBottomLeftViewMode = bottomLeftViewMode;
-            toolbar->CheckItem(CM_BOTTOMLEFTMODE_2, FALSE, CheckerBottomLeftViewMode == 1);
-            toolbar->CheckItem(CM_BOTTOMLEFTMODE_3, FALSE, CheckerBottomLeftViewMode == 2);
-        }
-
-        if (bottomLeftSortType != CheckerBottomLeftSortType || IdleForceRefresh)
-        {
-            CheckerBottomLeftSortType = bottomLeftSortType;
-            toolbar->CheckItem(CM_BOTTOMLEFTNAME, FALSE, CheckerBottomLeftSortType == stName);
-            toolbar->CheckItem(CM_BOTTOMLEFTEXT, FALSE,  CheckerBottomLeftSortType == stExtension);
-            toolbar->CheckItem(CM_BOTTOMLEFTTIME, FALSE, CheckerBottomLeftSortType == stTime);
-            toolbar->CheckItem(CM_BOTTOMLEFTSIZE, FALSE, CheckerBottomLeftSortType == stSize);
-        }
-
-        if (bottomLeftSmartMode != CheckerBottomLeftSmartMode || IdleForceRefresh)
-        {
-            CheckerBottomLeftSmartMode = bottomLeftSmartMode;
-            toolbar->CheckItem(CM_BOTTOMLEFT_SMARTMODE, FALSE, CheckerBottomLeftSmartMode == TRUE);
-        }
-    }
-
-    toolbar = obj->BottomRightPanel->DirectoryLine->ToolBar;
-    if (toolbar != NULL && toolbar->HWindow != NULL)
-    {
-        if (bottomRightViewMode != CheckerBottomRightViewMode || IdleForceRefresh)
-        {
-            CheckerBottomRightViewMode = bottomRightViewMode;
-            toolbar->CheckItem(CM_BOTTOMRIGHTMODE_2, FALSE, CheckerBottomRightViewMode == 1);
-            toolbar->CheckItem(CM_BOTTOMRIGHTMODE_3, FALSE, CheckerBottomRightViewMode == 2);
-        }
-
-        if (bottomRightSortType != CheckerBottomRightSortType || IdleForceRefresh)
-        {
-            CheckerBottomRightSortType = bottomRightSortType;
-            toolbar->CheckItem(CM_BOTTOMRIGHTNAME, FALSE, CheckerBottomRightSortType == stName);
-            toolbar->CheckItem(CM_BOTTOMRIGHTEXT, FALSE,  CheckerBottomRightSortType == stExtension);
-            toolbar->CheckItem(CM_BOTTOMRIGHTTIME, FALSE, CheckerBottomRightSortType == stTime);
-            toolbar->CheckItem(CM_BOTTOMRIGHTSIZE, FALSE, CheckerBottomRightSortType == stSize);
-        }
-
-        if (bottomRightSmartMode != CheckerBottomRightSmartMode || IdleForceRefresh)
-        {
-            CheckerBottomRightSmartMode = bottomRightSmartMode;
-            toolbar->CheckItem(CM_BOTTOMRIGHT_SMARTMODE, FALSE, CheckerBottomRightSmartMode == TRUE);
-        }
-    }
     obj->IdleStatesChanged = FALSE;
     IdleForceRefresh = FALSE;
 }
