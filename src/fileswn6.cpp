@@ -90,7 +90,7 @@ void CFilesWindow::Activate(BOOL shares)
             else // path appears to be OK
             {
                 if (!AutomaticRefresh && !GetNetworkDrive() ||           // manual disk refresh (excluding network drives)
-                    GetNetworkDrive() &&                                 // for network drives, we refresh on every
+                    GetNetworkDrive() &&                                 // for network drives, refresh every time
                         !Configuration.DrvSpecRemoteDoNotRefreshOnAct || // activation unless explicitly disabled (used to handle Samba behavior)
                     shares && !GetNetworkDrive() ||                      // restore shares (not relevant for network drives)
                     InactiveRefreshTimerSet)                             // delayed refresh in inactive window must be executed immediately upon activation
@@ -116,7 +116,7 @@ void CFilesWindow::Activate(BOOL shares)
     }
     else
     {
-        if (Is(ptPluginFS)) // plug-in FS: send FSE_ACTIVATEREFRESH so the plug-in can refresh itself
+        if (Is(ptPluginFS)) // plugin FS: dispatch FSE_ACTIVATEREFRESH so the plugin can refresh itself
         {
             if (!SkipOneActivateRefresh)
                 PostMessage(HWindow, WM_USER_REFRESH_PLUGINFS, 0, 0);
@@ -246,7 +246,7 @@ DWORD GetPathFlagsForCopyOp(const char* path, DWORD netFlag, DWORD fixedFlag)
         else if (drvType == DRIVE_REMOVABLE && UpperCase[path[0]] >= 'A' && UpperCase[path[0]] <= 'Z' && path[1] == ':' &&
                  GetDriveFormFactor(UpperCase[path[0]] - 'A' + 1) == 0 /* not a floppy */)
         {
-            return fixedFlag; // removable but not a floppy, e.g. USB stick or a camera via USB (e.g. FZ45) - we treat them as fixed, they're fast enough
+            return fixedFlag; // removable but not a floppy, e.g. a USB stick or a camera over USB (e.g. FZ45) - treated as fixed because they are fast enough
         }
     }
     return 0;
@@ -306,7 +306,7 @@ BOOL CFilesWindow::MoveFiles(const char* source, const char* target, const char*
             HasTheSameRootPath(source, target)) // + within the same drive
         {
             UINT sourceType = DRIVE_REMOTE;
-            if (source[0] != '\\') // not a UNC path (that is always "remote")
+            if (source[0] != '\\') // not a UNC path (UNC is always "remote")
             {
                 char root[4] = " :\\";
                 root[0] = source[0];
@@ -314,7 +314,7 @@ BOOL CFilesWindow::MoveFiles(const char* source, const char* target, const char*
             }
 
             if (sourceType == DRIVE_REMOTE) // network drive
-            {                               // detect Novell disks - fast-directory-move doesn't work on them
+            {                               // Detect Novell network drives - fast directory moves do not work on them
                 if (IsNOVELLDrive(source))
                     fastDirectoryMove = Configuration.NetwareFastDirMove;
             }
@@ -670,7 +670,7 @@ BOOL CFilesWindow::BuildScriptMain2(COperations* script, BOOL copy, char* target
                     srcAndTgtPathsFlags |= GetPathFlagsForCopyOp(lastSourcePath, OPFL_SRCPATH_IS_NET, OPFL_SRCPATH_IS_FAST);
                     lastSourcePath[s - fileName] = 0;
                 }
-                if (IsTheSamePath(sourcePath, targetPath) && // "Copy of..." is done only if paths match
+                if (IsTheSamePath(sourcePath, targetPath) && // "Copy of..." is used only when the paths match
                     makeCopyOfName)                          // check if we will need a "Copy of..." name
                 {
                     strcpy(targetName, s + 1); // copy the proposed full target name into targetPath
@@ -721,7 +721,7 @@ BOOL CFilesWindow::BuildScriptMain2(COperations* script, BOOL copy, char* target
                                 else
                                 {
                                     numBeg = NULL;
-                                    break; // "(number)" not present
+                                    break; // "(number)" not found
                                 }
                             }
 
@@ -1055,9 +1055,9 @@ void CFilesWindow::DropCopyMove(BOOL copy, char* targetPath, CCopyMoveData* data
             EnableWindow(MainWindow->HWindow, TRUE);
             DestroySafeWaitWindow();
 
-            // if Salamander is active, call SetFocus on the remembered window (SetFocus doesn't work
-            // when the main window is disabled - after reactivation/activation of the disabled main window
-            // the active panel lacks focus)
+            // if Salamander is active, call SetFocus on the remembered window (SetFocus does not work
+            // when the main window is disabled; after deactivation and reactivation of the disabled main window,
+            // the active panel does not have focus)
             HWND hwnd = GetForegroundWindow();
             while (hwnd != NULL && hwnd != MainWindow->HWindow)
                 hwnd = GetParent(hwnd);
@@ -1072,7 +1072,7 @@ void CFilesWindow::DropCopyMove(BOOL copy, char* targetPath, CCopyMoveData* data
                 BOOL occupiedSpTooBig = script->OccupiedSpace != CQuadWord(0, 0) &&
                                         script->BytesPerCluster != 0 && // we have disk information
                                         script->OccupiedSpace > script->FreeSpace &&
-                                        !IsSambaDrivePath(targetPath); // Samba returns an invalid cluster size, so we can rely only on TotalFileSize
+                                        !IsSambaDrivePath(targetPath); // Samba returns a bogus cluster size, so we can only rely on TotalFileSize
                 if (occupiedSpTooBig ||
                     script->BytesPerCluster != 0 && // we have disk information
                         script->TotalFileSize > script->FreeSpace)
@@ -1252,7 +1252,7 @@ BOOL CFilesWindow::BuildScriptMain(COperations* script, CActionType type,
     BOOL targetIsFAT32 = FALSE;
     CTargetPathState targetPathState = tpsUnknown;
     DWORD srcAndTgtPathsFlags = 0;        // flags only for Copy and Move
-    if (type == atMove || type == atCopy) // outside Copy and Move it makes no sense to check
+    if (type == atMove || type == atCopy) // It makes no sense to check this outside Copy and Move
     {
         sourceSupADS = (filterCriteria == NULL || !filterCriteria->IgnoreADS) &&
                        IsPathOnVolumeSupADS(sourcePath, NULL);
@@ -1279,7 +1279,7 @@ BOOL CFilesWindow::BuildScriptMain(COperations* script, CActionType type,
                 char dummy2[MAX_PATH];
                 if (MyGetVolumeInformation(targetPath, NULL, NULL, NULL, NULL, 0, NULL, &dummy1, &flags, dummy2, MAX_PATH) &&
                     (flags & FS_PERSISTENT_ACLS) == 0)
-                { // wants to copy permissions, but the target path doesn't support them, so we inform the user (the API function for setting security doesn't report any errors — which is poor design)
+                { // permissions are to be copied, but the target path does not support them, so inform the user (the API function for setting security reports no errors)
                     int res = SalMessageBox(HWindow, LoadStr(IDS_ACLNOTSUPPORTEDONTGTPATH), LoadStr(IDS_QUESTION),
                                             MB_YESNO | MB_ICONQUESTION | MSGBOXEX_ESCAPEENABLED);
                     UpdateWindow(MainWindow->HWindow);
@@ -1323,7 +1323,7 @@ BOOL CFilesWindow::BuildScriptMain(COperations* script, CActionType type,
 
     if (selCount > 0 || oneFile != NULL)
     {
-        if (type == atMove || type == atCopy) // outside Copy and Move it makes no sense to check
+        if (type == atMove || type == atCopy) // checking this only makes sense for Copy and Move
         {
             DWORD d1, d2, d3, d4;
             if (MyGetDiskFreeSpace(targetPath, &d1, &d2, &d3, &d4))
@@ -1345,7 +1345,7 @@ BOOL CFilesWindow::BuildScriptMain(COperations* script, CActionType type,
             }
             i++;
             // oneFile points to the selected or caret item in the filebox
-            if (oneFile->Attr & FILE_ATTRIBUTE_DIRECTORY) // jde o ptDisk
+            if (oneFile->Attr & FILE_ATTRIBUTE_DIRECTORY) // this is ptDisk
             {
                 if (subDirectories)
                 {
@@ -1390,7 +1390,7 @@ BOOL CFilesWindow::BuildScriptMain(COperations* script, CActionType type,
                         }
                         else
                         {
-                            if ((op.TargetName = BuildName(sourcePath, oneFile->Name)) == NULL) // too long name already handled by previous condition
+                            if ((op.TargetName = BuildName(sourcePath, oneFile->Name)) == NULL) // the previous condition already handles names that are too long
                             {
                                 free(op.SourceName);
                                 SetCurrentDirectoryToSystem();
@@ -1502,7 +1502,7 @@ void GetADSStreamsNames(char* listBuf, int bufSize, char* fileName, BOOL isDir)
         free(streamNames);
     }
 
-    if (bufSize > 0 && (StrICmp(listBuf, "Zone.Identifier") == 0 || // this stream is automatically created by XP SP2 and should be ignored, so we won't bother the user with it
+    if (bufSize > 0 && (StrICmp(listBuf, "Zone.Identifier") == 0 || // this stream is automatically created by Windows XP SP2 and should be ignored, so it is not shown to the user
                         StrICmp(listBuf, "encryptable") == 0))      // this stream appears mostly on thumbs.db, nobody knows what it is, but Windows creates it, so we ignore it too
     {
         listBuf[0] = 0;
@@ -1541,7 +1541,7 @@ BOOL CFilesWindow::BuildScriptDir(COperations* script, CActionType type, char* s
     else
         st = sourceEnd;
     if (st - sourcePath + strlen(dirName) >= MAX_PATH - 2) // -2 determined experimentally (longer paths cannot be listed)
-    {                                                      // data are on disk, which doesn't mean they can't exceed MAX_PATH
+    {                                                      // the data is on disk, which does not mean it cannot exceed MAX_PATH
         *sourceEnd = 0;                                    // restoring original sourcePath
         _snprintf_s(text, _TRUNCATE, LoadStr(IDS_NAMEISTOOLONG), dirName, sourcePath);
         BOOL skip = TRUE;
@@ -1554,8 +1554,8 @@ BOOL CFilesWindow::BuildScriptDir(COperations* script, CActionType type, char* s
             params.Caption = LoadStr(IDS_ERRORBUILDINGSCRIPT);
             params.Text = text;
             char aliasBtnNames[200];
-            /* used by export_mnu.py script that generates salmenu.mnu for the Translator
-               we let the msgbox buttons resolve hotkey collisions by simulating that it is a menu
+            /* used by the export_mnu.py script, which generates salmenu.mnu for the Translator
+  for msgbox buttons, let hotkey collisions be resolved by simulating a menu
 MENU_TEMPLATE_ITEM MsgBoxButtons[] = 
 {
 {MNTT_PB, 0
@@ -1598,9 +1598,9 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         char* s2;
         if (mapName == NULL)
         {
-            // Petr: a bit of a hack: the *.* mask doesn't produce a copy of the source name, which is a problem when copying
-            // directories with invalid names, e.g. "c   ..." + "*.*" = "c   ", so we'll help ourselves a bit and
-            // change the mask to NULL = a simple textual copy of the name
+            // Petr: a bit of a hack: the *.* mask does not create a copy of the source name, which is a problem when copying
+            // directories with invalid names, e.g. "c   ..." + "*.*" = "c   ", so the mask is changed
+            // to NULL, i.e. a simple textual copy of the name
             char* opMask = mask != NULL && strcmp(mask, "*.*") == 0 ? NULL : mask;
             s2 = MaskName(finalName, 2 * MAX_PATH + 200, dirName, opMask);
             if (opMask != NULL)
@@ -1623,8 +1623,8 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                 params.Caption = LoadStr(IDS_ERRORBUILDINGSCRIPT);
                 params.Text = text;
                 char aliasBtnNames[200];
-                /* used by export_mnu.py script that generates salmenu.mnu for the Translator
-                   we let the msgbox buttons resolve hotkey collisions by simulating that it is a menu
+                /* used by the export_mnu.py script, which generates salmenu.mnu for Translator
+   for message box buttons, hotkey collisions are resolved by simulating a menu
 MENU_TEMPLATE_ITEM MsgBoxButtons[] = 
 {
   {MNTT_PB, 0
@@ -1684,7 +1684,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         int res = SalMessageBox(MainWindow->HWindow, text, LoadStr(IDS_QUESTION),
                                 MB_YESNOCANCEL | MB_ICONQUESTION);
         UpdateWindow(MainWindow->HWindow);
-        if (res == IDNO || res == IDCANCEL) // if CANCEL or NO was chosen, we end or skip the directory
+        if (res == IDNO || res == IDCANCEL) // if CANCEL or NO was chosen, stop or skip the directory
         {
             *sourceEnd = 0; // restoring sourcePath
             if (targetEnd != NULL)
@@ -1764,7 +1764,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
     {
         srcAndTgtPathsFlags &= ~(OPFL_SRCPATH_IS_NET | OPFL_SRCPATH_IS_FAST);
         srcAndTgtPathsFlags |= GetPathFlagsForCopyOp(sourcePath, OPFL_SRCPATH_IS_NET, OPFL_SRCPATH_IS_FAST);
-        if (targetPathState == tpsEncryptedExisting || targetPathState == tpsNotEncryptedExisting) // target directory exists, get to know its flags (otherwise inherit flags from the parent target directory)
+        if (targetPathState == tpsEncryptedExisting || targetPathState == tpsNotEncryptedExisting) // target directory exists, determine its flags (otherwise keep the flags from the parent target directory)
         {
             srcAndTgtPathsFlags &= ~(OPFL_TGTPATH_IS_NET | OPFL_TGTPATH_IS_FAST);
             srcAndTgtPathsFlags |= GetPathFlagsForCopyOp(targetPath, OPFL_TGTPATH_IS_NET, OPFL_TGTPATH_IS_FAST);
@@ -1822,7 +1822,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                         }
                         dirCreated = TRUE;
                     }
-                    else // copying to a non-NTFS filesystem (prompt to discard ADS)
+                    else // copying to a filesystem other than NTFS (prompt to drop ADS)
                     {
                         int res;
                         if (ConfirmADSLossAll)
@@ -1899,8 +1899,8 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                                             params.Caption = LoadStr(IDS_ERRORTITLE);
                                             params.Text = text;
                                             char aliasBtnNames[200];
-                                            /* used by export_mnu.py script that generates salmenu.mnu for the Translator
-                                               we let the msgbox buttons resolve hotkey collisions by simulating that it is a menu
+                                            /* used by the export_mnu.py script that generates salmenu.mnu for the Translator
+   for message box buttons, resolve hotkey collisions by simulating a menu
 MENU_TEMPLATE_ITEM MsgBoxButtons[] = 
 {
   {MNTT_PB, 0
@@ -1962,7 +1962,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         {
             op.Opcode = ocCreateDir;
             op.OpFlags = checkNewDirName ? 0 : OPFL_IGNORE_INVALID_NAME;
-            if (!script->CopyAttrs && // when copying attributes, the heuristic for setting the Encrypted attribute is skipped
+            if (!script->CopyAttrs && // when copying attributes, the heuristic for setting the Encrypted attribute does not apply
                 ((sourceDirAttr & FILE_ATTRIBUTE_ENCRYPTED) || targetPathState == tpsEncryptedExisting ||
                  targetPathState == tpsEncryptedNotExisting))
             {
@@ -2018,7 +2018,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
 
     BOOL copyMoveDirIsLink = FALSE;
     BOOL copyMoveSkipLinkContent = FALSE;
-    if ((type == atCopy || type == atMove) && // if it's a link, determine whether to skip or copy its content
+    if ((type == atCopy || type == atMove) && // if it is a link, determine whether to skip or copy its content
         (sourceDirAttr & FILE_ATTRIBUTE_REPARSE_POINT))
     {
         copyMoveDirIsLink = TRUE;
@@ -2079,7 +2079,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
     //---  build the path to sourceDirName and start searching for contained files
     BOOL delDirectory = TRUE;       // delete a non-empty directory?
     BOOL delDirectoryReturn = TRUE; // return value when a non-empty directory isn't removed
-    BOOL canDelDirAfterMove = TRUE; // Move only: FALSE if not everything is moved (filter skipped something), source directory can't be removed (won't be empty)
+    BOOL canDelDirAfterMove = TRUE; // Move only: FALSE if not everything is moved (the filter skipped something); the source directory cannot be removed because it will not be empty
     if (!copyMoveDirIsLink || !copyMoveSkipLinkContent)
     {
         WIN32_FIND_DATA f;
@@ -2090,7 +2090,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         {
             DWORD err = GetLastError();
             if (err == ERROR_PATH_NOT_FOUND && type == atCountSize && dirDOSName != NULL && strcmp(dirName, dirDOSName) != 0)
-            { // workaround for computing the size of a directory that must be accessed via DOS-name when we can't handle the UNICODE name (the multibyte version converted back to UNICODE doesn't match the original)
+            { // workaround for computing the size of a directory that must be accessed via a DOS name when the Unicode name cannot be used (the multibyte version converted back to Unicode does not match the original directory name)
                 lstrcpyn(finalName, sourcePath, 2 * MAX_PATH + 200);
                 if (CutDirectory(finalName) &&
                     SalPathAppend(finalName, dirDOSName, 2 * MAX_PATH + 200) &&
@@ -2120,8 +2120,8 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                     params.Caption = LoadStr(IDS_ERRORTITLE);
                     params.Text = text;
                     char aliasBtnNames[200];
-                    /* used by export_mnu.py script that generates salmenu.mnu for the Translator
-                       we let the msgbox buttons resolve hotkey collisions by simulating that it is a menu
+                    /* used by the export_mnu.py script, which generates salmenu.mnu for Translator
+   for message box buttons, resolve hotkey collisions by simulating a menu
 MENU_TEMPLATE_ITEM MsgBoxButtons[] = 
 {
   {MNTT_PB, 0
@@ -2135,7 +2135,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                             DIALOG_NO, LoadStr(IDS_MSGBOXBTN_SKIPALL));
                     params.AliasBtnNames = aliasBtnNames;
                     int msgRes = SalMessageBoxEx(&params);
-                    if (msgRes != DIALOG_YES /* Skip */ && msgRes != DIALOG_NO /* Skip All */)
+                    if (msgRes != DIALOG_YES /* Skip All */ && msgRes != DIALOG_NO /* Skip All */)
                         skip = FALSE;
                     if (msgRes == DIALOG_NO /* Skip All */)
                         ErrListDirSkipAll = TRUE;
@@ -2181,7 +2181,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                     }
                     askDirDelete = FALSE;
                 }
-                //---  does anyone want to interrupt script building?
+                //---  check whether script building should be interrupted
                 if (GetTickCount() - LastTickCount > BS_TIMEOUT)
                 {
                     if (UserWantsToCancelSafeWaitWindow())
@@ -2258,8 +2258,8 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                     params.Caption = LoadStr(IDS_ERRORTITLE);
                     params.Text = text;
                     char aliasBtnNames[200];
-                    /* used by export_mnu.py script that generates salmenu.mnu for the Translator
-                       we let the msgbox buttons resolve hotkey collisions by simulating that it is a menu
+                    /* used by the export_mnu.py script that generates salmenu.mnu for Translator
+   for message box buttons, we resolve hotkey collisions by simulating a menu
 MENU_TEMPLATE_ITEM MsgBoxButtons[] = 
 {
   {MNTT_PB, 0
@@ -2303,7 +2303,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         {
             return skip;
         }
-        if ((op.TargetName = BuildName(sourcePath, dirName)) == NULL) // overly long name not a concern here, previous condition would handle it
+        if ((op.TargetName = BuildName(sourcePath, dirName)) == NULL) // an overly long name is not a concern here; it would already have been handled by the previous condition
         {
             free(op.SourceName);
             return FALSE;
@@ -2347,8 +2347,8 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
     }
     else
     {
-        // if directory's time&date should be preserved, store an operation to set the directory's time&date
-        // (can be done only after finishing writing subdirectories and files into this directory)
+        // if the directory's date and time should be preserved, store an operation to set them
+        // (this can be done only after finishing writing subdirectories and files into this directory)
         if ((type == atCopy || type == atMove) &&
             filterCriteria != NULL && filterCriteria->PreserveDirTime &&
             createDirIndex >= 0 && createDirIndex < script->Count)
@@ -2371,7 +2371,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         }
 
         // if we need to delete the directory or a link to it at sourcePath + dirName (delete and move)
-        if (copyMoveDirIsLink && type == atMove ||                                          // for a link canDelDirAfterMove is irrelevant (a link can always be removed)
+        if (copyMoveDirIsLink && type == atMove ||                                          // for a link, canDelDirAfterMove is irrelevant (a link can always be deleted)
             !copyMoveDirIsLink && type == atMove && canDelDirAfterMove || type == atDelete) // delete the source directory or the link to the directory
         {
             if (type == atDelete && !delDirectory)
@@ -2387,7 +2387,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                                            &ErrTooLongDirNameSkipAll, sourcePath)) == NULL)
             {
                 if (skip)
-                    skipTooLongSrcNameErr = TRUE; // we also want to add a flag to skip directory creation
+                    skipTooLongSrcNameErr = TRUE; // we also want to add a flag to skip creating the directory
                 else
                     return FALSE;
             }
@@ -2500,7 +2500,7 @@ BOOL CFilesWindow::BuildScriptFile(COperations* script, CActionType type, char* 
         op.Opcode = (type == atCopy) ? ocCopyFile : ocMoveFile;
         op.FileSize = fileSizeLoc;
         op.OpFlags = srcAndTgtPathsFlags;
-        if (!script->CopyAttrs && // when copying attributes, the heuristic for setting the Encrypted attribute is skipped
+        if (!script->CopyAttrs && // when copying attributes, the heuristic for setting the Encrypted attribute does not apply
             ((sourceFileAttr & FILE_ATTRIBUTE_ENCRYPTED) || targetPathState == tpsEncryptedExisting ||
              targetPathState == tpsEncryptedNotExisting))
         {
@@ -2531,8 +2531,8 @@ BOOL CFilesWindow::BuildScriptFile(COperations* script, CActionType type, char* 
                 params.Caption = LoadStr(IDS_ERRORTITLE);
                 params.Text = message;
                 char aliasBtnNames[200];
-                /* used by export_mnu.py script that generates salmenu.mnu for the Translator
-                   we let the msgbox buttons resolve hotkey collisions by simulating that it is a menu
+                /* used by the export_mnu.py script, which generates salmenu.mnu for the Translator
+   for message box buttons, we resolve hotkey collisions by simulating a menu
 MENU_TEMPLATE_ITEM MsgBoxButtons[] = 
 {
   {MNTT_PB, 0
@@ -2555,9 +2555,9 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         char finalName[2 * MAX_PATH + 200]; // +200 is a reserve (Windows creates paths longer than MAX_PATH)
         if (mapName == NULL)
         {
-            // Petr: a bit of a hack: the *.* mask doesn't create a copy of the source name, which is a problem when copying
-            // files with invalid names, e.g. "c   ..." + "*.*" = "c   ", so we help ourselves
-            // by changing the mask to NULL = a simple textual copy of the name
+            // Petr: a bit of a hack: the *.* mask does not create a copy of the source name, which is a problem when copying
+            // files with invalid names, e.g. "c   ..." + "*.*" = "c   ", so the mask is changed
+            // to NULL, i.e. a simple textual copy of the name
             char* opMask = mask != NULL && strcmp(mask, "*.*") == 0 ? NULL : mask;
             if ((op.TargetName = BuildName(targetPath,
                                            MaskName(finalName, 2 * MAX_PATH + 200, fileName, opMask),
@@ -2581,7 +2581,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         {
             free(op.SourceName);
             free(op.TargetName);
-            if (type == atMove) // moving where it already is ...
+            if (type == atMove) // moving to the same location ...
             {
                 SalMessageBox(MainWindow->HWindow, LoadStr(IDS_CANNOTMOVEFILETOITSELF),
                               LoadStr(IDS_ERRORTITLE), MB_OK | MB_ICONEXCLAMATION);
@@ -2604,12 +2604,12 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
             script->SameRootButDiffVolume || !HasTheSameRootPath(sourcePath, targetPath))
         {
             // if the path ends with a space/period, it is invalid and we must not perform the copy,
-            // CreateFile trims spaces/periods, potentially resulting in copying a different file or to a different name
+            // because CreateFile trims spaces/periods and could copy a different file or copy it under a different name
             BOOL invalidSrcName = FileNameIsInvalid(op.SourceName, TRUE);
 
-            // optimization "overwrite older" for copying from a slow network to a fast local disk
-            // (reading file times over a slow network is much faster when the directory
-            // listing is read sequentially instead of querying each file individually)
+            // "overwrite older" optimization for copying from a slow network to a fast local disk
+            // (reading file timestamps over a slow network is much faster when the directory
+            // listing is read sequentially than when each file is queried individually)
             if (!invalidSrcName && (srcAndTgtPathsFlags & OPFL_TGTPATH_IS_NET) == 0 && script->OverwriteOlder && fileLastWriteTime != NULL)
             {
                 BOOL invalidTgtName = FileNameIsInvalid(op.TargetName, TRUE);
@@ -2631,7 +2631,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                             *(unsigned __int64*)&roundedInTime = *(unsigned __int64*)fileLastWriteTime - (*(unsigned __int64*)fileLastWriteTime % 10000000);
                             *(unsigned __int64*)&dataOut.ftLastWriteTime = *(unsigned __int64*)&dataOut.ftLastWriteTime - (*(unsigned __int64*)&dataOut.ftLastWriteTime % 10000000);
 
-                            if (CompareFileTime(&roundedInTime, &dataOut.ftLastWriteTime) <= 0) // source file is not newer than the target one - skip the copy operation
+                            if (CompareFileTime(&roundedInTime, &dataOut.ftLastWriteTime) <= 0) // source file is not newer than the target file - skip the copy operation
                             {
                                 free(op.SourceName);
                                 free(op.TargetName);
@@ -2655,7 +2655,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
 
                     // we have a new file size, we need to handle this again:
                     // file too large for FAT32 (warn the user the operation will likely fail)
-                    if (targetPathIsFAT32 && fileSizeLoc > CQuadWord(0xFFFFFFFF /* 4GB minus 1 Byte */, 0))
+                    if (targetPathIsFAT32 && fileSizeLoc > CQuadWord(0xFFFFFFFF /* 4 GB minus 1 byte */, 0))
                     {
                         free(op.TargetName);
                         op.TargetName = NULL;
@@ -2672,7 +2672,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
             else
                 op.Size = COPY_MIN_FILE_SIZE; // zero/small files take at least as long as files of size COPY_MIN_FILE_SIZE
 
-            if (sourcePathSupADS &&                       // if there's a chance that ADS will be found and
+            if (sourcePathSupADS &&                       // if there is a chance of finding ADS and ADS should not be ignored
                 (targetPathSupADS || !ConfirmADSLossAll)) // if ADS should not be ignored
             {
                 CQuadWord adsSize;
@@ -2739,13 +2739,13 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                         }
                     }
                 }
-                else // an error occurred or no ADS
+                else // an error occurred or no ADS are present
                 {
                     if (invalidSrcName ||
                         adsWinError != NO_ERROR &&                                                                           // an error occurred
                             (adsWinError != ERROR_INVALID_FUNCTION || StrNICmp(op.SourceName, "\\\\tsclient\\", 11) != 0) && // paths to local disks in Terminal Server do not support ADS listing (even though ADS is otherwise supported, irony of ironies)
                             (adsWinError != ERROR_INVALID_PARAMETER && adsWinError != ERROR_NO_MORE_ITEMS ||
-                             (srcAndTgtPathsFlags & OPFL_SRCPATH_IS_NET) == 0)) // mounted FAT/FAT32 disk cannot be detected on a network drive (e.g. \petr\f\drive_c) plus a Novell NetWare volume browsed via NDS - we think it is NTFS and thus try to read ADS, which reports this error
+                             (srcAndTgtPathsFlags & OPFL_SRCPATH_IS_NET) == 0)) // a mounted FAT/FAT32 disk cannot be detected on a network drive (e.g. \\petr\\f\\drive_c), and for a Novell NetWare volume browsed via NDS we assume it is NTFS and therefore try to read ADS, which reports this error
                     {
                         // firstly, we try whether an error occurs even during opening the file - such an error
                         // the user understands it more easily, so we show it preferentially (before the ADS read error)
@@ -2789,7 +2789,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                             }
                             }
                         }
-                        else // report a file open error
+                        else // report a file opening error
                         {
                             DWORD err = GetLastError();
                             if (invalidSrcName)
@@ -2898,13 +2898,13 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         memmove(name + l, fileName, 1 + strlen(fileName)); // name is always < MAX_PATH
         CQuadWord s;
         DWORD err = NO_ERROR;
-        if (FileBasedCompression && !onlySize &&                                         // if compression is even possible
-            (sourceFileAttr & (FILE_ATTRIBUTE_COMPRESSED | FILE_ATTRIBUTE_SPARSE_FILE))) // if the file is compressed or sparse (sparse file)
+        if (FileBasedCompression && !onlySize &&                                         // if file-based compression is enabled at all
+            (sourceFileAttr & (FILE_ATTRIBUTE_COMPRESSED | FILE_ATTRIBUTE_SPARSE_FILE))) // if the file is compressed or sparse
         {
             s.LoDWord = GetCompressedFileSize(name, &s.HiDWord);
             err = GetLastError();
             if (err == ERROR_FILE_NOT_FOUND && fileDOSName != NULL && strcmp(fileName, fileDOSName) != 0)
-            {                                                            // workaround for computing the size of a file that must be accessed via DOS-name when we cannot do it via the UNICODE name (the multibyte version of the name converted back to UNICODE doesn't match the original file name)
+            {                                                            // workaround for determining the size of a file that must be accessed via its DOS name when we cannot use the Unicode name (the multibyte version of the name converted back to Unicode does not match the original Unicode file name)
                 memmove(name + l, fileDOSName, 1 + strlen(fileDOSName)); // name is always < MAX_PATH
                 s.LoDWord = GetCompressedFileSize(name, &s.HiDWord);
                 err = GetLastError();
@@ -2925,7 +2925,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
                                                                MB_YESNO | MB_ICONEXCLAMATION) == IDYES;
                 UpdateWindow(MainWindow->HWindow);
             }
-            s = fileSizeLoc; // cannot determine compressed size, we settle for the normal size
+            s = fileSizeLoc; // Cannot determine the compressed size; use the normal size.
         }
 
         script->Sizes.Add(fileSizeLoc); // the output dialog is prepared for the case when this array is in an error state
@@ -3023,7 +3023,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
         {
             return skip;
         }
-        if ((op.TargetName = BuildName(sourcePath, fileName)) == NULL) // if the name is too long, it will manifest already at this earlier condition
+        if ((op.TargetName = BuildName(sourcePath, fileName)) == NULL) // if the name is too long, it is already handled by the previous condition
         {
             free(op.SourceName);
             return FALSE;
@@ -3046,7 +3046,7 @@ MENU_TEMPLATE_ITEM MsgBoxButtons[] =
             return TRUE;
     }
     }
-    return FALSE; // cannot do anything else
+    return FALSE; // does not support anything else
 }
 
 void CFilesWindow::CalculateDirSizes()
@@ -3078,12 +3078,12 @@ void CFilesWindow::ExecuteFromArchive(int index, BOOL edit, HWND editWithMenuPar
         int format = PackerFormatConfig.PackIsArchive(GetZIPArchive());
         if (format != 0) // "always-true" - we found a supported archive
         {
-            if (!PackerFormatConfig.GetUsePacker(format - 1)) // no Edit?
+            if (!PackerFormatConfig.GetUsePacker(format - 1)) // no edit support?
             {
                 if (SalMessageBox(HWindow, LoadStr(IDS_EDITPACKNOTSUPPORTED),
                                   LoadStr(IDS_QUESTION), MB_YESNO | MB_DEFBUTTON2 | MB_ICONQUESTION) != IDYES)
                 {
-                    return; // action aborted (user does not want to edit if the archive cannot be updated)
+                    return; // action canceled (the user does not want to edit if the archive cannot be updated)
                 }
             }
         }
@@ -3104,7 +3104,7 @@ void CFilesWindow::ExecuteFromArchive(int index, BOOL edit, HWND editWithMenuPar
     int j;
     for (j = 0; j < count; j++)
     {
-        if (index != j) // do not compare the same item
+        if (index != j) // do not compare an item with itself
         {
             CFileData* f2 = j < Dirs->Count ? &Dirs->At(j) : &Files->At(j - Dirs->Count);
             if (f2->NameLen == f->NameLen &&
@@ -3132,7 +3132,7 @@ void CFilesWindow::ExecuteFromArchive(int index, BOOL edit, HWND editWithMenuPar
     {
         format--;
         int index2 = PackerFormatConfig.GetUnpackerIndex(format);
-        if (index2 < 0) // view: is this internal handling (plug-in)?
+        if (index2 < 0) // view: is this internal handling (plugin)?
         {
             CPluginData* data = Plugins.Get(-index2 - 1);
             if (data != NULL)
@@ -3171,7 +3171,7 @@ void CFilesWindow::ExecuteFromArchive(int index, BOOL edit, HWND editWithMenuPar
         char tmpPath[MAX_PATH];
         memcpy(tmpPath, name, backSlash - name);
         tmpPath[backSlash - name] = 0;
-        BeginStopRefresh(); // the snooper can take a break
+        BeginStopRefresh(); // stop refreshing
         SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_NORMAL);
         HCURSOR oldCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
         if (PackUnpackOneFile(this, GetZIPArchive(), PluginData.GetInterface(),
@@ -3252,7 +3252,7 @@ void CFilesWindow::ExecuteFromArchive(int index, BOOL edit, HWND editWithMenuPar
 
     if (UnpackedAssocFiles.AddFile(GetZIPArchive(), GetZIPPath(), buf, s, dosName, lastWrite, fileSize, attr))
     {                                                                         // this file doesn't have the disk-cache 'lock' object ExecuteAssocEvent yet
-        DiskCache.AssignName(dcFileName, ExecuteAssocEvent, FALSE, crtCache); // arcCacheCacheCopies has no effect – caching is done until the archive is closed, we won't unpack earlier
+        DiskCache.AssignName(dcFileName, ExecuteAssocEvent, FALSE, crtCache); // arcCacheCacheCopies has no effect - caching continues until the archive is closed, and we will not unpack earlier
     }
     else
     { // it is unnecessary to add the same 'lock' object to a tmp file

@@ -4,7 +4,7 @@
 
 #pragma once
 
-// menu item skill level ALL (zahrnuje beginned, intermediate a advanced)
+// menu item skill level ALL (includes beginner, intermediate, and advanced)
 #define MNTS_ALL (MNTS_B | MNTS_I | MNTS_A)
 
 #ifndef QWORD
@@ -48,8 +48,7 @@ extern CSalamanderGUIAbstract* SalGUI;
 
 // ****************************************************************************
 //
-// CCS -- samo-inicializujici se a samo-destruujici se kriticka sekce
-//
+// CCS -- self-initializing and self-destructing critical section
 
 struct CCS
 {
@@ -81,10 +80,9 @@ const char* Concatenate(const char* string1, const char* string2);
 
 // ****************************************************************************
 //
-// CDialogStack -- slouzi k ukladani hiearchie oken na zasobnik, vrchol
-// zasobniku je parent pro zobrazovane message- a error-boxy, kazdy thread
-// ma svou vlastni hierarchii oken
-//
+// CDialogStack -- stores the window hierarchy on a stack; the top of the
+// stack is the parent for displayed message and error boxes; each thread
+// has its own window hierarchy
 
 class CDialogStack
 {
@@ -117,8 +115,8 @@ public:
 
 // ****************************************************************************
 //
-// CDialogEx -- automaticky centrovany dialog, automaticky pridava a odebira
-// HWND do/z DialogStack
+// CDialogEx -- automatically centered dialog, automatically adds and removes
+// HWND to/from DialogStack
 //
 
 class CDialogEx : public CDialog
@@ -192,8 +190,7 @@ public:
 
 // ****************************************************************************
 //
-// CArgv -- Vytvori argument-vector z commanline retezce
-//
+// CArgv -- creates an argument vector from a command-line string
 
 class CArgv : public TIndirectArray<char>
 {

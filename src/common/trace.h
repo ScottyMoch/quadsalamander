@@ -110,7 +110,7 @@ public:
     }
 
 protected:
-    // store the element in the buffer, growing it if neccessary
+    // store the element in the buffer, growing it if necessary
     virtual int_type overflow(int_type element = traits_type::eof())
     {
         // if EOF, just return success
@@ -139,7 +139,7 @@ protected:
             if (ptr == 0)
                 return traits_type::eof();
 
-            // copy data and dealocate old buffer, if neccessary
+            // copy data and deallocate old buffer, if necessary
             if (pbase())
             {
                 traits_type::_Copy_s(ptr, newsize, pbase(), oldsize);
@@ -215,7 +215,7 @@ public:
     }
 
 protected:
-    // store the element in the buffer, growing it if neccessary
+    // store the element in the buffer, growing it if necessary
     virtual int_type overflow(int_type element = traits_type::eof())
     {
         // if EOF, just return success
@@ -244,7 +244,7 @@ protected:
             if (ptr == 0)
                 return traits_type::eof();
 
-            // copy data and dealocate old buffer, if neccessary
+            // copy data and deallocate old buffer, if necessary
             if (pbase())
             {
                 traits_type::_Copy_s(ptr, newsize, pbase(), oldsize);
@@ -522,10 +522,10 @@ uintptr_t __TRACE_beginthreadex(void* security, unsigned stack_size,
 #define TRACE_E(str) TRACE_ME(__FILE__, __LINE__, str)
 #define TRACE_EW(str) TRACE_MEW(__WFILE__, __LINE__, str)
 
-// fatal-error-trace (CRASHING TRACE), manually specified file location;
-// stop the program in the debugger to make the problem that just occurred easier to debug;
+// fatal-error-trace (CRASHING TRACE), manually specified source location;
+// stop the program in the debugger so the problem that just occurred is easier to debug;
 // the release build crashes, and the problem will hopefully be clear from the call stack in the bug report;
-// we do not use DebugBreak(), because when the program crashes through DebugBreak(), it is impossible to trace where
+// we do not use DebugBreak(), because when the program crashes that way, it is impossible to tell where
 // TRACE_C/MC was called: the exception address ends up somewhere in ntdll.dll,
 // and the Stack Back Trace section of the bug report may contain nonsense if
 // the function that calls TRACE_C/MC does not use the old simple model for
@@ -632,10 +632,10 @@ protected:
     const char* File;                    // helper variables for passing the file name (ANSI)
     const WCHAR* FileW;                  // helper variables for passing the file name (Unicode)
     int Line;                            // and the line number from which TRACE_X() is called
-    C__StringStreamBuf TraceStringBuf;   // string buffer drzici data trace streamu (ANSI)
-    C__StringStreamBufW TraceStringBufW; // string buffer drzici data trace streamu (unicode)
-    C__TraceStream TraceStrStream;       // vlastni trace stream (ANSI)
-    C__TraceStreamW TraceStrStreamW;     // vlastni trace stream (unicode)
+    C__StringStreamBuf TraceStringBuf;   // string buffer holding trace stream data (ANSI)
+    C__StringStreamBufW TraceStringBufW; // string buffer holding trace stream data (Unicode)
+    C__TraceStream TraceStrStream;       // trace stream object (ANSI)
+    C__TraceStreamW TraceStrStreamW;     // trace stream object (Unicode)
     DWORD StoredLastError;               // GetLastError() value before the TRACE_? macro
 
 public:

@@ -63,7 +63,7 @@ extern "C"
 }
 #endif
 
-// the original SDK that shipped with VC6 had this value defined as 0x00000040 (year 1998, when the attribute was not yet used; it only arrived with W2K)
+// the original SDK that shipped with VC6 defined this value as 0x00000040 (in 1998 the attribute did not yet exist; it was introduced with W2K)
 #if (FILE_ATTRIBUTE_ENCRYPTED != 0x00004000)
 #pragma message(__FILE__ " ERROR: FILE_ATTRIBUTE_ENCRYPTED != 0x00004000. You have to install latest version of Microsoft SDK. This value has changed!")
 #endif
@@ -79,16 +79,15 @@ class CSalamanderGUIAbstract;
 class CSalamanderSafeFileAbstract;
 class CGUIIconListAbstract;
 
-//
 // ****************************************************************************
 // CSalamanderDebugAbstract
 //
-// sada metod ze Salamandera, ktere se pouzivaji pro hledani chyb v debug i release verzi
+// set of Salamander methods used for debugging in both debug and release builds
 
-// makro CALLSTK_MEASURETIMES - zapne mereni casu straveneho pri priprave call-stack hlaseni (meri se pomer proti
-//                              celkovemu casu behu funkci)
-//                              POZOR: nutne zapnout tez pro kazdy plugin zvlast
-// makro CALLSTK_DISABLEMEASURETIMES - potlaci mereni casu straveneho pri priprave call-stack hlaseni v DEBUG/SDK/PB verzi
+// CALLSTK_MEASURETIMES macro - enables measurement of time spent preparing call-stack reports (measured as a ratio to
+// the total function runtime)
+// WARNING: must also be enabled separately for each plugin
+// CALLSTK_DISABLEMEASURETIMES macro - suppresses measurement of time spent preparing call-stack reports in DEBUG/SDK/PB builds
 
 #if (defined(_DEBUG) || defined(CALLSTK_MEASURETIMES)) && !defined(CALLSTK_DISABLEMEASURETIMES)
 struct CCallStackMsgContext
@@ -118,23 +117,23 @@ public:
     // _beginthreadex and CreateThread; optional (UID is then -1)
     virtual void WINAPI TraceAttachThread(HANDLE thread, unsigned tid) = 0;
 
-    // nastavi jmeno aktivniho threadu pro TRACE, nepovine (thread je oznacen jako "unknown")
-    // POZOR: vyzaduje registraci threadu u TRACE (viz TraceAttachThread), jinak nic nedela
+    // sets the active thread name for TRACE; optional (the thread is then marked as "unknown")
+    // WARNING: requires the thread to be registered with TRACE (see TraceAttachThread), otherwise it does nothing
     virtual void WINAPI TraceSetThreadName(const char* name) = 0;
     virtual void WINAPI TraceSetThreadNameW(const WCHAR* name) = 0;
 
-    // initializes the thread with the things needed for CALL-STACK methods (see Push and Pop below);
-    // in all called plugin methods, CALL_STACK methods can then be used directly;
+    // initializes the thread state required by the CALL-STACK methods (see Push and Pop below);
+    // all called plugin methods can then use the CALL_STACK methods directly;
     // this method is used only for new plugin threads;
-    // it runs 'threadBody' with the 'param' parameter and returns the result of 'threadBody'
+    // runs 'threadBody' with the 'param' parameter and returns its result
     virtual unsigned WINAPI CallWithCallStack(unsigned(WINAPI* threadBody)(void*), void* param) = 0;
 
-    // uklada na CALL-STACK zpravu ('format'+'args' viz vsprintf), pri padu aplikace je
-    // obsah CALL-STACKU vypsan do okna Bug Report ohlasujiciho pad aplikace
+    // stores a message on the CALL-STACK ('format'+'args', see vsprintf); if the application crashes,
+    // the CALL-STACK contents are written to the Bug Report window reporting the crash
     virtual void WINAPI Push(const char* format, va_list args, CCallStackMsgContext* callStackMsgContext,
                              BOOL doNotMeasureTimes) = 0;
 
-    // odstranuje z CALL-STACKU posledni zpravu, volani musi parovat s Push
+    // removes the last message from the CALL-STACK; the call must be paired with Push
     virtual void WINAPI Pop(CCallStackMsgContext* callStackMsgContext) = 0;
 
     // sets the active thread name for the VC debugger
@@ -157,13 +156,12 @@ public:
     virtual void WINAPI AddModuleWithPossibleMemoryLeaks(const char* fileName) = 0;
 };
 
-//
 // ****************************************************************************
 // CSalamanderRegistryAbstract
 //
-// sada metod Salamandera pro praci se systemovym registry,
-// pouziva se v CPluginInterfaceAbstract::LoadConfiguration
-// a CPluginInterfaceAbstract::SaveConfiguration
+// set of Salamander methods for working with the system registry,
+// used in CPluginInterfaceAbstract::LoadConfiguration
+// and CPluginInterfaceAbstract::SaveConfiguration
 
 class CSalamanderRegistryAbstract
 {
@@ -200,12 +198,11 @@ public:
     virtual BOOL WINAPI GetSize(HKEY key, const char* name, DWORD type, DWORD& bufferSize) = 0;
 };
 
-//
 // ****************************************************************************
 // CSalamanderConnectAbstract
 //
-// sada metod Salamandera pro navazani pluginu do Salamandera
-// (custom pack/unpack + panel archiver view/edit + file viewer + menu-items)
+// set of Salamander methods for connecting a plugin to Salamander
+// (custom pack/unpack + panel archiver view/edit + file viewer + menu items)
 
 // constants for CSalamanderConnectAbstract::AddMenuItem
 #define MENU_EVENT_TRUE 0x0001                    // always occurs
@@ -238,11 +235,11 @@ public:
 // #define SALHOTKEY(vk,mods,cst) ((DWORD)(((BYTE)(vk)|((WORD)((BYTE)(mods))<<8))|(((DWORD)(BYTE)(cst))<<16)))
 #define SALHOTKEY(vk, mods) ((DWORD)(((BYTE)(vk) | ((WORD)((BYTE)(mods)) << 8))))
 
-// makro pro pripravu 'hotKey' pro AddMenuItem()
-// rika Salamanderu, ze polozky menu bude obsahovat horkou klavesu (oddelenou znakem '\t')
-// Salamander nebude v tomto pripade kricet pomoci TRACE_E a horkou klavesu zobrazi v menu Plugins
-// POZOR: nejedna se o horkou klavesu, kterou by Salamander dorucil pluginu, jde skutecne pouze o napis
-// pokud uzivatel priradi v Plugin Manageru tomuto commandu vlastni horkou klavesu, bude hint potlacen
+// macro for preparing 'hotKey' for AddMenuItem()
+// tells Salamander that the menu item text contains a hot-key hint (separated by '\t')
+// in this case Salamander will not complain via TRACE_E and will display the hot key in the Plugins menu
+// WARNING: this is not a hot key that Salamander delivers to the plugin; it is really only a label
+// if the user assigns this command a custom hot key in Plugin Manager, the hint is suppressed
 #define SALHOTKEY_HINT ((DWORD)0x00020000)
 
 class CSalamanderConnectAbstract
@@ -281,12 +278,12 @@ public:
     virtual void WINAPI ForceRemovePanelArchiver(const char* extension) = 0;
 
     // adds the plugin to the list for "file viewer",
-    // 'masks' are the viewer masks handled by this plugin
+    // 'masks' are the viewer masks that this plugin should handle
     // (the separator is ';' (the escape sequence for ';' is ";;") and the '*' and '?' wildcards are used;
     // if possible, avoid spaces, and the '|' character is forbidden (inverse masks are not allowed)),
     // if this is not an upgrade of "file viewer" (or the addition of the whole plugin) and 'force' is FALSE,
-    // je volani ignorovano; je-li 'force' TRUE, prida 'masks' vzdy (pokud jiz nejsou na
-    // seznamu) - nutna prevence proti opakovanemu 'force'==TRUE (neustalemu pridavani 'masks')
+    // the call is ignored; if 'force' is TRUE, 'masks' are always added (if they are not already on the
+    // list) - repeated 'force'==TRUE must be prevented (to avoid constantly adding 'masks')
     virtual void WINAPI AddViewer(const char* masks, BOOL force) = 0;
 
     // removes a mask from the list for "file viewer" (only from items belonging to this plugin);
@@ -296,56 +293,59 @@ public:
 
     // adds items to the Plugins/"plugin name" menu in Salamander, 'iconIndex' is the
     // item icon index (-1=no icon; for assigning a bitmap with icons see
-    // CSalamanderConnectAbstract::SetBitmapWithIcons; u separatoru se ignoruje), 'name' je
-    // jmeno polozky (max. MAX_PATH - 1 znaku) nebo NULL jde-li o separator (parametry
-    // 'state_or'+'state_and' parameters have no meaning in that case); 'hotKey' is the hot key
-    // for the item, obtained with the SALHOTKEY macro; 'name' may contain a hot-key hint,
+    // CSalamanderConnectAbstract::SetBitmapWithIcons; it is ignored for separators), 'name' is
+    // the item name (max. MAX_PATH - 1 characters), or NULL for a separator (the
+    // 'state_or'+'state_and' parameters have no meaning in that case); 'hotKey' is the item's hot key
+    // obtained with the SALHOTKEY macro; 'name' may contain a hot-key hint,
     // separated by '\t'; in that case the 'hotKey' variable must be assigned the
-    // SALHOTKEY_HINT, vice viz komentar k SALHOTKEY_HINT; 'id' je unikatni identifikacni
-    // cislo polozky v ramci pluginu (u separatoru ma vyznam jen je-li 'callGetState' TRUE),
-    // pokud je 'callGetState' TRUE, vola se pro zjisteni stavu polozky metoda
-    // CPluginInterfaceForMenuExtAbstract::GetMenuItemState (u separatoru ma vyznam jen stav
-    // MENU_ITEM_STATE_HIDDEN, ostatni se ignoruji), jinak se k vypoctu stavu polozky (enabled/disabled)
+    // SALHOTKEY_HINT, for more details see the comment for SALHOTKEY_HINT; 'id' is the unique
+    // identifier
+    // item's unique identifier within the plugin (for a separator it matters only if 'callGetState' is TRUE),
+    // if 'callGetState' is TRUE, the item state is obtained by calling
+    // CPluginInterfaceForMenuExtAbstract::GetMenuItemState (for separators, only the
+    // MENU_ITEM_STATE_HIDDEN state matters; the others are ignored), otherwise the item state
+    // (enabled/disabled)
     // is computed from 'state_or'+'state_and' - the item state is calculated by first building the mask
     // ('eventMask') as the logical OR of all events that occurred (see
-    // MENU_EVENT_XXX), polozka bude "enable" pokud bude nasl. vyraz TRUE:
+    // MENU_EVENT_XXX); the item is enabled if the following expression is TRUE:
     //   ('eventMask' & 'state_or') != 0 && ('eventMask' & 'state_and') == 'state_and',
     // the 'skillLevel' parameter specifies for which user levels the item (or separator)
     // is displayed; the value contains one or more MENU_SKILLLEVEL_XXX constants ORed together;
     // menu items are updated on every plugin load (the items may change with configuration)
-    // POZOR: pro "dynamic menu extension" se pouziva CSalamanderBuildMenuAbstract::AddMenuItem
+    // WARNING: use CSalamanderBuildMenuAbstract::AddMenuItem for a "dynamic menu extension"
     virtual void WINAPI AddMenuItem(int iconIndex, const char* name, DWORD hotKey, int id, BOOL callGetState,
                                     DWORD state_or, DWORD state_and, DWORD skillLevel) = 0;
 
     // adds a submenu to the Plugins/"plugin name" menu in Salamander, 'iconIndex'
     // is the submenu icon index (-1=no icon; for assigning a bitmap with icons
-    // viz CSalamanderConnectAbstract::SetBitmapWithIcons), 'name' je jmeno
+    // see CSalamanderConnectAbstract::SetBitmapWithIcons), 'name' is the submenu
     // name (max. MAX_PATH - 1 characters), 'id' is the unique menu-item identifier
-    // menu v ramci pluginu (u submenu ma vyznam jen je-li 'callGetState' TRUE),
-    // pokud je 'callGetState' TRUE, vola se pro zjisteni stavu submenu metoda
-    // CPluginInterfaceForMenuExtAbstract::GetMenuItemState (vyznam maji jen stavy
+    // within the plugin menu (for a submenu it matters only if 'callGetState' is TRUE),
+    // if 'callGetState' is TRUE, the submenu state is obtained by calling
+    // CPluginInterfaceForMenuExtAbstract::GetMenuItemState (only the
     // MENU_ITEM_STATE_ENABLED and MENU_ITEM_STATE_HIDDEN states matter; the others are ignored), otherwise
     // the item state (enabled/disabled) is computed from 'state_or'+'state_and' - for the state calculation
-    // stavu polozky viz CSalamanderConnectAbstract::AddMenuItem(), parametr 'skillLevel'
+    // for the item state calculation, see CSalamanderConnectAbstract::AddMenuItem(); the
+    // 'skillLevel' parameter
     // specifies for which user levels the submenu is displayed; the value contains one or more
     // MENU_SKILLLEVEL_XXX constants ORed together; the submenu is closed by calling
     // CSalamanderConnectAbstract::AddSubmenuEnd();
     // menu items are updated on every plugin load (the items may change with configuration)
-    // POZOR: pro "dynamic menu extension" se pouziva CSalamanderBuildMenuAbstract::AddSubmenuStart
+    // WARNING: use CSalamanderBuildMenuAbstract::AddSubmenuStart for a "dynamic menu extension"
     virtual void WINAPI AddSubmenuStart(int iconIndex, const char* name, int id, BOOL callGetState,
                                         DWORD state_or, DWORD state_and, DWORD skillLevel) = 0;
 
-    // ukonci submenu v menu Plugins/"jmeno pluginu" v Salamanderu, dalsi polozky budou
-    // pridavany do vyssi (rodicovske) urovne menu;
-    // polozky v menu se updatuji pri kazdem loadu pluginu (mozna zmena polozek dle konfigurace)
-    // POZOR: pro "dynamic menu extension" se pouziva CSalamanderBuildMenuAbstract::AddSubmenuEnd
+    // ends the submenu in the Plugins/"plugin name" menu in Salamander; subsequent items are added
+    // to the higher-level (parent) menu;
+    // menu items are updated on every plugin load (the items may change with configuration)
+    // WARNING: use CSalamanderBuildMenuAbstract::AddSubmenuEnd for a "dynamic menu extension"
     virtual void WINAPI AddSubmenuEnd() = 0;
 
-    // nastavuje polozku pro FS v Change Drive menu a v Drive barach; 'title' je jeji text,
-    // 'iconIndex' je index jeji ikony (-1=zadna ikona; zadani bitmapy s ikonami viz
-    // CSalamanderConnectAbstract::SetBitmapWithIcons), 'title' muze obsahovat az tri sloupce
-    // vzajemne oddelene '\t' (viz Alt+F1/F2 menu); viditelnost polozky je mozne nastavit
-    // z Plugins Manageru nebo primo z pluginu pomoci metody
+    // sets the item for FS in the Change Drive menu and in drive bars; 'title' is its text,
+    // 'iconIndex' is the icon index (-1=no icon; for assigning a bitmap with icons see
+    // CSalamanderConnectAbstract::SetBitmapWithIcons), 'title' may contain up to three columns
+    // separated by '\t' (see the Alt+F1/F2 menu); item visibility can be set
+    // from Plugins Manager or directly from the plugin by calling
     // CSalamanderGeneralAbstract::SetChangeDriveMenuItemVisibility
     virtual void WINAPI SetChangeDriveMenuItem(const char* title, int iconIndex) = 0;
 
@@ -355,21 +355,21 @@ public:
     // CPluginInterfaceForThumbLoaderAbstract::LoadThumbnail
     virtual void WINAPI SetThumbnailLoader(const char* masks) = 0;
 
-    // nastavi bitmapu s ikonami pluginu; Salamander si obsah bitmapy kopiruje do internich
-    // struktur, plugin je zodpovedny za destrukci bitmapy (ze strany Salamanadera se
-    // bitmapa pouzije pouze behem teto funkce); pocet ikon se odvozuje ze
-    // sirky bitmapy, ikony jsou vzdy 16x16 bodu; transparentni cast ikon tvori fialova
-    // barva (RGB(255,0,255)), barevna hloubka bitmapy muze byt 4 nebo 8 bitu (16 nebo 256
-    // barev), idealni je mit pripravene obe barevne varianty a vybirat z nich podle
-    // vysledku metody CSalamanderGeneralAbstract::CanUse256ColorsBitmap()
-    // POZOR: tato metoda je zastarala, nepodporuje alpha transparenci, pouzijte misto ni
+    // sets the bitmap with plugin icons; Salamander copies the bitmap contents into its internal
+    // structures, and the plugin is responsible for destroying the bitmap (on Salamander's side the
+    // bitmap is used only during this function); the number of icons is derived from the
+    // bitmap width, and the icons are always 16x16 pixels; the transparent part of the icons is
+    // purple (RGB(255,0,255)); the bitmap color depth may be 4 or 8 bits (16 or 256
+    // colors); ideally, prepare both color variants and choose between them according to the
+    // result of CSalamanderGeneralAbstract::CanUse256ColorsBitmap()
+    // WARNING: this method is obsolete, does not support alpha transparency; use
     //        SetIconListForGUI()
     virtual void WINAPI SetBitmapWithIcons(HBITMAP bitmap) = 0;
 
     // sets the plugin icon index used for the plugin in the Plugins/Plugins Manager window,
     // in the Help/About Plugin menu, and optionally also for the plugin submenu in the Plugins menu (for details
-    // viz CSalamanderConnectAbstract::SetPluginMenuAndToolbarIcon()); pokud plugin tuto
-    // method, the standard Salamander plugin icon is used; 'iconIndex'
+    // see CSalamanderConnectAbstract::SetPluginMenuAndToolbarIcon()); if the plugin does not call this
+    // method, the standard Salamander icon for the plugin is used; 'iconIndex'
     // is the icon index to set (for assigning a bitmap with icons see
     // CSalamanderConnectAbstract::SetBitmapWithIcons)
     virtual void WINAPI SetPluginIcon(int iconIndex) = 0;
@@ -377,11 +377,11 @@ public:
     // sets the icon index for the plugin submenu, used for the plugin submenu
     // in the Plugins menu and optionally also in the top toolbar for the drop-down button used
     // to display the plugin submenu; if the plugin does not call this method, the
-    // plugin icon is used for the plugin submenu in the Plugins menu (configured by
-    // CSalamanderConnectAbstract::SetPluginIcon) and no toolbar button is shown
-    // for the plugin; 'iconIndex' is the icon index to set (-1=use the plugin icon
-    // pluginu, viz CSalamanderConnectAbstract::SetPluginIcon(); zadani bitmapy
-    // s ikonami viz CSalamanderConnectAbstract::SetBitmapWithIcons);
+    // plugin icon is used for the plugin submenu in the Plugins menu (see
+    // CSalamanderConnectAbstract::SetPluginIcon) and no button appears in the top toolbar
+    // for the plugin; 'iconIndex' is the icon index to set (-1=use the plugin icon,
+    // see CSalamanderConnectAbstract::SetPluginIcon(); for assigning a bitmap with icons see
+    // CSalamanderConnectAbstract::SetBitmapWithIcons);
     virtual void WINAPI SetPluginMenuAndToolbarIcon(int iconIndex) = 0;
 
     // sets the icon list with plugin icons; the icon list must be allocated by calling
@@ -394,11 +394,10 @@ public:
     virtual void WINAPI SetIconListForGUI(CGUIIconListAbstract* iconList) = 0;
 };
 
-//
 // ****************************************************************************
 // CDynamicString
 //
-// dynamicky string: realokuje se podle potreby
+// dynamic string: reallocates as needed
 
 class CDynamicString
 {
@@ -409,19 +408,18 @@ public:
     virtual BOOL WINAPI Add(const char* str, int len = -1) = 0;
 };
 
-//
 // ****************************************************************************
 // CPluginInterfaceAbstract
 //
-// sada metod pluginu, ktere potrebuje Salamander pro praci s pluginem
+// set of plugin methods that Salamander needs to work with the plugin
 //
-// Pro vetsi prehlednost jsou oddelene casti pro:
-// archivatory - viz CPluginInterfaceForArchiverAbstract,
-// viewry - viz CPluginInterfaceForViewerAbstract,
-// rozsireni menu - viz CPluginInterfaceForMenuExtAbstract,
-// file-systemy - viz CPluginInterfaceForFSAbstract,
-// nacitace thumbnailu - viz CPluginInterfaceForThumbLoaderAbstract.
-// Casti jsou pripojeny k CPluginInterfaceAbstract pres CPluginInterfaceAbstract::GetInterfaceForXXX
+// For better clarity, separate parts are provided for:
+// archivers - see CPluginInterfaceForArchiverAbstract,
+// viewers - see CPluginInterfaceForViewerAbstract,
+// menu extensions - see CPluginInterfaceForMenuExtAbstract,
+// file systems - see CPluginInterfaceForFSAbstract,
+// thumbnail loaders - see CPluginInterfaceForThumbLoaderAbstract.
+// These parts are attached to CPluginInterfaceAbstract through CPluginInterfaceAbstract::GetInterfaceForXXX
 
 // flags indicating which functions the plugin provides (which methods of the
 // CPluginInterfaceAbstract descendant are actually implemented in the plugin):
@@ -478,16 +476,17 @@ public:
     // called in response to the About button in the Plugins window or the Help/About Plugins menu command
     virtual void WINAPI About(HWND parent) = 0;
 
-    // called before the plugin is unloaded (naturally only if SalamanderPluginEntry returned
+    // called before the plugin is unloaded (only if SalamanderPluginEntry returned
     // this object and not NULL); returns TRUE if the unload may proceed,
-    // 'parent' is the parent window for message boxes, 'force' is TRUE if the return
+    // 'parent' is the parent window for message boxes; 'force' is TRUE if the return
     // value is ignored; if it returns TRUE, this object and all other objects obtained from it
     // will no longer be used and the plugin will be unloaded; if a critical shutdown is in progress (see
-    // CSalamanderGeneralAbstract::IsCriticalShutdown), nema smysl se usera na cokoliv ptat
-    // (do not open any more windows)
-    // POZOR!!! Je nutne ukoncit vsechny thready pluginu (pokud Release vrati TRUE, vola se
-    // FreeLibrary is called on the plugin .SPL => the plugin code is unmapped from memory => the threads then
-    // have nothing left to execute => usually neither a bug report nor Windows exception info is generated)
+    // CSalamanderGeneralAbstract::IsCriticalShutdown), there is no point in asking the user
+    // anything
+    // (do not open any windows)
+    // WARNING!!! All plugin threads must be terminated (if Release returns TRUE, Salamander calls
+    // FreeLibrary is called on the plugin .SPL, so the plugin code is unmapped from memory and the threads
+    // have nothing left to run; usually neither a bug report nor Windows exception info is generated)
     virtual BOOL WINAPI Release(HWND parent, BOOL force) = 0;
 
     // method for loading the default configuration and for "load/save configuration" (loading from the plugin's private
@@ -511,97 +510,97 @@ public:
     // called to connect the plugin to Salamander; called only after LoadConfiguration,
     // 'parent' is the parent of the message boxes; 'salamander' is the set of methods used to connect the plugin
 
-    /*  PRAVIDLA PRO IMPLEMENTACI METODY CONNECT
-        (pluginy musi mit ulozenou verzi konfigurace - viz DEMOPLUGin,
-         promenna ConfigVersion a konstanta CURRENT_CONFIG_VERSION; nize je
-         nazorny PRIKLAD pridani pripony "dmp2" do DEMOPLUGinu):
+    /*  RULES FOR IMPLEMENTING THE CONNECT METHOD
+        (plugins must store the configuration version - see DEMOPLUGin,
+         variable ConfigVersion and constant CURRENT_CONFIG_VERSION; below is
+         an illustrative EXAMPLE of adding the "dmp2" extension to DEMOPLUGin):
 
-      -s kazdou zmenou je potreba zvysit cislo verze konfigurace - CURRENT_CONFIG_VERSION
-       (v prvni verzi metody Connect je CURRENT_CONFIG_VERSION=1)
-      -do zakladni casti (pred podminky "if (ConfigVersion < YYY)"):
-        -se napise kod pro instalaci pluginu (uplne prvni load pluginu):
-         viz metody CSalamanderConnectAbstract
-        -pri upgradech je nutne aktualizovat seznamy pripon pro instalaci pro "custom archiver
+      -with every change, increase the configuration version number - CURRENT_CONFIG_VERSION
+       (in the first version of the Connect method, CURRENT_CONFIG_VERSION=1)
+      -in the basic section (before the condition "if (ConfigVersion < YYY)"):
+        -write code for plugin installation (the very first plugin load):
+         see methods of CSalamanderConnectAbstract
+        -during upgrades, update the extension lists used for installation for "custom archiver
          unpack" (AddCustomUnpacker), "panel archiver view/edit" (AddPanelArchiver),
-         "file viewer" (AddViewer), polozky menu (AddMenuItem), atd.
-        -u volani AddPanelArchiver a AddViewer nechame 'updateExts' a 'force' FALSE
-         (jinak bysme uzivateli nutili nejen nove, ale i stare pripony, ktere uz treba
-         rucne smazal)
-        -u volani AddCustomPacker/AddCustomUnpacker dame do parametru 'update' podminku
-         "ConfigVersion < XXX", kde XXX je cislo posledni verze, kde se menily
-         pripony pro custom packery/unpackery (obe volani je potreba posuzovat zvlast;
-         zde pro jednoduchost vnutime uzivateli vsechny pripony, pokud si nejake promazal
-         nebo pridal, ma smulu, bude to muset udelat rucne znovu)
-        -AddMenuItem, SetChangeDriveMenuItem a SetThumbnailLoader funguje pri kazdem loadu
-         pluginu stejne (instalace/upgrady se nelisi - vzdy se zacina na zelene louce)
-      -jen pri upgradech: do casti pro upgrady (za zakladni casti):
-        -pridame podminku "if (ConfigVersion < XXX)", kde XXX je nova hodnota
-         konstanty CURRENT_CONFIG_VERSION + pridame komentar od teto verze;
-         v tele teto podminky zavolame:
-          -pokud pribyly pripony pro "panel archiver", zavolame
-           "AddPanelArchiver(PPP, EEE, TRUE)", kde PPP jsou jen nove pripony oddelene
-           strednikem a EEE je TRUE/FALSE ("panel view+edit"/"jen panel view")
-          -pokud pribyly pripony pro "viewer", zavolame "AddViewer(PPP, TRUE)",
-           kde PPP jsou jen nove pripony oddelene strednikem
-          -pokud se maji smazat nejake stare pripony pro "viewer", zavolame
-           pro kazdou takovou priponu PPP "ForceRemoveViewer(PPP)"
-          -pokud se maji smazat nejake stare pripony pro "panel archiver", zavolame
-           pro kazdou takovou priponu PPP "ForceRemovePanelArchiver(PPP)"
+         "file viewer" (AddViewer), menu items (AddMenuItem), etc.
+        -for AddPanelArchiver and AddViewer, keep 'updateExts' and 'force' FALSE
+         (otherwise we would force not only new but also old extensions on the user, even if
+         they had removed them manually)
+        -for AddCustomPacker/AddCustomUnpacker, pass an 'update' condition
+         "ConfigVersion < XXX", where XXX is the last version number in which the
+         custom packer/unpacker extensions changed (the two calls must be evaluated separately;
+         for simplicity here we force all extensions back onto the user, so if they removed
+         or added some, they will have to fix it manually again)
+        -AddMenuItem, SetChangeDriveMenuItem and SetThumbnailLoader work the same on every plugin load
+         (installation/upgrades do not differ - everything always starts from a clean slate)
+      -only during upgrades: in the upgrade section (after the basic section):
+        -add a condition "if (ConfigVersion < XXX)", where XXX is the new value
+         of constant CURRENT_CONFIG_VERSION + add a comment for that version;
+         in the body of that condition call:
+          -if new extensions were added for "panel archiver", call
+           "AddPanelArchiver(PPP, EEE, TRUE)", where PPP are only the new extensions separated
+           by semicolons and EEE is TRUE/FALSE ("panel view+edit"/"panel view only")
+          -if new extensions were added for "viewer", call "AddViewer(PPP, TRUE)",
+           where PPP are only the new extensions separated by semicolons
+          -if some old extensions for "viewer" must be removed, call
+           "ForceRemoveViewer(PPP)" for each such extension PPP
+          -if some old extensions for "panel archiver" must be removed, call
+           "ForceRemovePanelArchiver(PPP)" for each such extension PPP
 
-      KONTROLA: po techto upravach doporucuji vyzkouset, jestli to funguje, jak ma,
-                staci nakompilovat plugin a zkusit ho naloadit do Salama, melo by
-                dojit k automatickemu upgradu z predesle verze (bez potreby
-                vyhozeni a pridani pluginu):
-                -viz menu Options/Configuration:
-                  -Viewery jsou na strance Viewers: najdete pridane pripony,
-                   zkontrolujte, ze odebrane pripony jiz neexistuji
-                  -Panel Archivers jsou na strance Archives Associations in Panels:
-                   najdete pridane pripony
-                  -Custom Unpackers jsou na strance Unackers in Unpack Dialog Box:
-                   najdete vas plugin a zkontrolujte, jestli je seznam masek OK
-                -zkontrolovat novou podobu submenu pluginu (v menu Plugins)
-                -zkontrolovat novou podobu Change Drive menu (Alt+F1/F2)
-                -zkontrolovat v Plugins Manageru (v menu Plugins) masky thumbnaileru:
-                 fokusnout vas plugin, pak zkontrolovat editbox "Thumbnails"
-              +nakonec muzete jeste taky zkusit vyhodit a pridat plugin, jestli
-               funguje "instalace" pluginu: kontrola viz vsechny predesle body
+      CHECK: after these changes, I recommend testing that everything works as expected.
+             It is enough to compile the plugin and try loading it into Salamander; there should
+             be an automatic upgrade from the previous version (without needing
+             to remove and add the plugin again):
+             -see menu Options/Configuration:
+               -Viewers are on the Viewers page: find the added extensions,
+                check that the removed extensions no longer exist
+               -Panel Archivers are on the Archives Associations in Panels page:
+                find the added extensions
+               -Custom Unpackers are on the Unpackers in Unpack Dialog Box page:
+                find your plugin and check that the mask list is correct
+             -check the new form of the plugin submenu (in the Plugins menu)
+             -check the new form of the Change Drive menu (Alt+F1/F2)
+             -check thumbnailer masks in Plugins Manager (in the Plugins menu):
+              focus your plugin, then check the "Thumbnails" edit box
+           +finally, you can also try removing and adding the plugin again to check whether
+            plugin "installation" works: use all the checks listed above
 
-      POZNAMKA: pri pridani pripon pro "panel archiver" je tez potreba doplnit
-                seznam pripon v parametru 'extensions' metody SetBasicPluginData
+      NOTE: when adding extensions for a "panel archiver", it is also necessary to update
+            the extension list in the 'extensions' parameter of SetBasicPluginData
 
-      PRIKLAD PRIDANI PRIPONY "dmp2" VIEWERU A ARCHIVERU:
-        (radky zacinajici na "-" byly odstraneny, radky zacinajici na "+" pridany,
-         symbol "=====" na zacatku radky znaci preruseni souvisleho useku kodu)
-        Prehled zmen:
-          -zvysila se verze konfigurace z 2 na 3:
-            -pridany komentar k verzi 3
-            -zvyseni CURRENT_CONFIG_VERSION na 3
-          -pridani pripony "dmp2" do parametru 'extensions' SetBasicPluginData
-           (protoze pridavame priponu "dmp2" pro "panel archiver")
-          -pridani masky "*.dmp2" do AddCustomUnpacker + zvyseni verze z 1 na 3
-           v podmince (protoze pridavame priponu "dmp2" pro "custom unpacker")
-          -pridani pripony "dmp2" do AddPanelArchiver (protoze pridavame priponu
-           "dmp2" pro "panel archiver")
-          -pridani masky "*.dmp2" do AddViewer (protoze pridavame priponu "dmp2"
-           pro "viewer")
-          -pridani podminky pro upgrade na verzi 3 + komentar tohoto upgradu,
-           telo podminky:
-            -volani AddPanelArchiver pro priponu "dmp2" s 'updateExts' TRUE
-             (protoze pridavame priponu "dmp2" pro "panel archiver")
-            -volani AddViewer pro masku "*.dmp2" s 'force' TRUE (protoze
-             pridavame priponu "dmp2" pro "viewer")
+      EXAMPLE OF ADDING THE "dmp2" EXTENSION TO THE VIEWER AND ARCHIVER:
+        (lines starting with "-" were removed, lines starting with "+" were added,
+         the "=====" symbol at the start of a line means the continuous code section was truncated)
+        Summary of changes:
+          -the configuration version was increased from 2 to 3:
+            -comment added for version 3
+            -CURRENT_CONFIG_VERSION increased to 3
+          -extension "dmp2" added to the 'extensions' parameter of SetBasicPluginData
+           (because we are adding the "dmp2" extension for the "panel archiver")
+          -mask "*.dmp2" added to AddCustomUnpacker + version in the condition increased from 1 to 3
+           (because we are adding the "dmp2" extension for the "custom unpacker")
+          -extension "dmp2" added to AddPanelArchiver (because we are adding extension
+           "dmp2" for the "panel archiver")
+          -mask "*.dmp2" added to AddViewer (because we are adding extension "dmp2"
+           for the "viewer")
+          -condition for upgrade to version 3 added + comment for this upgrade,
+           body of the condition:
+            -call AddPanelArchiver for extension "dmp2" with 'updateExts' TRUE
+             (because we are adding extension "dmp2" for the "panel archiver")
+            -call AddViewer for mask "*.dmp2" with 'force' TRUE (because
+             we are adding extension "dmp2" for the "viewer")
 =====
-  // ConfigVersion: 0 - zadna konfigurace se z Registry nenacetla (jde o instalaci pluginu),
-  //                1 - prvni verze konfigurace
-  //                2 - druha verze konfigurace (pridane nejake hodnoty do konfigurace)
-+ //                3 - treti verze konfigurace (pridani pripony "dmp2")
+  // ConfigVersion: 0 - no configuration was loaded from the Registry (plugin installation),
+  //                1 - first configuration version
+  //                2 - second configuration version (some values added to the configuration)
++ //                3 - third configuration version (the "dmp2" extension added)
 
   int ConfigVersion = 0;
 - #define CURRENT_CONFIG_VERSION 2
 + #define CURRENT_CONFIG_VERSION 3
   const char *CONFIG_VERSION = "Version";
 =====
-  // nastavime zakladni informace o pluginu
+  // set basic plugin information
   salamander->SetBasicPluginData("Salamander Demo Plugin",
                                  FUNCTION_PANELARCHIVERVIEW | FUNCTION_PANELARCHIVEREDIT |
                                  FUNCTION_CUSTOMARCHIVERPACK | FUNCTION_CUSTOMARCHIVERUNPACK |
@@ -618,7 +617,7 @@ public:
   {
     CALL_STACK_MESSAGE1("CPluginInterface::Connect(,)");
 
-    // zakladni cast:
+    // basic section:
     salamander->AddCustomPacker("DEMOPLUG (Plugin)", "dmp", FALSE);
 -   salamander->AddCustomUnpacker("DEMOPLUG (Plugin)", "*.dmp", ConfigVersion < 1);
 +   salamander->AddCustomUnpacker("DEMOPLUG (Plugin)", "*.dmp;*.dmp2", ConfigVersion < 3);
@@ -626,9 +625,9 @@ public:
 +   salamander->AddPanelArchiver("dmp;dmp2", TRUE, FALSE);
 -   salamander->AddViewer("*.dmp", FALSE);
 +   salamander->AddViewer("*.dmp;*.dmp2", FALSE);
-===== (vynechal jsem pridavani polozek do menu, nastavovani ikon a masek thumbnailu)
-    // cast pro upgrady:
-+   if (ConfigVersion < 3)   // verze 3: pridani pripony "dmp2"
+===== (I omitted adding menu items, setting icons and thumbnail masks)
+    // upgrade section:
++   if (ConfigVersion < 3)   // version 3: the "dmp2" extension was added
 +   {
 +     salamander->AddPanelArchiver("dmp2", TRUE, TRUE);
 +     salamander->AddViewer("*.dmp2", TRUE);
@@ -639,8 +638,8 @@ public:
     virtual void WINAPI Connect(HWND parent, CSalamanderConnectAbstract* salamander) = 0;
 
     // releases the 'pluginData' interface that Salamander obtained from the plugin by calling
-    // CPluginInterfaceForArchiverAbstract::ListArchive nebo
-    // CPluginFSInterfaceAbstract::ListCurrentPath; pred timto volanim jeste
+    // CPluginInterfaceForArchiverAbstract::ListArchive or
+    // CPluginFSInterfaceAbstract::ListCurrentPath; before this call,
     // file and directory data (CFileData::PluginData) are released using methods of
     // CPluginDataInterfaceAbstract
     virtual void WINAPI ReleasePluginDataInterface(CPluginDataInterfaceAbstract* pluginData) = 0;
@@ -725,22 +724,23 @@ public:
     // "SalamanderPluginEntry" function) and is only a reference, so it is not released
     virtual CSalamanderDebugAbstract* WINAPI GetSalamanderDebug() = 0;
 
-    // nastaveni zakladnich dat o pluginu (data, ktera si o pluginu spolu se jmenem DLL souboru
-    // Salamander pamatuje), nutne volat, jinak nemuze byt plugin pripojen;
-    // 'pluginName' je jmeno pluginu; 'functions' obsahuje naORovane vsechny funkce, ktere plugin
-    // podporuje (viz konstanty FUNCTION_XXX); 'version'+'copyright'+'description' jsou data pro
-    // uzivatele zobrazovana v okne Plugins; 'regKeyName' je navrhovany nazev soukromeho klice
-    // pro ulozeni konfigurace v registry (bez FUNCTION_LOADSAVECONFIGURATION je ignorovan);
-    // 'extensions' jsou zakladni pripony (napr. jen "ARJ"; "A01", atd. uz ne) zpracovavanych
-    // archivu oddelene ';' (zde nema ';' zadnou escape sekvenci) - Salamander tyto pripony pouziva
-    // jen pri hledani nahrady za odstranene panelove archivatory (nastava pri odstraneni pluginu;
-    // resi se problem "co se ted postara o priponu XXX, kdyz byl puvodni asociovany archivator
-    // odstranen v ramci pluginu PPP?") (bez FUNCTION_PANELARCHIVERVIEW a bez FUNCTION_PANELARCHIVEREDIT
-    // je ignorovan); 'fsName' je navrhovane jmeno (ziskani prideleneho jmena se provede pomoci
-    // CSalamanderGeneralAbstract::GetPluginFSName) file systemu (bez FUNCTION_FILESYSTEM je
-    // ignorovan, povolene znaky jsou 'a-zA-Z0-9_+-', min. delka 2 znaky), pokud plugin potrebuje
-    // vic jmen file systemu, muze pouzit metodu CSalamanderPluginEntryAbstract::AddFSName;
-    // vraci TRUE pri uspesnem prijeti dat
+    // sets the basic plugin data (data Salamander remembers about the plugin together with the DLL file name);
+    // this call is required, otherwise the plugin cannot be connected;
+    // 'pluginName' is the plugin name; 'functions' contains all functions supported by the plugin ORed
+    // together (see FUNCTION_XXX constants); 'version'+'copyright'+'description' are values shown to the
+    // user in the Plugins window; 'regKeyName' is the proposed name of the private key
+    // for storing configuration in the registry (ignored without FUNCTION_LOADSAVECONFIGURATION);
+    // 'extensions' are the basic extensions of handled archives (e.g. just "ARJ"; not "A01", etc.)
+    // separated by ';' (here ';' has no escape meaning) - Salamander uses these extensions
+    // only when searching for a replacement for removed panel archivers (this happens when the plugin is removed;
+    // it solves the problem "which associated archiver should handle extension XXX now
+    // that the original archiver from plugin PPP has been removed?") (ignored without
+    // FUNCTION_PANELARCHIVERVIEW and FUNCTION_PANELARCHIVEREDIT); 'fsName' is the proposed name
+    // (the actually assigned name is obtained by calling
+    // CSalamanderGeneralAbstract::GetPluginFSName) of the file system (ignored without FUNCTION_FILESYSTEM;
+    // allowed characters are 'a-zA-Z0-9_+-', minimum length 2 characters). If the plugin needs
+    // more file-system names, it can use CSalamanderPluginEntryAbstract::AddFSName;
+    // returns TRUE if the data was accepted successfully
     virtual BOOL WINAPI SetBasicPluginData(const char* pluginName, DWORD functions,
                                            const char* version, const char* copyright,
                                            const char* description, const char* regKeyName = NULL,
@@ -757,14 +757,14 @@ public:
     virtual DWORD WINAPI GetLoadInformation() = 0;
 
     // loads the module with language-dependent resources (the SLG module); it always first tries to load the module
-    // for the same language Salamander is currently running in; if it cannot find such a module (or
-    // the version does not match), it lets the user choose an alternative module (if there is more than one
-    // alternative and the user's choice from the previous plugin load is not already stored);
-    // pluginu); pokud nenajde zadny modul, vraci NULL -> plugin by se mel ukoncit;
-    // 'parent' is the parent of the error message boxes and of the dialog for selecting an alternative
+    // for the same language Salamander is currently running in; if no such module is found (or
+    // the version does not match), it lets the user choose an alternative module (if more
+    // than one alternative exists and the user's choice from the previous plugin load is not already stored);
+    // if no module is found, it returns NULL and the plugin should terminate;
+    // 'parent' is the parent window for error message boxes and the dialog for selecting an alternative
     // language module; 'pluginName' is the plugin name (so the user knows which plugin
     // the error message or the alternative language module selection refers to)
-    // POZOR: tuto metodu je mozne volat jen jednou; ziskany handle jazykoveho modulu
+    // WARNING: this method may be called only once; the returned handle to the language module
     //        is released automatically when the plugin is unloaded
     virtual HINSTANCE WINAPI LoadLanguageModule(HWND parent, const char* pluginName) = 0;
 
@@ -790,51 +790,48 @@ public:
 
     // adds another file-system name; without FUNCTION_FILESYSTEM in the 'functions'
     // parameter passed to SetBasicPluginData, this method always fails;
-    // 'fsName' is the proposed name (the assigned file-system name can be obtained with
-    // CSalamanderGeneralAbstract::GetPluginFSName) file systemu (povolene znaky jsou
-    // 'a-zA-Z0-9_+-', min. delka 2 znaky); v 'newFSNameIndex' (nesmi byt NULL) se
-    // vraci index nove pridaneho jmena file systemu; vraci TRUE v pripade uspechu;
-    // vraci FALSE pri fatalni chybe - v tomto pripade se 'newFSNameIndex' ignoruje
+    // 'fsName' is the proposed file-system name (the assigned name can be obtained with
+    // CSalamanderGeneralAbstract::GetPluginFSName); allowed characters are
+    // 'a-zA-Z0-9_+-'; the minimum length is 2 characters; 'newFSNameIndex' (must not be NULL)
+    // receives the index of the newly added file-system name; returns TRUE on success;
+    // returns FALSE on a fatal error - in that case 'newFSNameIndex' is ignored
     // limitation: must not be called before SetBasicPluginData
     virtual BOOL WINAPI AddFSName(const char* fsName, int* newFSNameIndex) = 0;
 };
 
-//
 // ****************************************************************************
 // FSalamanderPluginEntry
 //
 // Open Salamander 1.6 or Later Plugin Entry Point Function Type,
-// tuto funkci plugin vyvazi jako "SalamanderPluginEntry" a Salamander ji vola
-// pro pripojeni pluginu v okamziku loadu pluginu
-// vraci interface pluginu v pripade uspesneho pripojeni, jinak NULL,
-// interface pluginu se uvolnuje volanim jeho metody Release pred unloadem pluginu
+// the plugin exports this function as "SalamanderPluginEntry", and Salamander calls it
+// when the plugin is loaded to connect it;
+// returns the plugin interface if the connection succeeds, otherwise NULL;
+// the plugin interface is released by calling its Release method before the plugin is unloaded
 
 typedef CPluginInterfaceAbstract*(WINAPI* FSalamanderPluginEntry)(CSalamanderPluginEntryAbstract* salamander);
 
-//
 // ****************************************************************************
 // FSalamanderPluginGetReqVer
 //
 // Open Salamander 2.5 Beta 2 or Later Plugin Get Required Version of Salamander Function Type,
-// tuto funkci plugin vyvazi jako "SalamanderPluginGetReqVer" a Salamander ji vola
-// jako prvni funkci pluginu (pred "SalamanderPluginGetSDKVer" a "SalamanderPluginEntry")
-// v okamziku loadu pluginu;
-// vraci verzi Salamandera, pro kterou je plugin staven (nejstarsi verze, do ktere lze plugin nacist)
+// the plugin exports this function as "SalamanderPluginGetReqVer", and Salamander calls it
+// as the first plugin function (before "SalamanderPluginGetSDKVer" and "SalamanderPluginEntry")
+// when the plugin is loaded;
+// returns the Salamander version the plugin was built for (the oldest version into which the plugin can be loaded)
 
 typedef int(WINAPI* FSalamanderPluginGetReqVer)();
 
-//
 // ****************************************************************************
 // FSalamanderPluginGetSDKVer
 //
 // Open Salamander 2.52 beta 2 (PB 22) or Later Plugin Get SDK Version Function Type,
-// tuto funkci plugin volitelne vyvazi jako "SalamanderPluginGetSDKVer" a Salamander
-// ji zkousi volat jako druhou funkci pluginu (pred "SalamanderPluginEntry")
-// v okamziku loadu pluginu;
-// vraci verzi SDK, pouziteho pro stavbu pluginu (informuje Salamandera, ktere metody
-// plugin poskytuje); exportovat "SalamanderPluginGetSDKVer" ma smysl jen pokud vraci
-// "SalamanderPluginGetReqVer" mensi cislo nez LAST_VERSION_OF_SALAMANDER; je vhodne
-// vracet primo LAST_VERSION_OF_SALAMANDER
+// the plugin may optionally export this function as "SalamanderPluginGetSDKVer", and Salamander
+// tries to call it as the second plugin function (before "SalamanderPluginEntry")
+// when the plugin is loaded;
+// returns the SDK version used to build the plugin (it tells Salamander which methods
+// the plugin provides); exporting "SalamanderPluginGetSDKVer" only makes sense if
+// "SalamanderPluginGetReqVer" returns a number smaller than LAST_VERSION_OF_SALAMANDER; it is best
+// to return LAST_VERSION_OF_SALAMANDER directly
 
 typedef int(WINAPI* FSalamanderPluginGetSDKVer)();
 

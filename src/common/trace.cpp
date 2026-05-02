@@ -380,12 +380,12 @@ C__Trace::C__Trace() : TraceStrStream(&TraceStringBuf), TraceStrStreamW(&TraceSt
     // program exit with compiler priority, i.e. after our memory-leak check.
     // So if someone uses a stream to print anything localizable,
     // our debug heap starts reporting memory leaks even though there are none. To prevent
-    // that, we force the locales to create all "facets" now, while
-    // we are not watching the heap yet.
+    // that, we force the locales to create all "facets" now, before
+    // heap tracking starts.
     // For now we use only output streams, and only with strings (without conversion)
-    // and numbers. So sending a number to stringstream should be enough. If
+    // and numbers. So writing a number to a stringstream should be enough. If
     // we start using streams more in the future and the debug heap starts reporting
-    // leaks, we will have to add more input/output here.
+    // leaks, we will have to cover more stream operations here.
     std::stringstream s;
     s << 1;
     std::wstringstream s2;
@@ -494,7 +494,7 @@ BOOL C__Trace::Connect(BOOL onUserRequest)
         // try to open the mutex for access to the shared memory
         HANDLE hOpenConnectionMutex;
         hOpenConnectionMutex = OpenMutex(/*MUTEX_ALL_ACCESS*/ SYNCHRONIZE, FALSE, __OPEN_CONNECTION_MUTEX);
-        if (hOpenConnectionMutex != NULL) // server available
+        if (hOpenConnectionMutex != NULL) // server found
         {
             // acquire ConnectionMutex
             DWORD waitRet;
@@ -1150,7 +1150,7 @@ C__Trace::SendMessageToServer(C__MessageType type, BOOL crash)
             if (msgBoxOpened)
             {
                 while (1)
-                    Sleep(1000); // blokace vede na deadlock napr. kdyz je (a nema byt) TRACE_C v DLL_THREAD_DETACH
+                    Sleep(1000); // Blocking causes a deadlock, for example if TRACE_C is used in DLL_THREAD_DETACH, where it must not be.
             }
         }
     }

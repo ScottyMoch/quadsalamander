@@ -198,8 +198,8 @@ BOOL CHotPathItems::Save(HKEY hKey)
 
             if (*name == 0 && *path == 0 && visible == TRUE)
             {
-                // optimalizace, nebudeme spinit registry pokud to neni nutne
-                // neni pripravene na merge konfiguraci, ale to neni ani zbytek nasi konfigurace
+                // optimization: don't clutter the registry unless needed
+                // not ready for configuration merging, but neither is the rest of our configuration
                 ClearKey(actKey);
                 CloseKey(actKey);
                 DeleteKey(hKey, keyName);
@@ -238,7 +238,7 @@ BOOL CHotPathItems::Load(HKEY hKey)
             CleanName(name);
             if (GetValue(actKey, SALAMANDER_HOTPATHS_PATH, REG_SZ, path, HOTPATHITEM_MAXPATH))
             {
-                if (Configuration.ConfigVersion < 47)            // stara cesta byla limitovana na MAX_PATH, takze se vejde i s expanzi
+                if (Configuration.ConfigVersion < 47)            // the old path limit was MAX_PATH, so it fits with expansion
                     DuplicateDollars(path, HOTPATHITEM_MAXPATH); // pokud je cesta dlouha a obsahuje '$', muze dojit k oriznuti konce; neresim
             }
             GetValue(actKey, SALAMANDER_HOTPATHS_VISIBLE, REG_DWORD, &visible, sizeof(DWORD));
@@ -267,7 +267,7 @@ BOOL CHotPathItems::Load1_52(HKEY hKey)
         itoa(i, keyName, 10);
         if (GetValue(hKey, keyName, REG_SZ, path, MAX_PATH))
         {
-            DuplicateDollars(path, MAX_PATH); // pokud je cesta dlouha a obsahuje '$', muze dojit k oriznuti konce; neresim
+            DuplicateDollars(path, MAX_PATH); // if the path is long and contains '$', the end might be truncated; ignore it
             strcpy(name, path);
         }
 
@@ -357,7 +357,7 @@ CMainWindow::CMainWindow() : ChangeNotifArray(3, 5)
     item = new CViewerMasksItem();
     if (ViewerMasks != NULL && item != NULL)
     {
-        ViewerMasks->Add(item); // kriticka sekce neni treba, jsme v konstruktoru
+        ViewerMasks->Add(item); // no critical section needed, we're in the constructor
         item->Set("*.htm;*.html;*.xml;*.mht", "", "", "");
         item->ViewerType = -4; // IE viewer (4. plug-in v def. konfiguraci)
     }
@@ -365,7 +365,7 @@ CMainWindow::CMainWindow() : ChangeNotifArray(3, 5)
     item = new CViewerMasksItem();
     if (ViewerMasks != NULL && item != NULL)
     {
-        ViewerMasks->Add(item); // kriticka sekce neni treba, jsme v konstruktoru
+        ViewerMasks->Add(item); // no critical section needed, we're in the constructor
         item->Set("*.rpm", "", "", "");
         item->ViewerType = -2; // TAR (2. plug-in v def. konfiguraci)
     }
@@ -373,7 +373,7 @@ CMainWindow::CMainWindow() : ChangeNotifArray(3, 5)
     item = new CViewerMasksItem();
     if (ViewerMasks != NULL && item != NULL)
     {
-        ViewerMasks->Add(item); // kriticka sekce neni treba, jsme v konstruktoru
+        ViewerMasks->Add(item); // no critical section needed, we're in the constructor
         item->Set("*.*", "", "", "");
         item->ViewerType = VIEWER_INTERNAL; // interni viewer
     }
@@ -569,7 +569,7 @@ BOOL CMainWindow::TogglePluginsBar(BOOL storePos)
         if (!PluginsBar->CreateWnd(HTopRebar))
             return FALSE;
         //    IdleForceRefresh = TRUE;   // forcneme update
-        //    IdleRefreshStates = TRUE;  // pri pristim Idle vynutime kontrolu stavovych promennych
+        //    IdleRefreshStates = TRUE;  // on next Idle, enforce a check on status variables
         PluginsBar->CreatePluginButtons();
         InsertPluginsBarBand();
         ShowWindow(PluginsBar->HWindow, SW_SHOW);
@@ -1330,7 +1330,7 @@ void CMainWindow::EditWindowSetDirectory()
         EditWindow->Enable(TRUE); // cached in EditWindow
         EditWindow->SetDirectory(dir);
     }
-    else // disable/hide edit-line
+    else // disable/hide the edit line
     {
         if (EditMode && panel != NULL) // sysvobodime focus z commanline pred jejim disablenim
             FocusPanel(panel, TRUE);
@@ -1397,7 +1397,7 @@ void CMainWindow::SetUnescapedHotPath(int index, const char* path)
         lstrcpyn(HotPathSetBufferName, path, MAX_PATH);
         lstrcpyn(HotPathSetBufferPath, path, HOTPATHITEM_MAXPATH);
         DuplicateDollars(HotPathSetBufferPath, HOTPATHITEM_MAXPATH);
-        // nechame vybalit stranku HotPaths a rozeditovat polozku index
+        // open the HotPaths page and edit item index
         PostMessage(HWindow, WM_USER_CONFIGURATION, 1, index);
     }
     else
@@ -1946,7 +1946,7 @@ void CMainWindow::GetFormatedPathForTitle(char* path)
                                 if (chars < pathLen)
                                     lastChars = chars;
                                 else
-                                    break; // end of path isn't a point of division;bug in GetNextDirectoryLineHotPath implementation
+                                    break; // end of path is not a split point; bug in GetNextDirectoryLineHotPath implementation
                             }
                             trimEnd = path + lastChars;
                         }
@@ -1999,7 +1999,7 @@ void CMainWindow::GetFormatedPathForTitle(char* path)
                             if (chars < pathLen)
                                 lastChars = chars;
                             else
-                                break; // end of path isn't a point of division; bug in GetNextDirectoryLineHotPath implementation
+                                break; // end of path is not a split point; bug in GetNextDirectoryLineHotPath implementation
                         }
                         if (lastChars > 0)
                         {
@@ -3547,7 +3547,7 @@ void CMainWindow_RefreshCommandStates(CMainWindow* obj)
 
 void CMainWindow::RefreshCommandStates()
 {
-    CMainWindow_RefreshCommandStates(this); // this hack exists because we can't obtain the object's method address (as a plain function we can)
+    CMainWindow_RefreshCommandStates(this); // this workaround exists because the address of an object method cannot be obtained here (unlike for a plain function)
 }
 
 void CMainWindow::OnEnterIdle()

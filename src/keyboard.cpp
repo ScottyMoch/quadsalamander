@@ -1,5 +1,6 @@
 ﻿// SPDX-FileCopyrightText: 2023 Open Salamander Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
+// CommentsTranslationProject: TRANSLATED
 
 #include "precomp.h"
 
@@ -73,7 +74,7 @@ BOOL IsSalHotKey(WORD hotKey)
         {
         case NONE:          // select + calculate directory size
         case CONTROL:       // brings current dir to command line
-        case ALT:           // window mwnu
+        case ALT:           // window menu
         case SHIFT:         // quick search
         case CONTROL_SHIFT: // brings current dir to command line (8.3)
             found = TRUE;
@@ -148,7 +149,7 @@ BOOL IsSalHotKey(WORD hotKey)
         {
         case NONE:    // up
         case CONTROL: // scroll up, keep cursor
-        case ALT:     // up to selected item
+        case ALT:     // move to the selected item
         case SHIFT:   // select + up
             found = TRUE;
         }
@@ -175,7 +176,7 @@ BOOL IsSalHotKey(WORD hotKey)
         {
         case NONE:    // down
         case CONTROL: // scroll down, keep cursor
-        case ALT:     // down to selected item
+        case ALT:     // move down to the selected item
         case SHIFT:   // select + down
             found = TRUE;
         }
@@ -512,7 +513,7 @@ BOOL IsSalHotKey(WORD hotKey)
         switch (mods)
         {
         case NONE:    // quick search/type in command line
-        case CONTROL: // files list
+        case CONTROL: // file list
         case ALT:     // enter menu
         case SHIFT:   // change drive
             found = TRUE;
@@ -785,8 +786,8 @@ BOOL IsSalHotKey(WORD hotKey)
         case NONE:          // edit
         case CONTROL:       // sort by extension
         case ALT:           // exit
-        case SHIFT:         // edit new
-        case CONTROL_SHIFT: // edit width
+        case SHIFT:         // edit new file
+        case CONTROL_SHIFT: // edit in wide mode
             found = TRUE;
         }
         break;
@@ -986,12 +987,12 @@ BOOL IsSalHotKey(WORD hotKey)
         break;
     }
 
-    case 0xDC: // '\'
+    case 0xDC: // '\\'
     {
         switch (mods)
         {
         case NONE:    // quick search/type in command line
-        case CONTROL: // root dir
+        case CONTROL: // go to the root directory
             found = TRUE;
         }
         break;

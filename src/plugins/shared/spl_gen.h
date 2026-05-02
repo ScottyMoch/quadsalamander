@@ -13,7 +13,7 @@
 #pragma once
 
 #ifdef _MSC_VER
-#pragma pack(push, enter_include_spl_gen) // aby byly struktury nezavisle na nastavenem zarovnavani
+#pragma pack(push, enter_include_spl_gen) // to keep structures independent of the current packing/alignment setting
 #pragma pack(4)
 #endif // _MSC_VER
 #ifdef __BORLANDC__
@@ -64,8 +64,8 @@ class CPluginDataInterfaceAbstract;
 
 // altap specific
 #define MSGBOXEX_SILENT 0x10000000 // The message box does not play any sound when opened (bit mask)
-// For an MB_YESNO message box, Escape is allowed (generates IDNO); for an MB_ABORTRETRYIGNORE message box,
-// Escape is allowed (generates IDCANCEL) (bit mask)
+// For MB_YESNO message boxes, pressing Escape is allowed and returns IDNO;
+// for MB_ABORTRETRYIGNORE message boxes, pressing Escape is allowed and returns IDCANCEL. (bit mask)
 #define MSGBOXEX_ESCAPEENABLED 0x20000000
 #define MSGBOXEX_HINT 0x40000000 // If CheckBoxText is used, a \t separator is searched for in it and displayed as a hint
 // Vista: the default button will require elevation (an elevated icon is displayed)
@@ -79,7 +79,7 @@ class CPluginDataInterfaceAbstract;
 #define MSGBOXEX_EXMASK 0xF0000000
 
 // Message box return values
-#define DIALOG_FAIL 0x00000000 // The dialog could not be opened
+#define DIALOG_FAIL 0x00000000 // The dialog could not be opened.
 // Individual buttons
 #define DIALOG_OK 0x00000001       // IDOK
 #define DIALOG_CANCEL 0x00000002   // IDCANCEL
@@ -115,7 +115,7 @@ struct MSGBOXEX_PARAMS
 
 /*
 HParent
-  Handle to the owner window. Message box is centered to this window.
+  Handle to the owner window. The message box is centered on this window.
   If this parameter is NULL, the message box has no owner window.
 
 Text
@@ -132,19 +132,17 @@ Flags
    To indicate the buttons displayed in the message box, specify one of the following values.
     MSGBOXEX_OK                   (MB_OK)
       The message box contains one push button: OK. This is the default.
-      Message box can be closed using Escape and return value will be DIALOG_OK (IDOK).
+      The message box can be closed using Escape; the return value will be DIALOG_OK (IDOK).
     MSGBOXEX_OKCANCEL             (MB_OKCANCEL)
       The message box contains two push buttons: OK and Cancel.
     MSGBOXEX_ABORTRETRYIGNORE     (MB_ABORTRETRYIGNORE)
       The message box contains three push buttons: Abort, Retry, and Ignore.
-      Message box can be closed using Escape when MSGBOXEX_ESCAPEENABLED flag is specified.
-      In that case return value will be DIALOG_CANCEL (IDCANCEL).
+      The message box can be closed using Escape when the MSGBOXEX_ESCAPEENABLED flag is specified; in that case the return value will be DIALOG_CANCEL (IDCANCEL).
     MSGBOXEX_YESNOCANCEL          (MB_YESNOCANCEL)
       The message box contains three push buttons: Yes, No, and Cancel.
     MSGBOXEX_YESNO                (MB_YESNO)
       The message box contains two push buttons: Yes and No.
-      Message box can be closed using Escape when MSGBOXEX_ESCAPEENABLED flag is specified.
-      In that case return value will be DIALOG_NO (IDNO).
+      The message box can be closed using Escape when the MSGBOXEX_ESCAPEENABLED flag is specified; in that case the return value will be DIALOG_NO (IDNO).
     MSGBOXEX_RETRYCANCEL          (MB_RETRYCANCEL)
       The message box contains two push buttons: Retry and Cancel.
     MSGBOXEX_CANCELTRYCONTINUE    (MB_CANCELTRYCONTINUE)
@@ -265,8 +263,8 @@ URLText
 #define BUTTONS_YESNOCANCEL 0x00000005      // Yes / No / Cancel
 #define BUTTONS_YESALLCANCEL 0x00000006     // Yes / All / Cancel
 #define BUTTONS_MASK 0x000000FF             // Internal mask, do not use
-// detekci zda kombinace ma tlacitko SKIP nebo YES nechavam zde ve forme inline, aby
-// v pripade zavadeni novych kombinaci byla dobre na ocich a nezapomeli jsme ji doplnit
+// The detection of whether a combination contains the SKIP or YES button is kept inline here
+// so that when new combinations are introduced, it stays visible and we do not forget to add it.
 inline BOOL ButtonsContainsSkip(DWORD btn)
 {
     return (btn & BUTTONS_MASK) == BUTTONS_SKIPCANCEL ||
@@ -402,10 +400,10 @@ struct CSalamanderPluginViewerData
     const char* FileName;
 };
 
-// rozsireni struktury CSalamanderPluginViewerData pro interni text/hex viewer
+// extension of the CSalamanderPluginViewerData structure for the internal text/hex viewer
 struct CSalamanderPluginInternalViewerData : public CSalamanderPluginViewerData
 {
-    int Mode;            // 0 - textovy mod, 1 - hexa mod
+    int Mode;            // 0 - text mode, 1 - hex mode
     const char* Caption; // NULL -> the window caption contains FileName, otherwise Caption
     BOOL WholeCaption;   // Meaningful only if Caption != NULL. TRUE ->
                          // only the Caption string is shown in the viewer title; FALSE ->
@@ -532,7 +530,7 @@ public:
     // 'flags' are algorithm flags (see the SASF_XXX constants)
     virtual void WINAPI Set(const char* pattern, const int length, WORD flags) = 0;
 
-    // nastaveni priznaku algoritmu; 'flags' jsou priznaky algoritmu (viz konstanty SASF_XXX)
+    // sets algorithm flags; 'flags' are algorithm flags (see SASF_XXX constants)
     virtual void WINAPI SetFlags(WORD flags) = 0;
 
     // returns the pattern length (usable only after a successful call to Set)
@@ -608,9 +606,9 @@ public:
 // (WARNING: only the range <0, 499> is reserved for command numbers)
 #define SALCMD_VIEW 0     // view (F3 in the panel)
 #define SALCMD_ALTVIEW 1  // alternate view (Alt+F3 in the panel)
-#define SALCMD_VIEWWITH 2 // view with (klavesa Ctrl+Shift+F3 v panelu)
+#define SALCMD_VIEWWITH 2 // view with (Ctrl+Shift+F3 in the panel)
 #define SALCMD_EDIT 3     // edit (F4 in the panel)
-#define SALCMD_EDITWITH 4 // edit with (klavesa Ctrl+Shift+F4 v panelu)
+#define SALCMD_EDITWITH 4 // edit with (Ctrl+Shift+F4 in the panel)
 
 #define SALCMD_OPEN 20        // open (Enter key in the panel)
 #define SALCMD_QUICKRENAME 21 // quick rename (F2 in the panel)
@@ -622,15 +620,15 @@ public:
 #define SALCMD_PROPERTIES 44    // show properties (Alt+Enter in the panel)
 #define SALCMD_CHANGECASE 45    // change case (Ctrl+F7 in the panel)
 #define SALCMD_CHANGEATTRS 46   // change attributes (Ctrl+F2 in the panel)
-#define SALCMD_OCCUPIEDSPACE 47 // calculate occupied space (klavesa Alt+F10 v panelu)
+#define SALCMD_OCCUPIEDSPACE 47 // calculate occupied space (Alt+F10 in the panel)
 
-#define SALCMD_EDITNEWFILE 70     // edit new file (klavesa Shift+F4 v panelu)
+#define SALCMD_EDITNEWFILE 70     // edit new file (Shift+F4 in the panel)
 #define SALCMD_REFRESH 71         // refresh (Ctrl+R in a panel)
 #define SALCMD_CREATEDIRECTORY 72 // create directory (F7 in a panel)
 #define SALCMD_DRIVEINFO 73       // drive info (Ctrl+F1 in a panel)
-#define SALCMD_CALCDIRSIZES 74    // calculate directory sizes (klavesa Ctrl+Shift+F10 v panelu)
+#define SALCMD_CALCDIRSIZES 74    // calculate directory sizes (Ctrl+Shift+F10 in the panel)
 
-#define SALCMD_DISCONNECT 90 // disconnect (network drive or plugin-fs) (klavesa F12 v panelu)
+#define SALCMD_DISCONNECT 90 // disconnect (network drive or plugin-fs) (F12 in the panel)
 
 #define MAX_GROUPMASK 1001 // maximum number of characters (including the terminating null) in a group mask
 
@@ -652,18 +650,18 @@ public:
 //        AgreeMasks)
 //
 // Object lifetime:
-//   1) Alokujeme metodou CSalamanderGeneralAbstract::AllocSalamanderMaskGroup
+//   1) Allocate it with CSalamanderGeneralAbstract::AllocSalamanderMaskGroup
 //   2) Pass the mask group to SetMasksString.
 //   3) Call PrepareMasks to build the internal data; if it fails,
 //      show the error position and, after correcting the mask, return to step (3)
 //   4) Call AgreeMasks as needed to determine whether a name matches the mask group.
 //   5) After calling SetMasksString again, continue from step (3)
-//   6) Destrukce objektu metodou CSalamanderGeneralAbstract::FreeSalamanderMaskGroup
+//   6) Destroy the object with CSalamanderGeneralAbstract::FreeSalamanderMaskGroup
 //
 // Mask:
 //   '?' - any character
 //   '*' - any string, including an empty one
-//   '#' - libovolna cislice (pouze je-li 'extendedMode'==TRUE)
+//   '#' - any digit (only if 'extendedMode'==TRUE)
 //
 //   Examples:
 //     *     - all names
@@ -710,13 +708,13 @@ public:
 //
 // Object lifetime:
 //
-//   1) Alokujeme metodou CSalamanderGeneralAbstract::AllocSalamanderMD5
+//   1) Allocate it using CSalamanderGeneralAbstract::AllocSalamanderMD5
 //   2) Call Update() repeatedly for the data whose MD5 should be computed
 //   3) Call Finalize()
 //   4) Retrieve the computed MD5 with GetDigest()
 //   5) If you want to reuse the object, call Init()
 //      (it is called automatically in step (1)) and continue with step (2)
-//   6) Destrukce objektu metodou CSalamanderGeneralAbstract::FreeSalamanderMD5
+//   6) Destroy the object using CSalamanderGeneralAbstract::FreeSalamanderMD5
 //
 class CSalamanderMD5
 {
@@ -725,8 +723,8 @@ public:
     // this method is published so the allocated object can be reused multiple times
     virtual void WINAPI Init() = 0;
 
-    // aktualizuje vnitrni stav objektu na zaklade bloku dat urceneho promennou 'input',
-    // 'input_length' udava velikost bufferu v bajtech
+    // updates the internal object state from the data block specified by 'input',
+    // 'input_length' specifies the buffer size in bytes
     virtual void WINAPI Update(const void* input, DWORD input_length) = 0;
 
     // Prepares the MD5 for retrieval by GetDigest
@@ -738,7 +736,7 @@ public:
     virtual void WINAPI GetDigest(void* dest) = 0;
 };
 
-#define SALPNG_GETALPHA 0x00000002    // pri vytvareni DIB se nastavi take alpha kanal (jinak bude roven 0)
+#define SALPNG_GETALPHA 0x00000002    // when creating the DIB, the alpha channel is also initialized (otherwise it would be 0)
 #define SALPNG_PREMULTIPLE 0x00000004 // Meaningful only when SALPNG_GETALPHA is set; premultiplies the RGB components so AlphaBlend() can be called on the bitmap with BLENDFUNCTION::AlphaFormat == AC_SRC_ALPHA
 
 class CSalamanderPNGAbstract
@@ -765,7 +763,7 @@ public:
     //         with 8 bits per channel
 };
 
-// vsechny metody je mozne volat pouze z hlavniho threadu
+// all methods may be called only from the main thread
 class CSalamanderPasswordManagerAbstract
 {
 public:
@@ -808,13 +806,13 @@ public:
 // commands for HTML help: see CSalamanderGeneralAbstract::OpenHtmlHelp
 enum CHtmlHelpCommand
 {
-    HHCDisplayTOC,     // viz HH_DISPLAY_TOC: dwData = 0 (zadny topic) nebo: pointer to a topic within a compiled help file
+    HHCDisplayTOC,     // see HH_DISPLAY_TOC: dwData = 0 (no topic) or: pointer to a topic within a compiled help file
     HHCDisplayIndex,   // see HH_DISPLAY_INDEX: dwData = 0 (no keyword) or: keyword to select in the index (.hhk) file
-    HHCDisplaySearch,  // viz HH_DISPLAY_SEARCH: dwData = 0 (prazdne hledani) nebo: pointer to an HH_FTS_QUERY structure
-    HHCDisplayContext, // viz HH_HELP_CONTEXT: dwData = numeric ID of the topic to display
+    HHCDisplaySearch,  // see HH_DISPLAY_SEARCH: dwData = 0 (empty search) or: pointer to an HH_FTS_QUERY structure
+    HHCDisplayContext, // see HH_HELP_CONTEXT: dwData = numeric ID of the topic to display
 };
 
-// slouzi jako parametr OpenHtmlHelpForSalamander pri command==HHCDisplayContext
+// used as a parameter of OpenHtmlHelpForSalamander when command==HHCDisplayContext
 #define HTMLHELP_SALID_PWDMANAGER 1 // displays help for Password Manager
 
 class CPluginFSInterfaceAbstract;
@@ -850,19 +848,19 @@ public:
     // FlashWindow(mainwnd, FALSE) is called after it is closed; mainwnd is the parent of 'hParent'
     // that no longer has a parent (typically the Salamander main window).
     //
-    // SalMessageBox naplni strukturu MSGBOXEX_PARAMS (hParent->HParent, lpText->Text,
-    // lpCaption->Caption and uType->Flags; all other structure members are zeroed and
-    // SalMessageBoxEx is then called, so only SalMessageBoxEx is described below.
+    // SalMessageBox fills the MSGBOXEX_PARAMS structure (hParent->HParent, lpText->Text,
+    // lpCaption->Caption and uType->Flags; all other structure members are zeroed) and
+    // then calls SalMessageBoxEx, so only SalMessageBoxEx is described below.
     //
     // SalMessageBoxEx tries to behave as much as possible like the Windows API functions
     // MessageBox and MessageBoxIndirect. The differences are:
     //   - the message box is centered on hParent (if it is a child window, the non-child parent is used)
     //   - for MB_YESNO/MB_ABORTRETRYIGNORE message boxes, it is possible to enable
     //     closing the window with Escape or by clicking the title-bar close box (flag
-    //     MSGBOXEX_ESCAPEENABLED); navratova hodnota pak bude IDNO/IDCANCEL
+    //     MSGBOXEX_ESCAPEENABLED); the return value will then be IDNO/IDCANCEL
     //   - the beep can be suppressed (flag MSGBOXEX_SILENT)
     //
-    // Komentar k uType viz komentar k MSGBOXEX_PARAMS::Flags
+    // Comment for uType: see comment for MSGBOXEX_PARAMS::Flags
     //
     // Return Values
     //    DIALOG_FAIL       (0)            The function fails.
@@ -904,7 +902,7 @@ public:
     // FlashWindow(mainwnd, TRUE) is called before the dialog is shown and
     // FlashWindow(mainwnd, FALSE) is called after it is closed; mainwnd is the parent of 'parent'
     // that no longer has a parent (typically the Salamander main window)
-    // ERROR: filename+error+title (pokud 'title' == NULL, jde o std. titulek "Error")
+    // ERROR: filename+error+title (if 'title' == NULL, the standard title "Error" is used)
     //
     // The 'flags' variable specifies the displayed buttons; DialogError accepts one of:
     // BUTTONS_OK               // OK                                    (old DialogError3)
@@ -922,7 +920,7 @@ public:
     virtual int WINAPI DialogOverwrite(HWND parent, DWORD flags, const char* fileName1, const char* fileData1,
                                        const char* fileName2, const char* fileData2) = 0;
 
-    // QUESTION: filename+question+title (pokud 'title' == NULL, jde o std. titulek "Question")
+    // QUESTION: filename+question+title (if 'title' == NULL, the standard title "Question" is used)
     // The 'flags' variable specifies the displayed buttons; DialogQuestion accepts one of:
     // BUTTONS_YESALLSKIPCANCEL // Yes / All / Skip / Skip all / Cancel  (old DialogQuestion)
     // BUTTONS_YESNOCANCEL      // Yes / No / Cancel                     (old DialogQuestion2)
@@ -1102,9 +1100,9 @@ public:
     // can be called from any thread
     virtual void WINAPI GetLowerAndUpperCase(unsigned char** lowerCase, unsigned char** upperCase) = 0;
 
-    // prevod retezce 'str' na mala/velka pismena; narozdil od ANSI C tolower/toupper pracuje
-    // rovnou s retezcem a podporuje nejen znaky 'A' az 'Z' (prevod na mala pismena provadi pres
-    // pole inicializovane Win32 API funkci CharLower)
+    // converts string 'str' to lowercase/uppercase; unlike ANSI C tolower/toupper it works
+    // directly on the string and supports more than just characters 'A' to 'Z' (conversion to lowercase is performed via
+    // an array initialized by the Win32 API function CharLower)
     virtual void WINAPI ToLowerCase(char* str) = 0;
     virtual void WINAPI ToUpperCase(char* str) = 0;
 
@@ -1220,7 +1218,7 @@ public:
     // Compares n bytes of the two blocks of memory stored at buf1 and buf2.
     // Characters are converted to lowercase before comparing (not permanently;
     // using LowerCase array which was filled using CharLower Win32 API call),
-    // so case is ignored in comparation.
+    // so case is ignored in comparison.
     //
     // Parameters
     //   buf1, buf2: memory buffers to compare
@@ -1235,16 +1233,16 @@ public:
     virtual int WINAPI MemICmp(const void* buf1, const void* buf2, int n) = 0;
 
     // Case-insensitive comparison of strings 's1' and 's2';
-    // je-li SALCFG_SORTUSESLOCALE TRUE, pouziva razeni podle regionalniho nastaveni Windows,
-    // otherwise it compares them the same way as CSalamanderGeneral::StrICmp; if SALCFG_SORTDETECTNUMBERS
-    // TRUE, pouziva ciselne razeni pro cisla obsazene v retezcich
+    // if SALCFG_SORTUSESLOCALE is TRUE, Windows regional collation is used,
+    // otherwise they are compared the same way as CSalamanderGeneral::StrICmp; if SALCFG_SORTDETECTNUMBERS is
+    // TRUE, numeric sorting is used for numbers contained in the strings
     // returns <0 ('s1' < 's2'), ==0 ('s1' == 's2'), >0 ('s1' > 's2')
     virtual int WINAPI RegSetStrICmp(const char* s1, const char* s2) = 0;
 
     // Compares strings 's1' and 's2' (with lengths 'l1' and 'l2') case-insensitively.
-    // pismen (ignore-case), je-li SALCFG_SORTUSESLOCALE TRUE, pouziva razeni podle
-    // Windows regional settings; otherwise it compares them the same way as CSalamanderGeneral::StrICmp,
-    // je-li SALCFG_SORTDETECTNUMBERS TRUE, pouziva ciselne razeni pro cisla obsazene
+    // If SALCFG_SORTUSESLOCALE is TRUE, Windows regional collation is used,
+    // otherwise it compares them the same way as CSalamanderGeneral::StrICmp;
+    // if SALCFG_SORTDETECTNUMBERS is TRUE, numeric sorting is used for numbers contained
     // in the strings; if 'numericalyEqual' is not NULL, it returns TRUE if the strings are
     // numerically equal (for example, "a01" and "a1"); it is automatically TRUE if the strings are equal
     // returns <0 ('s1' < 's2'), ==0 ('s1' == 's2'), >0 ('s1' > 's2')
@@ -1259,9 +1257,9 @@ public:
     virtual int WINAPI RegSetStrCmp(const char* s1, const char* s2) = 0;
 
     // Case-sensitive comparison of strings 's1' and 's2' (with lengths 'l1' and 'l2'); if
-    // SALCFG_SORTUSESLOCALE TRUE, pouziva razeni podle regionalniho nastaveni Windows,
+    // SALCFG_SORTUSESLOCALE is TRUE, Windows regional collation is used,
     // otherwise it compares them the same way as the standard C library function strcmp; if
-    // SALCFG_SORTDETECTNUMBERS TRUE, pouziva ciselne razeni pro cisla obsazene v retezcich;
+    // SALCFG_SORTDETECTNUMBERS is TRUE, numeric sorting is used for numbers contained in the strings;
     // in 'numericalyEqual' (if not NULL), it returns TRUE if the strings are numerically equal
     // (e.g. "a01" and "a1"); it is automatically TRUE if the strings are equal
     // returns <0 ('s1' < 's2'), ==0 ('s1' == 's2'), >0 ('s1' > 's2')
@@ -1402,9 +1400,9 @@ public:
     // main thread only (otherwise the panel contents may change)
     virtual BOOL WINAPI GetPanelWithPluginFS(CPluginFSInterfaceAbstract* pluginFS, int& panel) = 0;
 
-    // aktivuje druhy panel (ala klavesa TAB); panely oznacene pres PANEL_SOURCE a PANEL_TARGET
-    // se tim prirozene prohazuji
-    // omezeni: hlavni thread
+    // Activates the other panel (like the TAB key); the panels designated by PANEL_SOURCE and
+    // PANEL_TARGET naturally swap as a result.
+    // Restriction: main thread
     virtual void WINAPI ChangePanel() = 0;
 
     // Converts a number to a more readable string (a space after every three digits), writes the string to
@@ -1624,8 +1622,8 @@ public:
     // Duplicates '&'; useful for paths displayed in menus ('&&' is displayed as '&'). 'buffer' is an input/output string, and 'bufferSize' is the size of 'buffer' in bytes. Returns TRUE if duplicating '&' did not truncate characters from the end of the string, that is, the buffer was large enough. Callable from any thread.
     virtual BOOL WINAPI DuplicateAmpersands(char* buffer, int bufferSize) = 0;
 
-    // odstrani '&' z textu; najde-li dvojici "&&", nahradi ji jednim znakem '&'
-    // mozne volat z libovolneho threadu
+    // removes '&' from the text; if it finds the pair "&&", it replaces it with a single '&'
+    // can be called from any thread
     virtual void WINAPI RemoveAmpersands(char* text) = 0;
 
     // ValidateVarString and ExpandVarString:
@@ -1653,9 +1651,9 @@ public:
     // marks the calling plugin to be unloaded at the next possible opportunity
     // (once all posted menu commands have been processed (see PostMenuExtCommand), there are no
     // messages in the main-thread message queue, and Salamander is not "busy");
-    // POZOR: pokud se vola z jineho nez hlavniho threadu, muze dojit k zadosti o unload (probiha
-    // in the main thread) even before PostUnloadThisPlugin returns (for more information about
-    // unloadu - viz CPluginInterfaceAbstract::Release)
+    // WARNING: if this is called from a thread other than the main thread, the unload request
+    // (processed in the main thread) may be posted even before PostUnloadThisPlugin returns
+    // (for more information about unloading, see CPluginInterfaceAbstract::Release)
     // callable from any thread, but only after the plugin entry point has finished; while the
     // entry point is running, the method may be called only from the main thread
     virtual void WINAPI PostUnloadThisPlugin() = 0;
@@ -1695,7 +1693,7 @@ public:
     // WARNING: if called from a thread other than the main thread, the menu command may run
     // (in the main thread) even before PostMenuExtCommand returns
     // callable from any thread, and if 'waitForSalIdle' is FALSE, it is necessary to wait until after calling
-    // CPluginInterfaceAbstract::GetInterfaceForMenuExt (vola se po entry-pointu z hlavniho threadu)
+    // CPluginInterfaceAbstract::GetInterfaceForMenuExt (called after the entry point from the main thread)
     virtual void WINAPI PostMenuExtCommand(int id, BOOL waitForSalIdle) = 0;
 
     // Determines whether there is a high chance, though this cannot be known with certainty, that Salamander will not be "busy" during the next few moments (no modal dialog open and no message being processed); in that case it returns TRUE, otherwise FALSE. If 'lastIdleTime' is not NULL, it receives the GetTickCount() value from the last transition from the "idle" state to the "busy" state. This can be used, for example, as a prediction for the delivery of a command posted with CSalamanderGeneralAbstract::PostMenuExtCommand and 'waitForSalIdle'==TRUE. Callable from any thread.
@@ -1800,7 +1798,7 @@ public:
     // 'showCloseButton' specifies whether the window contains a Close button; equivalent to the Escape key
     virtual void WINAPI CreateSafeWaitWindow(const char* message, const char* caption,
                                              int delay, BOOL showCloseButton, HWND hForegroundWnd) = 0;
-    // zavreni okenka
+    // closing the window
     virtual void WINAPI DestroySafeWaitWindow() = 0;
     // Hide/show the window (if it is open); call in response to WM_ACTIVATE from hForegroundWnd:
     //    case WM_ACTIVATE:
@@ -1890,7 +1888,7 @@ public:
 
     // Returns conversion tables one by one (loaded from convert\XXX\convert.cfg
     // in the Salamander installation - XXX is the currently used conversion-table directory);
-    // 'parent' je parent messageboxu (je-li NULL, je parent hlavni okno);
+    // 'parent' is the parent of the message box (if NULL, the main window is the parent);
     // 'index' is an input/output variable pointing to an int that is 0 on the first call;
     // the function stores the value for the next call on return (usage: initialize it to 0, then
     // do not modify it); returns FALSE if there is no next table; if it returns TRUE,
@@ -1898,7 +1896,7 @@ public:
     // underlined character in the menu) or NULL if it is a separator, and 'table' (if not NULL)
     // contains a pointer to a 256-byte conversion table or NULL if it is a separator; the 'name'
     // and 'table' pointers remain valid for the entire Salamander run (you do not need to copy them)
-    // POZOR: ukazatel 'table' pouzivat timto zpusobem (nutne pretypovani na "unsigned"):
+    // WARNING: use pointer 'table' this way (cast to "unsigned" is required):
     //        *s = table[(unsigned char)*s]
     // Can be called from any thread
     virtual BOOL WINAPI EnumConversionTables(HWND parent, int* index, const char** name, const char** table) = 0;
@@ -1926,10 +1924,10 @@ public:
     // Determines from buffer 'pattern' of length 'patternLen' (e.g. the first 10000 characters) whether it is
     // text (there is a code page in which it contains only permitted characters - printable
     // and control) and, if it is text, also determines its most likely code page;
-    // 'parent' je parent messageboxu (je-li NULL, je parent hlavni okno); je-li 'forceText'
-    // TRUE, neprovadi se kontrola na nepovolene znaky (pouziva se, pokud 'pattern' obsahuje
+    // 'parent' is the parent of the message box (if NULL, the main window is the parent); if 'forceText'
+    // is TRUE, the check for disallowed characters is skipped (used when 'pattern' contains
     // text); if 'isText' is not NULL, TRUE is returned in it if the buffer is text; if 'codePage'
-    // NULL, jde o buffer (min. 101 znaku) pro jmeno kodove stranky (nejpravdepodobnejsi)
+    // is not NULL, it is a buffer (min. 101 characters) for the code-page name (the most likely one)
     // Can be called from any thread
     virtual void WINAPI RecognizeFileType(HWND parent, const char* pattern, int patternLen, BOOL forceText,
                                           BOOL* isText, char* codePage) = 0;
@@ -1956,21 +1954,21 @@ public:
     // Can be called from any thread
     virtual BYTE WINAPI GetUserDefaultCharset() = 0;
 
-    // alokuje novy objekt Boyer-Moorova vyhledavaciho algoritmu
-    // mozne volat z libovolneho threadu
+    // Allocates a new object for the Boyer-Moore search algorithm.
+    // Can be called from any thread.
     virtual CSalamanderBMSearchData* WINAPI AllocSalamanderBMSearchData() = 0;
 
-    // uvolni objekt Boyer-Moorova vyhledavaciho algoritmu (ziskany metodou AllocSalamanderBMSearchData)
-    // mozne volat z libovolneho threadu
+    // Releases the Boyer-Moore search object obtained by AllocSalamanderBMSearchData.
+    // Can be called from any thread.
     virtual void WINAPI FreeSalamanderBMSearchData(CSalamanderBMSearchData* data) = 0;
 
-    // alokuje novy objekt algoritmu pro vyhledavani pomoci regularnich vyrazu
-    // mozne volat z libovolneho threadu
+    // Allocates a new object for regular-expression searching.
+    // Can be called from any thread.
     virtual CSalamanderREGEXPSearchData* WINAPI AllocSalamanderREGEXPSearchData() = 0;
 
-    // uvolni objekt algoritmu pro vyhledavani pomoci regularnich vyrazu (ziskany metodou
-    // AllocSalamanderREGEXPSearchData)
-    // mozne volat z libovolneho threadu
+    // Releases the regular-expression search object obtained by
+    // AllocSalamanderREGEXPSearchData.
+    // Can be called from any thread.
     virtual void WINAPI FreeSalamanderREGEXPSearchData(CSalamanderREGEXPSearchData* data) = 0;
 
     // Returns Salamander commands one by one (in the definition order of SALCMD_XXX constants);
@@ -2045,12 +2043,12 @@ public:
     //
     virtual DWORD WINAPI UpdateCrc32(const void* buffer, DWORD count, DWORD crcVal) = 0;
 
-    // alokuje novy objekt pro vypocet MD5
-    // mozne volat z libovolneho threadu
+    // Allocates a new object for MD5 calculation.
+    // Can be called from any thread.
     virtual CSalamanderMD5* WINAPI AllocSalamanderMD5() = 0;
 
-    // uvolni objekt pro vypocet MD5 (ziskany metodou AllocSalamanderMD5)
-    // mozne volat z libovolneho threadu
+    // Releases the MD5 object obtained by AllocSalamanderMD5.
+    // Can be called from any thread.
     virtual void WINAPI FreeSalamanderMD5(CSalamanderMD5* md5) = 0;
 
     // Finds '<' and '>' pairs in the text, removes them from the buffer, and adds references to
@@ -2116,7 +2114,7 @@ public:
     //      primary display monitor, some of the point's coordinates may be negative values.
     //
     // Return Values
-    //   If the default window position lies on the primary monitor or some error occured,
+    //   If the default window position lies on the primary monitor or some error occurred,
     //   the return value is FALSE and you should use CreateWindow with CW_USEDEFAULT in
     //   the 'x' parameter.
     //
@@ -2870,14 +2868,14 @@ public:
     // Shows a security icon in panel 'panel' (a locked or unlocked padlock, for example FTPS uses it to inform
     // the user that the connection to the server is secured with SSL and that the server identity is either
     // verified (locked padlock) or not verified (unlocked padlock)); 'panel' is one of PANEL_XXX;
-    // je-li 'showIcon' TRUE, ikona se ukaze, jinak se schova; 'isLocked' urcuje, jestli jde
-    // whether the padlock is locked (TRUE) or unlocked (FALSE); if 'tooltip' is not NULL, it is the text shown
+    // if 'showIcon' is TRUE, the icon is shown, otherwise it is hidden; 'isLocked' determines whether
+    // the padlock is locked (TRUE) or unlocked (FALSE); if 'tooltip' is not NULL, it is the text shown
     // when the mouse hovers over the icon (if it is NULL, no text is shown); if clicking the security icon should
     // perform an action (for example, FTPS displays a server certificate dialog), it must be added to the
-    // serveru), je nutne ji pridat do metody CPluginFSInterfaceAbstract::ShowSecurityInfo file-systemu
-    // displayed in the panel;
+    // file-system's CPluginFSInterfaceAbstract::ShowSecurityInfo method
+    // shown for the file system displayed in the panel;
     // NOTE: a suitable place to show the security icon for an FS is when handling
-    // FSE_PATHCHANGED, to uz je FS v panelu (jestli se ma nebo nema ikona zobrazit se muze urcit
+    // FSE_PATHCHANGED, once the FS is already in the panel (whether the icon should be shown or hidden can be determined
     // in ChangePath or ListCurrentPath)
     // NOTE: the security icon is automatically hidden immediately before the panel path changes or
     // before a refresh (for an FS, this means immediately after a successful ListCurrentPath call; for archives,
@@ -2992,7 +2990,7 @@ public:
     // LockMainWindow
     //   Locks main window to pretend it is disabled. Main windows is still able to receive focus
     //   in the locked state. Set 'lock' to TRUE to lock main window and to FALSE to revert it back
-    //   to normal state. 'hToolWnd' is reserverd parameter, set it to NULL. 'lockReason' is (optional,
+    //   to normal state. 'hToolWnd' is a reserved parameter, set it to NULL. 'lockReason' is (optional,
     //   can be NULL) describes the reason for main window locked state. It will be displayed during
     //   attempt to close locked main window; content of string is copied to internal structure
     //   so buffer can be deallocated after return from LockMainWindow().
@@ -3111,7 +3109,7 @@ public:
     // valid icons from the array; when system colors change, the plugin should reload the icon-overlays and
     // set them again with this function; the ideal reaction is to handle PLUGINEVENT_COLORSCHANGED in
     // CPluginInterfaceAbstract::Event()
-    // POZOR: pred Windows XP (ve W2K) je velikost ikony SALICONSIZE_48 jen 32 bodu!
+    // WARNING: before Windows XP (on W2K), the SALICONSIZE_48 icon is only 32 pixels in size!
     // limitation: main thread
     virtual void WINAPI SetPluginIconOverlays(int iconOverlaysCount, HICON* iconOverlays) = 0;
 

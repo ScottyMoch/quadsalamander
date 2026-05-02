@@ -1,5 +1,6 @@
 ﻿// SPDX-FileCopyrightText: 2023 Open Salamander Authors
 // SPDX-License-Identifier: GPL-2.0-or-later
+// CommentsTranslationProject: TRANSLATED
 
 #pragma once
 
@@ -23,14 +24,14 @@ typedef void (*FRefillInBuffer)(CDecompressionObject*);
 
 typedef struct
 {
-    //public fields, should be intialized before calling Inflate()
+    //public fields, should be initialized before calling Inflate()
     uch* NextByte;      //pointer to next byte in the input buffer
     unsigned BytesLeft; //number of bytes left in buffer
                         //i.e. number of valid bytes pointed
                         //by NextByte
     void* UserData;     //pointer to a user data
     int Error;          //error state (0 = no error), could be set
-                        //by arbitrary funcion at every time
+                        //by arbitrary function at every time
                         //checked in NextByte() function (inflate.cpp)
 
     //internal fields
@@ -48,7 +49,7 @@ typedef struct
 
 typedef int (*FFlushOutput)(unsigned, CDecompressionObject*);
 //first parameter is number of bytes to be flushed
-//return zero if succesfull, non zero value if failed
+//return zero if successful, non zero value if failed
 
 typedef struct
 {
@@ -72,7 +73,7 @@ typedef struct
 //decopmression object
 
 typedef int (*FProgressMonitor)(CDecompressionObject*);
-//if return zero value decompression is aborted
+// If zero is returned, decompression is aborted.
 
 struct tagCDecompressionObject
 {
@@ -99,7 +100,7 @@ struct tagCDecompressionObject
     unsigned Flag;          //general purpose bit flag
 
     //unshrink + unreduce
-    unsigned __int64 CompBytesLeft; //bytes left to decompress
+    unsigned __int64 CompBytesLeft; //compressed bytes left to decompress
 
     //unreduce
     int Method;
