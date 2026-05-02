@@ -4,7 +4,7 @@
 STRINGTABLE
 {
  // main menu
- IDS_MENU_LEFT,              "&TopLeft"
+ IDS_MENU_LEFT,              "Top&Left"
  IDS_MENU_LEFT_CHANGEDRIVE,  "&Change Drive\tAlt+F1"
  IDS_MENU_LEFT_GO,           "&Go To"
  IDS_MENU_LEFT_GO_BACK,      "&Back\tAlt+Left Arrow"
@@ -153,11 +153,11 @@ STRINGTABLE
  IDS_MENU_OPT_CST_BOTTOMLEFT, "&Bottom Left Panel Toolbar..." 
  IDS_MENU_OPT_CST_BOTTOMRIGHT,"&Bottom Right Panel Toolbar..."
 
- IDS_MENU_RIGHT,             "&TopRight"
+ IDS_MENU_RIGHT,             "Top&Right"
  IDS_MENU_RIGHT_CHANGEDRIVE, "&Change Drive\tAlt+F2"
- IDS_MENU_BOTTOMLEFT,             "BottomLeft"
+ IDS_MENU_BOTTOMLEFT,             "&BottomLeft"
  IDS_MENU_BOTTOMLEFT_CHANGEDRIVE, "&Change Drive\tAlt+F3" 
- IDS_MENU_BOTTOMRIGHT,             "BottomRight" 
+ IDS_MENU_BOTTOMRIGHT,             "BottomRigh&t" 
  IDS_MENU_BOTTOMRIGHT_CHANGEDRIVE, "&Change Drive\tAlt+F4"
 
 
