@@ -912,8 +912,8 @@ CWindowQueue::~CWindowQueue()
 {
     if (!Empty())
         TRACE_ET(_T("Some window is still opened in ") << QueueName << _T(" queue!")); // should not happen...
-    // there is no multithreading risk here anymore (the app is shutting down, the threads are/were terminated)
-    // deallocate at least some memory
+// there is no multithreading risk here anymore (the app is shutting down and the threads have been terminated)
+// deallocate at least some memory
     CWindowQueueItem* last;
     CWindowQueueItem* item = Head;
     while (item != NULL)
@@ -1107,7 +1107,7 @@ void CTransferInfo::EditLine(int ctrlID, double& value, TCHAR* format, BOOL sele
             BOOL decPoints = FALSE;
             BOOL expPart = FALSE;
             if (*s == _T('-') || *s == _T('+'))
-                s++;        // skip the digit
+                s++;        // skip the sign
             while (*s != 0) // convert comma to period
             {
                 if (!expPart && !decPoints && (*s == _T(',') || *s == _T('.')))
@@ -1142,7 +1142,7 @@ void CTransferInfo::EditLine(int ctrlID, double& value, TCHAR* format, BOOL sele
                 value = _tcstod(buff, &stopString); // only if the string is a number
             }
             else
-                value = 0; // on error, set zero
+                value = 0; // on error, set it to zero
             break;
         }
         }
@@ -1173,7 +1173,7 @@ void CTransferInfo::EditLine(int ctrlID, int& value, BOOL select)
 
             TCHAR* s = buff;
             if (*s == _T('-') || *s == _T('+'))
-                s++;        // skip the digit
+                s++;        // skip the sign
             while (*s != 0) // validate the number
             {
                 if (*s < _T('0') || *s > _T('9'))
@@ -1187,7 +1187,7 @@ void CTransferInfo::EditLine(int ctrlID, int& value, BOOL select)
             }
 
             TCHAR* endptr;
-            value = _tcstoul(buff, &endptr, 10); // replacement for atoi / _ttoi, which returns 2147483647 instead of 4000000000 because it uses signed int
+            value = _tcstoul(buff, &endptr, 10); // replacement for atoi / _ttoi, which return 2147483647 instead of 4000000000 because they use signed int
             break;
         }
         }
@@ -1227,7 +1227,7 @@ void CTransferInfo::EditLine(int ctrlID, __int64& value, BOOL select, BOOL unsig
             TCHAR* s = buff;
             BOOL minus = !unsignedNum && *s == _T('-');
             if (!unsignedNum && *s == _T('-') || *s == _T('+'))
-                s++; // skip the digit
+                s++; // skip the sign
             unsigned __int64 num = 0;
             BOOL overflow = FALSE;
             while (*s != 0) // validate the number
@@ -1257,7 +1257,7 @@ void CTransferInfo::EditLine(int ctrlID, __int64& value, BOOL select, BOOL unsig
             }
             if (*s != 0)
             {
-                value = 0; // on error, set zero
+                value = 0; // on error, set it to zero
                 break;
             }
 

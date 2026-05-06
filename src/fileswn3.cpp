@@ -784,7 +784,7 @@ BOOL CFilesWindow::ReadDirectory(HWND parent, BOOL isRefresh)
                                     *ifaces++ = foundThumbLoaderPlugins[i2]->GetPluginInterfaceForThumbLoader();
                                 }
                                 *ifaces = NULL;      // the end of list of plugin interfaces
-                                iconData.SetFlag(4); // so far no unread thumbnail
+                                iconData.SetFlag(4); // thumbnail not loaded yet
 
                                 // we must allocate space for the thumbnail here; it cannot be done in the thread
                                 iconData.SetIndex(IconCache->AllocThumbnail());
@@ -1834,7 +1834,7 @@ BOOL AddWin64RedirectedDirAux(const char* path, const char* subDir, const char* 
                 if (found)
                 {
                     if (deleteIndex != -1)
-                        dirs->Delete(deleteIndex); // there's is a directory here, we will delete it, redirected-dir has priority (redirector ignores this directory)
+                        dirs->Delete(deleteIndex); // there is a directory here, we will delete it; redirected-dir has priority (redirector ignores this directory)
                     lstrcpyn(fileData->cFileName, redirectedDirLastComp, MAX_PATH);
                     fileData->cAlternateFileName[0] = 0;
 
@@ -2455,7 +2455,7 @@ CHANGE_AGAIN:
                 if (newDir != NULL)
                 {
                     if (useStopRefresh)
-                        EndStopRefresh(); // snopper will be started again
+                        EndStopRefresh(); // snooper will be started again
                     if (failReason != NULL)
                         *failReason = textFailReason;
                     return FALSE; // Stop here; cannot retry.
@@ -2523,7 +2523,7 @@ BOOL CFilesWindow::ChangePathToDrvType(HWND parent, int driveType, const char* d
 void CFilesWindow::ChangeDrive(char drive)
 {
     CALL_STACK_MESSAGE2("CFilesWindow::ChangeDrive(%u)", drive);
-    //--- DefaultDire refresh
+    //--- DefaultDir refresh
     MainWindow->UpdateDefaultDir(MainWindow->GetActivePanel() != this);
     //---  possible disk selection from the dialog
     CFilesWindow* anotherPanel = Parent->GetOtherPanel(this);

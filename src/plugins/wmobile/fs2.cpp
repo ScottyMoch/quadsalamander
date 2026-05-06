@@ -1537,7 +1537,7 @@ CPluginFSInterface::CopyOrMoveFromFS(BOOL copy, int mode, const char* fsName, HW
                 userPart = secondPart;
                 if ((userPart - targetPath) - 1 == (int)strlen(fsName) &&
                     SalamanderGeneral->StrNICmp(targetPath, fsName, (int)(userPart - targetPath) - 1) == 0)
-                { // different FS, report only "not supported"
+                { // it is CEFS
                     diskPath = FALSE;
                     ok = TRUE;
                 }
@@ -1679,7 +1679,7 @@ CPluginFSInterface::CopyOrMoveFromFS(BOOL copy, int mode, const char* fsName, HW
     HWND parentWin;
     while ((parentWin = GetParent(mainWnd)) != NULL && IsWindowEnabled(parentWin))
         mainWnd = parentWin;
-    // disablujeme 'mainWnd'
+    // Disable 'mainWnd'.
 
     CProgress2Dlg dlg(mainWnd, LoadStr(copy ? IDS_COPY : IDS_MOVE), LoadStr(copy ? IDS_COPYING : IDS_MOVING), LoadStr(IDS_TO), ooStatic); // use 'ooStatic' so the modeless dialog can live on the stack
 

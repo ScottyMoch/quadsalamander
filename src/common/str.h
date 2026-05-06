@@ -71,8 +71,8 @@ int StrICmp(const char* s1, const char* s2);
 //
 // Parameters
 //   s1, s2: strings to compare
-//   l1    : compared length of s1 (must be less or equal to strlen(s1))
-//   l2    : compared length of s2 (must be less or equal to strlen(s2))
+//   l1    : compared length of s1 (must be less than or equal to strlen(s1))
+//   l2    : compared length of s2 (must be less than or equal to strlen(s2))
 //
 // Return Values
 //   -1 if s1 < s2 (if substring pointed to by s1 is less than the substring pointed to by s2)
@@ -212,7 +212,7 @@ inline int SWPrintFToEnd_s(WCHAR* _Dst, size_t _SizeInWords, const WCHAR* _Forma
 //
 // SPrintFToEnd_s
 //
-// The only difference from sprintf_s is that it writes after the text already
+// The only difference from swprintf_s is that it writes after the text already
 // in the buffer
 
 template <size_t _Size>

@@ -1585,9 +1585,9 @@
 // plugins manager: thumbnail extensions is empty string: "(none)"
 #define IDS_PLUGINTHUMBNONE          12114
 
-// pluing shortcuts dialog box: Command
+// plugin shortcuts dialog box: Command
 #define IDS_PLUGIN_COMMAND           12115
-// pluing shortcuts dialog box: Shortcut Keys
+// plugin shortcuts dialog box: Shortcut Keys
 #define IDS_PLUGIN_KEY               12116
 
 // command line parameters of Salamander: invalid parameters, usage: ...
@@ -1947,7 +1947,7 @@
 
 // ****************************************************************************
 // ****************************************************************************
-// konec sekce obycejnych textu (misto pro vkladani dalsich obyc. textu)
+// End of the ordinary text section (space for adding more ordinary text).
 // ****************************************************************************
 // ****************************************************************************
 
@@ -2349,7 +2349,7 @@
 #define IDS_CNFRM_CLOSEARCHIVE          13477
 #define IDS_CNFRM_ONCREATEDIR           13478
 
-//                        rezervovat do 13550
+//                        reserve up to 13550
 #define IDS_CANCLOSESALAMANDER          13551
 
 // Do you want to close Find?

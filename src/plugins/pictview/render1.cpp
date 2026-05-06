@@ -1961,7 +1961,7 @@ LRESULT CRendererWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
             KillTimer(HWindow, IMGSEQ_TIMER_ID);
         }
         DragAcceptFiles(HWindow, FALSE);
-        if (Loading) //Ooops. Someone is closing our window, but we are still decompressing!
+        if (Loading) // Oops. Someone is closing our window, but we are still decompressing!
         {
             Canceled = TRUE;
             break; // j.r. verify this path
@@ -2024,7 +2024,7 @@ LRESULT CRendererWindow::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         if ((XStretchedRange > 65535) && ((LOWORD(wParam) == SB_THUMBPOSITION) || (LOWORD(wParam) == SB_THUMBTRACK)))
         {
-            // We need 32-bit accurary
+            // We need 32-bit accuracy
             SCROLLINFO si;
 
             si.fMask = SIF_TRACKPOS;

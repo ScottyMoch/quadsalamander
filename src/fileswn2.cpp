@@ -1826,7 +1826,7 @@ BOOL CFilesWindow::ChangePathToDisk(HWND parent, const char* path, int suggested
                 cannotList = !CommonRefresh(parent, suggestedTopIndex, suggestedFocusName, refreshListBox, TRUE, isRefresh); // repeat the listing; this one should fail
             }
             if (cannotList)
-            { // the selected path can't be listed ("access denied" or low_memory) or it was alreadydeleted
+            { // the selected path can't be listed ("access denied" or low_memory) or it was already deleted
 
             FIXED_DRIVE:
 
@@ -3289,7 +3289,7 @@ BOOL CFilesWindow::ChangePathToDetachedFS(int fsIndex, int suggestedTopIndex,
         fsNameIndex = pluginFS->GetPluginFSNameIndex();
     }
     if (mode == -1)
-        mode = newUserPart == NULL ? 1 : 2 /* refresh nebo history */;
+        mode = newUserPart == NULL ? 1 : 2 /* refresh or history */;
 
     if (mode != 3 && canFocusFileName)
     {
