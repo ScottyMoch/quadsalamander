@@ -40,8 +40,8 @@ protected:
     int SelectionEnd;
 
 public:
-    // 'history' determines whether the dialog will contain a combobox (TRUE) or an editline (FALSE)
-    // 'directoryHelper' specifies if a resource with a button behind the editline will be used to select a directory
+    // 'history' determines whether the dialog will contain a combo box (TRUE) or an edit line (FALSE)
+    // 'directoryHelper' specifies if a resource with a button behind the edit line will be used to select a directory
     // 'selectionEnd' specifies up to which character the name is selected (used for quick rename), -1 == all
     CCopyMoveDialog(HWND parent, char* path, int pathBufSize, char* title,
                     CTruncatedString* subject, DWORD helpID,
@@ -92,8 +92,8 @@ protected:
     CButton* MoreButton;
 
 public:
-    // 'history' determines whether the dialog will contain a combobox (TRUE) or an editline (FALSE)
-    // 'directoryHelper' specifies if a resource with a button behind the editline will be used to select a directory
+    // 'history' determines whether the dialog will contain a combo box (TRUE) or an edit line (FALSE)
+    // 'directoryHelper' specifies if a resource with a button behind the edit line will be used to select a directory
     CCopyMoveMoreDialog(HWND parent, char* path, int pathBufSize, char* title,
                         CTruncatedString* subject, DWORD helpID,
                         char* history[], int historyCount, CCriteriaData* criteriaInOut,
@@ -257,12 +257,12 @@ public:
     void SetDlgData(CProgressDlgArrItem* dlg, HANDLE dlgThread, HWND dlgWindow);
 
     // removes the 'dlg' structure from the array; 'dlg->DlgThread' must be NULL;
-    // call only if starting the dialog for which 'dlg' was acquired via 
+    // call only if starting the dialog for which 'dlg' was acquired via
     // PrepareNewDlg() function failed
     void RemoveDlg(CProgressDlgArrItem* dlg);
 
     // removes all dialogs whose threads have already finished from the array (closes their handles);
-    // returns the number of still running operation dialog threads (so when it returns zero, 
+    // returns the number of still running operation dialog threads (so when it returns zero,
     // for example Salamander can be terminated)
     int RemoveFinishedDlgs();
 
@@ -271,8 +271,8 @@ public:
     void ClearDlgWindow(HWND hdlg);
 
     // returns the next open dialog; if no dialog is open, returns NULL;
-    // before the first call set 'index' to 0, use the returned value of 'index' 
-    // for subsequent calls (do not touch 'index' between calls); dialogs are returned 
+    // before the first call set 'index' to 0, use the returned value of 'index'
+    // for subsequent calls (do not touch 'index' between calls); dialogs are returned
     // in cycles (after the last one it returns to the first)
     HWND GetNextOpenedDlg(int* index);
 
@@ -281,7 +281,7 @@ public:
     // know it should terminate)
     void PostCancelToAllDlgs();
 
-    // sends a message to all dialogs that the icon (color) has changed and needs 
+    // sends a message to all dialogs that the icon (color) has changed and needs
     // to be set again; call only from the main thread
     void PostIconChange();
 };
@@ -298,8 +298,8 @@ class CStaticText;
 class CProgressBar;
 struct CStartProgressDialogData;
 
-// returns FALSE if the progress dialog could not be opened in the new thread or 
-// if starting an operation in the worker thread failed in this dialog; when FALSE 
+// returns FALSE if the progress dialog could not be opened in the new thread or
+// if starting an operation in the worker thread failed in this dialog; when FALSE
 // is returned the caller must free the script 'script' manually (otherwise the script
 // is freed after the operation in the worker thread finishes)
 BOOL StartProgressDialog(COperations* script, const char* caption,
@@ -1278,7 +1278,7 @@ class CSharesDialog : public CCommonDialog
 {
 protected:
     HWND HListView;
-    CShares SharedDirs; // keep our own instance so nobody 
+    CShares SharedDirs; // keep our own instance so nobody
                         // refreshes it in the background
     BYTE SortBy;        // indicates the column used for sorting
     int FocusedIndex;   // used to return the value
@@ -1350,8 +1350,8 @@ public:
     ~CDisconnectDialog();
 
     const char* GetFocusedPath();                 // returns the path of the selected share; call only after Execute() returns
-                                  // returns NULL if the "Focus" button was not pressed and the dialog returned IDOK
-                                  // from Execute()
+                                                  // returns NULL if the "Focus" button was not pressed and the dialog returned IDOK
+                                                  // from Execute()
     BOOL NoConnection() { return NoConncection; } // returns TRUE if the dialog wasn't opened because there was no connection
 
 protected:
@@ -1520,7 +1520,7 @@ public:
     // changes progress relatively
     void AddSize(const CQuadWord& size);
 
-    // distributes messages; returns FALSE if the user cancelled the operation
+    // distributes messages; returns FALSE if the user canceled the operation
     BOOL Continue();
 
     void FlushDataToControls(); // passes stored values to controls for display

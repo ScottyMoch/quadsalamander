@@ -36,7 +36,7 @@ void ReleaseSalShLib();
 
 // returns TRUE if the data object contains only a "fake" directory; in 'fakeType' (if not NULL) it returns
 // 1 if the source is an archive and 2 if the source is the filesystem; if the source is the filesystem and 'srcFSPathBuf' is not NULL,
-// it returns the source filesystem path ('srcFSPathBufSize' is the size of the 'srcFSPathBuf' buffer)
+// Returns the source filesystem path ('srcFSPathBufSize' is the size of the 'srcFSPathBuf' buffer)
 BOOL IsFakeDataObject(IDataObject* pDataObject, int* fakeType, char* srcFSPathBuf, int srcFSPathBufSize);
 
 //
@@ -89,7 +89,7 @@ public:
     }
 
     STDMETHOD(QueryInterface)
-    (REFIID, void FAR * FAR*);
+    (REFIID, void FAR* FAR*);
     STDMETHOD_(ULONG, AddRef)
     (void) { return ++RefCount; }
     STDMETHOD_(ULONG, Release)
@@ -266,7 +266,7 @@ public:
     void SetCutOrCopyDone() { CutOrCopyDone = TRUE; }
 
     STDMETHOD(QueryInterface)
-    (REFIID, void FAR * FAR*);
+    (REFIID, void FAR* FAR*);
     STDMETHOD_(ULONG, AddRef)
     (void)
     {

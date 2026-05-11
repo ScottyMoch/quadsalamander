@@ -261,7 +261,7 @@ public:
     BOOL CopySecurity;          // preserve NTFS permissions; FALSE = don't care = perform no extra handling and accept any result
     BOOL CopyAttrs;             // preserve the Archive, Encrypted, and Compressed attributes; FALSE = don't care = perform no extra handling and accept any result
     BOOL PreserveDirTime;       // preserve directory timestamps (during Move we detect unintended changes and fix them manually; works e.g. on Samba)
-    BOOL StartOnIdle;           // should start only when nothing else is running
+    BOOL StartOnIdle;           // should start only when no other operation is running
     BOOL SourcePathIsNetwork;   // TRUE = the source path is a network path (UNC or mapped drive)
 
     // for the status line in the progress dialog (Copy and Move only)
@@ -370,7 +370,7 @@ public:
 
     // adds an operation to the queue; returns TRUE on success, otherwise the addition failed (not enough memory);
     // 'dlg' is the handle of the operation dialog window; 'startOnIdle' is TRUE if the operation should start
-    // only when nothing else is running; in 'startPaused' (must not be NULL) it returns TRUE when
+    // only when no other operation is running; in 'startPaused' (must not be NULL) it returns TRUE when
     // the added operation should start "paused", otherwise it starts "running"
     BOOL AddOperation(HWND dlg, BOOL startOnIdle, BOOL* startPaused);
 
@@ -514,7 +514,7 @@ typedef struct
 // returns TRUE); if 'streamNamesCount' is not NULL, it returns the number of elements
 // in 'streamNames'; if 'lowMemory' is not NULL, it returns TRUE when an out-of-memory
 // error occurs (possible only when 'streamNames' is not NULL); if 'winError' is not NULL,
-// it returns the Windows error code (NO_ERROR if none occurred - if a Windows error occurs,
+// Returns the Windows error code (NO_ERROR if none occurred - if a Windows error occurs,
 // the function always returns FALSE); the function returns TRUE if the file/directory
 // contains any ADS, otherwise FALSE; 'bytesPerCluster' is the cluster size
 // used to compute the disk space occupied by the ADS (0 = unknown size);

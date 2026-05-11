@@ -5,7 +5,7 @@
 #include "precomp.h"
 
 // ****************************************************************************
-// support for filling the combobox with default behavior when errors occur during operations
+// support for filling the combo box with default behavior when errors occur during operations
 
 int OperDefFileAlreadyExists[] = {IDS_OPERATIONSUSERPROMPT, IDS_OPERATIONSAUTORENAME, IDS_OPERATIONSRESUME,
                                   IDS_OPERATIONSRESUMEOROVERWR, IDS_OPERATIONSOVERWRITE,
@@ -1063,11 +1063,11 @@ void COperDlgListView::Attach(HWND hListView, COperationDlg* operDlg, BOOL consO
     if (dlgFont != NULL || SystemFont != NULL)
         SendMessage(HToolTip, WM_SETFONT, (WPARAM)(dlgFont != NULL ? dlgFont : SystemFont), TRUE);
 
-// SetWindowPos(HWND_TOPMOST) is commented out because otherwise message boxes above the operation dialog do not work correctly:
-// when Alt+TAB switches to a message box, the operation dialog is not activated automatically
-// (not brought to the front).
-//  SetWindowPos(HToolTip, HWND_TOPMOST, 0, 0, 0, 0,
-//               SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE);
+    // SetWindowPos(HWND_TOPMOST) is commented out because otherwise message boxes above the operation dialog do not work correctly:
+    // when Alt+TAB switches to a message box, the operation dialog is not activated automatically
+    // (not brought to the front).
+    //  SetWindowPos(HToolTip, HWND_TOPMOST, 0, 0, 0, 0,
+    //               SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOSIZE);
 
     SendMessage(HToolTip, TTM_SETDELAYTIME, TTDT_INITIAL, 0);
     SendMessage(HToolTip, TTM_SETDELAYTIME, TTDT_RESHOW, 0);
@@ -1235,9 +1235,9 @@ COperDlgListView::WindowProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
             if (pt.x + width > monRect.right)
                 pt.x = monRect.right - width;
 
-// SetWindowPos(HWND_TOPMOST) is commented out because otherwise message boxes above the operation dialog do not work correctly:
-// when Alt+TAB switches to a message box, the operation dialog is not activated automatically
-// (not brought to the front).
+            // SetWindowPos(HWND_TOPMOST) is commented out because otherwise message boxes above the operation dialog do not work correctly:
+            // when Alt+TAB switches to a message box, the operation dialog is not activated automatically
+            // (not brought to the front).
             /*
         SetWindowPos(HToolTip, HWND_TOPMOST,
                      pt.x,

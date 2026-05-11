@@ -1181,7 +1181,7 @@ int CUDF::UnpackFile(CSalamanderForOperationsAbstract* salamander, const char* s
                 // picb->Offset is nonzero only for small (less than a sector) files inlined within File Entry
                 if (!file.Write(sector + picb->Offset, nbytes, &written, name, NULL))
                 {
-// The error message was already displayed by SafeWriteFile().
+                    // The error message was already displayed by SafeWriteFile().
                     ret = UNPACK_CANCEL;
                     bFileComplete = FALSE;
                     break;
@@ -1209,7 +1209,7 @@ int CUDF::UnpackFile(CSalamanderForOperationsAbstract* salamander, const char* s
             if (!SetFileAttributes(name, attrs))
                 Error(LoadStr(IDS_CANT_SET_ATTRS), GetLastError(), silent == 1);
 
-            // the user cancelled the operation
+            // the user canceled the operation
             // delete the incomplete file afterwards
             if (!DeleteFile(name))
                 Error(LoadStr(IDS_CANT_DELETE_TEMP_FILE), GetLastError(), silent == 1);

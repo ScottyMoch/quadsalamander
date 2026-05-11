@@ -48,7 +48,7 @@ public:
     }
 
     STDMETHOD(QueryInterface)
-    (REFIID refiid, void FAR * FAR * ppv)
+    (REFIID refiid, void FAR* FAR* ppv)
     {
         if (refiid == IID_IUnknown || refiid == IID_IDropTarget)
         {
@@ -374,7 +374,7 @@ public:
                     BOOL shell = FALSE;
 
                     // CMainWindow::UserMenu was changed so that if it does not launch through the Shell,
-                    // it calls ShellExecuteEx instead of CreateProcess; therefore quotes are no longer needed
+                    // Calls ShellExecuteEx instead of CreateProcess; therefore quotes are no longer needed
                     /*
             // if it is not an executable file (.exe, .com, .bat, .pif),
             // wrap the name in quotes and launch it through the shell

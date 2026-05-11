@@ -580,7 +580,7 @@ BOOL CExFATSnapshot<CHAR>::EncodeClusterChains(CRunsBuffer<CHAR>* tmpRunsBuffer,
                 delete[] runs;
                 return String<CHAR>::Error(IDS_UNDELETE, IDS_LOWMEM);
             }
-            stream->FirstLCN = 0; // not needed anymore, encoded in data runs
+            stream->FirstLCN = 0; // no longer needed, encoded in data runs
             stream->Ptrs = ptrs;
             ptrs->StartVCN = 0;
             ptrs->LastVCN = (stream->DSSize - 1) / this->Volume->BytesPerCluster;
@@ -741,7 +741,7 @@ BOOL CExFATSnapshot<CHAR>::Update(CSnapshotProgressDlg* progress, DWORD udFlags,
     if (this->UdFlags & UF_ESTIMATEDAMAGE)
         EstimateFileDamage(deletedFiles, clusterMap);
 
-    // we can destroy {Metafiles} virtual directory now if not needed anymore
+    // we can destroy {Metafiles} virtual directory now if no longer needed
     if ((this->UdFlags & UF_SHOWMETAFILES) == 0 && VirtualDirsCount == 2)
     {
         FreeRecord2(this->Root->DirItems[this->Root->NumDirItems - 1].Record);
@@ -916,7 +916,7 @@ BOOL CExFATSnapshot<CHAR>::FilterExistingDirectories(FILE_RECORD_I<CHAR>* record
 {
     CALL_STACK_MESSAGE_NONE
     //CALL_STACK_MESSAGE1("CExFATSnapshot::FilterExistingDirectories()");
-    // remove existing directories which contains only existing files and directories
+    // remove existing directories that contain only existing files and directories
     // (single deleted subdirectory of subfile means we cannot remove this directory)
     DWORD j = 0;
     for (DWORD i = 0; i < record->NumDirItems; i++)
@@ -943,7 +943,7 @@ BOOL CExFATSnapshot<CHAR>::FilterEmptyDirectories(FILE_RECORD_I<CHAR>* record)
     CALL_STACK_MESSAGE_NONE
     //CALL_STACK_MESSAGE1("CExFATSnapshot::FilterEmptyDirectories()");
 
-    // remove directories which contains only further directories (doesn't contain files)
+    // remove directories that contain only further directories (doesn't contain files)
     DWORD j = 0;
     for (DWORD i = 0; i < record->NumDirItems; i++)
     {
@@ -1269,7 +1269,7 @@ BOOL CExFATSnapshot<CHAR>::EstimateFileDamage(const FILE_RECORD_I<CHAR>* deleted
         if (clusterMap != NULL)
         {
             // files with Condition FC_FAIR or FC_POOR render as "2 - there are more then one delete file in this place"
-            // because we should return map of clusters which are not used by existing files and files which could be recovered (FC_GOOD)
+            // because we should return map of clusters that are not used by existing files and files which could be recovered (FC_GOOD)
             for (i = 0; i < deletedFiles->NumDirItems; i++)
             {
                 FILE_RECORD_I<CHAR>* r = deletedFiles->DirItems[i].Record;

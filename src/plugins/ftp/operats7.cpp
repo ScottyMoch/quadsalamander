@@ -268,7 +268,7 @@ void CFTPWorker::WaitForPASVRes(CFTPWorkerEvent event, char* reply, int replySiz
                 HANDLES(LeaveCriticalSection(&WorkerCritSect));
 
                 // Since we are already in CSocketsThread::CritSect, these calls
-                // can also be made from CSocket::SocketCritSect (no deadlock risk).
+                // can also be called while holding CSocket::SocketCritSect (no deadlock risk).
                 if (WorkerDataCon != NULL)
                 {
                     WorkerDataCon->SetPassive(ip, port, logUID);
@@ -317,7 +317,7 @@ void CFTPWorker::WaitForPASVRes(CFTPWorkerEvent event, char* reply, int replySiz
         {
             HANDLES(LeaveCriticalSection(&WorkerCritSect));
             // Since we are already in CSocketsThread::CritSect, this call
-            // can also be made from CSocket::SocketCritSect (no deadlock risk).
+            // can also be called while holding CSocket::SocketCritSect (no deadlock risk).
             DeleteSocket(WorkerDataCon); // no connection has been established yet; it will only be deallocated
             WorkerDataCon = NULL;
             HANDLES(EnterCriticalSection(&WorkerCritSect));
@@ -836,8 +836,8 @@ void CFTPWorker::HandleEventInWorkingState2(CFTPWorkerEvent event, BOOL& sendQui
                     if (FTP_DIGIT_1(replyCode) != FTP_D1_SUCCESS ||
                         !WorkerDataCon->IsTransfering(&trFinished) && !trFinished)
                     { // the server returned a listing error or the connection was not established
-// Since we are already in CSocketsThread::CritSect, this call
-// is allowed even from CSocket::SocketCritSect (no deadlock risk)
+                        // Since we are already in CSocketsThread::CritSect, this call
+                        // is allowed even from CSocket::SocketCritSect (no deadlock risk)
                         if (WorkerDataCon->IsConnected())
                         {                                       // close the "data connection", the system will attempt a "graceful"
                             WorkerDataCon->CloseSocketEx(NULL); // shutdown (we will not learn about the result)
@@ -971,7 +971,7 @@ void CFTPWorker::HandleEventInWorkingState2(CFTPWorkerEvent event, BOOL& sendQui
                     if (lowMem) // the "data connection" reports out-of-memory ("always false")
                     {
                         // Since we are already inside CSocketsThread::CritSect, this call
-                        // can also be made from CSocket::SocketCritSect (no deadlock risk).
+                        // can also be called while holding CSocket::SocketCritSect (no deadlock risk).
                         DeleteSocket(WorkerDataCon);
                         WorkerDataCon = NULL;
                         HANDLES(EnterCriticalSection(&WorkerCritSect));
@@ -985,7 +985,7 @@ void CFTPWorker::HandleEventInWorkingState2(CFTPWorkerEvent event, BOOL& sendQui
                     {
                         if (err != NO_ERROR && !IsConnected())
                         { // the LIST reply arrived, but while waiting for the transfer to finish over the data connection
-// both connections were interrupted (data connection and control connection) -> RETRY
+                            // both connections were interrupted (data connection and control connection) -> RETRY
 
                             // Since we are already in CSocketsThread::CritSect, this call
                             // is allowed even from CSocket::SocketCritSect (no deadlock risk)
@@ -1534,8 +1534,8 @@ void CFTPWorker::HandleEventInWorkingState2(CFTPWorkerEvent event, BOOL& sendQui
                                                         CFTPQueueItemDir* parentItem = (CFTPQueueItemDir*)(ftpQueueItems->At(ftpQueueItems->Count - 1)); // it must necessarily be a descendant of CFTPQueueItemDir (each "parent" item has the counts Skipped+Failed+NotDone)
                                                         parentItem->SetStateAndNotDoneSkippedFailed(childItemsNotDone, childItemsSkipped,
                                                                                                     childItemsFailed, childItemsUINeeded);
-// Now all new items are represented only by the "parent" item -> count
-// the new NotDone + Skipped + Failed + UINeeded only for this item
+                                                        // Now all new items are represented only by the "parent" item -> count
+                                                        // the new NotDone + Skipped + Failed + UINeeded only for this item
                                                         childItemsNotDone = 1;
                                                         childItemsFailed = 0;
                                                         childItemsSkipped = 0;

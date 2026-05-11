@@ -592,7 +592,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
             case fwssConWaitingForIP: // delete the WORKER_CONTIMEOUTTIMID timer
             {
                 // because we are already inside CSocketsThread::CritSect, this call is also possible
-                // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of dead-lock)
+                // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of deadlock)
                 SocketsThread->DeleteTimer(UID, WORKER_CONTIMEOUTTIMID);
                 break;
             }
@@ -612,7 +612,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
             case fwssConWaitForSystRes:      // close the connection and delete the WORKER_TIMEOUTTIMERID timer (it might no longer exist, but that does not matter)
             {
                 // since we are already in CSocketsThread::CritSect, this call
-                                // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
+                // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
                 SocketsThread->DeleteTimer(UID, WORKER_TIMEOUTTIMERID);
                 closeSocket = TRUE;
                 break;
@@ -663,7 +663,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                 else // we only have a host name
                 {
                     // since we are already in CSocketsThread::CritSect, this call
-                                        // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
+                    // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
                     BOOL getHostByAddressRes = GetHostByAddress(host, ++IPRequestUID);
                     RefreshCopiesOfUIDAndMsg(); // refresh the UID+Msg copies (they changed)
                     if (!getHostByAddressRes)
@@ -681,7 +681,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                         if (serverTimeout < 1000)
                             serverTimeout = 1000; // at least one second
                         // because we are already inside CSocketsThread::CritSect, this call is also possible
-                        // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of dead-lock)
+                        // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of deadlock)
                         SocketsThread->AddTimer(Msg, UID, GetTickCount() + serverTimeout,
                                                 WORKER_CONTIMEOUTTIMID, NULL); // ignore the error, at worst the user hits Stop
 
@@ -699,7 +699,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                 case fweIPReceived:
                 {
                     // because we are already inside CSocketsThread::CritSect, this call is also possible
-                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of dead-lock)
+                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of deadlock)
                     SocketsThread->DeleteTimer(UID, WORKER_CONTIMEOUTTIMID);
                     SubState = fwssConConnect;
                     run = TRUE;
@@ -709,7 +709,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                 case fweIPRecFailure:
                 {
                     // because we are already inside CSocketsThread::CritSect, this call is also possible
-                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of dead-lock)
+                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of deadlock)
                     SocketsThread->DeleteTimer(UID, WORKER_CONTIMEOUTTIMID);
                     SubState = fwssConReconnect;
                     run = TRUE;
@@ -760,7 +760,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
 
                 DWORD error;
                 // since we are already in CSocketsThread::CritSect, this call
-                                // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
+                // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
                 BOOL conRes = ConnectWithProxy(serverIP, port, proxyType, &error, host, hostPort,
                                                proxyUser, proxyPassword, hostIP);
                 RefreshCopiesOfUIDAndMsg(); // refresh the UID+Msg copies (they changed)
@@ -775,7 +775,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                     if (serverTimeout < 1000)
                         serverTimeout = 1000; // at least one second
                     // because we are already inside CSocketsThread::CritSect, this call is also possible
-                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of dead-lock)
+                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of deadlock)
                     SocketsThread->AddTimer(Msg, UID, GetTickCount() + serverTimeout,
                                             WORKER_CONTIMEOUTTIMID, NULL); // ignore the error, at worst the user hits Stop
 
@@ -800,7 +800,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                 case fweConnected:
                 {
                     // because we are already inside CSocketsThread::CritSect, this call is also possible
-                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of dead-lock)
+                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of deadlock)
                     SocketsThread->DeleteTimer(UID, WORKER_CONTIMEOUTTIMID);
 
                     // set the worker state to wait for a command reply (even though we did not
@@ -810,7 +810,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                     if (serverTimeout < 1000)
                         serverTimeout = 1000; // at least one second
                     // because we are already inside CSocketsThread::CritSect, this call is also possible
-                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of dead-lock)
+                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of deadlock)
                     SocketsThread->AddTimer(Msg, UID, GetTickCount() + serverTimeout,
                                             WORKER_TIMEOUTTIMERID, NULL); // ignore the error, at worst the user hits Stop
 
@@ -822,7 +822,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                 case fweConnectFailure:
                 {
                     // because we are already inside CSocketsThread::CritSect, this call is also possible
-                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of dead-lock)
+                    // from within CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no risk of deadlock)
                     SocketsThread->DeleteTimer(UID, WORKER_CONTIMEOUTTIMID);
                     SubState = fwssConReconnect;
                     run = TRUE;
@@ -1178,7 +1178,7 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                                 BOOL retryLoginWithoutAsking;
                                 if (FTP_DIGIT_1(replyCode) == FTP_D1_TRANSIENTERROR)
                                 { // convenient handling of the "too many users" error - retry immediately without prompting
-// possible issue: this code may be followed by a message that requires changing the user/password
+                                    // possible issue: this code may be followed by a message that requires changing the user/password
                                     retryLoginWithoutAsking = TRUE;
                                 }
                                 else
@@ -1363,13 +1363,13 @@ void CFTPWorker::HandleEventInConnectingState(CFTPWorkerEvent event, BOOL& sendQ
                         ConnectAttemptNumber++;
 
                         // since we are already in CSocketsThread::CritSect, this call
-                                                // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
+                        // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
                         SocketsThread->DeleteTimer(UID, WORKER_RECONTIMEOUTTIMID);
 
                         // start a timer for the next connect attempt
                         int delayBetweenConRetries = Config.GetDelayBetweenConRetries() * 1000;
                         // since we are already in CSocketsThread::CritSect, this call
-                                                // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
+                        // is allowed even from CSocket::SocketCritSect and CFTPWorker::WorkerCritSect (no deadlock risk)
                         SocketsThread->AddTimer(Msg, UID, GetTickCount() + delayBetweenConRetries,
                                                 WORKER_RECONTIMEOUTTIMID, NULL); // ignore the error, at worst the user hits Stop
 

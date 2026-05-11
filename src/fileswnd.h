@@ -74,7 +74,7 @@ class CCriteriaData // data for atCopy/atMove
 {
 public:
     BOOL OverwriteOlder;      // overwrite older, skip newer ones
-    BOOL StartOnIdle;         // start only when nothing else is running
+    BOOL StartOnIdle;         // start only when no other operation is running
     BOOL CopySecurity;        // preserve NTFS permissions, FALSE = don't care = no special handling, result doesn't matter
     BOOL CopyAttrs;           // preserve Archive, Encrypt and Compress attributes; FALSE = don't care = no special handling, result doesn't matter to us
     BOOL PreserveDirTime;     // preserve date and time of directories
@@ -94,11 +94,11 @@ public:
 
     CCriteriaData& operator=(const CCriteriaData& s);
 
-    // it returns TRUE if any criterion is set
+    // Returns TRUE if any criterion is set
     BOOL IsDirty();
 
     // if the file 'file' matches UseMasks/Masks and UseAdvanced/Advanced
-    // it returns TRUE; if it doesn't match, it returns FALSE
+    // Returns TRUE; otherwise returns FALSE
     // NOTE: masks must be prepared beforehand
     // NOTE: advanced criteria must also be prepared
     BOOL AgreeMasksAndAdvanced(const CFileData* file);
@@ -112,7 +112,7 @@ public:
 
 // options for the Copy/Move dialog; for now only one item is stored
 // if it exists, it is used as the default for newly opened Copy/Move dialogs
-// eventually users will likely push us to extend this to multiple options as Find has
+// over time, users will probably ask for multiple saved options, similar to the Find dialog
 class CCopyMoveOptions
 {
 protected:
@@ -121,7 +121,7 @@ protected:
 public:
     CCopyMoveOptions() : Items(1, 1) {}
 
-    void Set(const CCriteriaData* item); // it stores the item (if the item already exists in the array, it will be overwritten); if 'item' is NULL, the current item is cleared and the array becomes empty
+    void Set(const CCriteriaData* item); // Stores the item (if the item already exists in the array, it will be overwritten); if 'item' is NULL, the current item is cleared and the array becomes empty
     const CCriteriaData* Get();          // if an item is held, it returns a pointer to it, otherwise it returns NULL
 
     BOOL Save(HKEY hKey);
@@ -146,7 +146,7 @@ extern CCopyMoveOptions CopyMoveOptions; // global variable holding the default 
 #define DRAWFLAG_IGNORE_CLIPBOX 0x00000100 // paint will be performed for all displayed items, \
                                            // ignoring the clip box (GetClipBox); \
                                            // it is used after repainting the panel that had a dialog with a stored \
-                                           // old background displayed over it; after it is closed, a full repaint is needed
+                                           // old background displayed on top of it; after it is closed, a full repaint is needed
 #define DRAWFLAG_DRAGDROP 0x00000200       // colors for the drag&drop image
 #define DRAWFLAG_SKIP_FRAME 0x00000400     // dirty hack for thumbnails: do not paint a frame around the thumbnail to avoid corrupting the alpha channel
 #define DRAWFLAG_OVERLAY_ONLY 0x00000800   // draw only the overlay (no icon); used for drawing overlay icons on thumbnails
@@ -334,16 +334,16 @@ public:
                  const char* fileName, const char* dosFileName,
                  const FILETIME& lastWrite, const CQuadWord& fileSize, DWORD attr);
 
-    // it verifies time stamps, updates if necessary and prepares the object for further use
+    // Verifies time stamps, updates if necessary and prepares the object for further use
     void CheckAndPackAndClear(HWND parent, BOOL* someFilesChanged = NULL, BOOL* archMaybeUpdated = NULL);
 
-    // it fills a list box with names of all stored files
+    // Fills a list box with names of all stored files
     void AddFilesToListBox(HWND list);
 
-    // it removes files from all given indexes; 'indexes' is an array of indexes, 'count' is their number
+    // Removes files from the specified indexes; 'indexes' is an array of indexes, 'count' is their number
     void Remove(int* indexes, int count);
 
-    // it allows copying files from all given indexes; 'indexes' is an array of indexes, 'count' is
+    // Allows copying the files at the specified indexes; 'indexes' is an array of indexes, 'count' is
     // the number of them; 'parent' is the parent dialog; 'initPath' is the suggested target path
     void CopyFilesTo(HWND parent, int* indexes, int count, const char* initPath);
 };
@@ -544,7 +544,7 @@ public:
     // returns the path shown in the panel (disk, archive, or FS);
     // if convertFSPathToExternal is TRUE and the panel holds an FS path,
     // CPluginInterfaceForFSAbstract::ConvertPathToExternal() is called
-    // it returns TRUE if the path fits into the buffer completely, otherwise a truncated path is returned
+    // Returns TRUE if the path fits into the buffer completely, otherwise a truncated path is returned
     BOOL GetGeneralPath(char* buf, int bufSize, BOOL convertFSPathToExternal = FALSE);
 
     const char* GetPath() { return Path; }
@@ -642,14 +642,14 @@ class CVisibleItemsArray
 protected:
     CRITICAL_SECTION Monitor; // critical section used to synchronize this object (monitor behavior)
 
-    BOOL SurroundArr; // TRUE/FALSE = array of items around the visible area / array ofitems only from the visible area
+    BOOL SurroundArr; // TRUE/FALSE = array of items around the visible area / array of items only from the visible area
 
     int ArrVersionNum; // version of the array
     BOOL ArrIsValid;   // is the array filled and valid?
 
-    char** ArrNames;       // allocated array of names that are currently visible in the panel (names are only references into Files+Dirs in the (CFileData: :Name) panel)
+    char** ArrNames;       // allocated array of names that are currently visible in the panel (names are only references into Files+Dirs in the (CFileData::Name) panel)
     int ArrNamesCount;     // number of names in ArrNames
-    int ArrNamesAllocated; // number of allocated namesfor ArrNames
+    int ArrNamesAllocated; // number of allocated names for ArrNames
 
     int FirstVisibleItem; // index of the first visible item
     int LastVisibleItem;  // index of the last visible item
@@ -658,10 +658,10 @@ public:
     CVisibleItemsArray(BOOL surroundArr);
     ~CVisibleItemsArray();
 
-    // Returns TRUE if the array is filled and valid (matches the current state of thepanel
+    // Returns TRUE if the array is filled and valid (matches the current state of the panel
     // and visible items), also returns the number of the array version in 'versionNum'
-    // (if it is not NULL), otherwise it returns FALSE ('versionNum' is also returnedin this case)
-    // Called by both - the panel and the icon reader
+    // (if it is not NULL), otherwise it returns FALSE ('versionNum' is also returned in this case)
+    // Called by both the panel and the icon reader
     BOOL IsArrValid(int* versionNum);
 
     // Reports a change in the panel or visible items; invalidates the array
@@ -669,7 +669,7 @@ public:
     void InvalidateArr();
 
     // it is used to refresh the array based on the current state of the panel and displayed items
-    // it increments the version number and marks it valid. Called only by the
+    // Increments the version number and marks it valid. Called only by the
     // panel while in idle mode
     void RefreshArr(CFilesWindow* panel);
 
@@ -733,7 +733,7 @@ public:
     DWORD WaitBeforeReadingIcons;         // how many milliseconds to wait before the icon reader starts reading icons (used on refresh; while waiting old icons can be pushed into the cache to avoid repeated reading and endless refreshes on network drives)
     DWORD WaitOneTimeBeforeReadingIcons;  // how many milliseconds to wait before starting to read icons, then this value resets (used to catch batches of changes from Tortoise SVN, see IconOverlaysChangedOnPath())
     DWORD EndOfIconReadingTime;           // GetTickCount() from the moment all icons were loaded in the panel
-    HANDLE IconCacheThread;               // handle of the icon - reading the thread
+    HANDLE IconCacheThread;               // handle of the icon reader thread
     HANDLE ICEventTerminate;              // signaled -> terminate the thread
     HANDLE ICEventWork;                   // signaled -> start reading icons
     BOOL ICSleep;                         // TRUE -> leave the icon-reading loop
@@ -1177,7 +1177,7 @@ public:
 
     void SetAutomaticRefresh(BOOL value, BOOL force = FALSE);
 
-    // it sets ValidFileData; it checks if the VALID_DATA_PL_XXX constants can be used
+    // Sets ValidFileData; checks if the VALID_DATA_PL_XXX constants can be used
     // (PluginData must not be empty and the corresponding constant VALID_DATA_SIZE,
     // VALID_DATA_DATE or VALID_DATA_TIME must not be used)
     void SetValidFileData(DWORD validFileData);
